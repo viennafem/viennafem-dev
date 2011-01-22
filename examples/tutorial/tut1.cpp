@@ -1,21 +1,27 @@
-/* =======================================================================
-   Copyright (c) 2010, Institute for Microelectronics, TU Vienna.
+/* ====================================================================================
+   Copyright (c) 2010, Institute for Microelectronics, Vienna University of Technology.
    http://www.iue.tuwien.ac.at
-                             -----------------
-                     ViennaFEM - The Vienna Finite Element Module
-                             -----------------
+                                  -----------------
+               ViennaFEM - The Vienna Finite Element Method Library
+                                  -----------------
                             
    authors:    Karl Rupp                          rupp@iue.tuwien.ac.at
-               Florian Rudolf                     flo.rudy+viennacl@gmail.com
-               Josef Weinbub                      weinbub@iue.tuwien.ac.at
 
-   license:    MIT (X11), see file LICENSE in the ViennaCL base directory
-
-   file changelog: - May 28, 2010   New from scratch for first release
-======================================================================= */
+   license:    MIT (X11), see file LICENSE in the ViennaFEM base directory
+======================================================================================= */
 
 // include necessary system headers
 #include <iostream>
+
+
+#include "viennafem/afftrans.hpp"
+#include "viennafem/dtdx_tetrahedron.h"
+#include "viennafem/dtdx_triangle.h"
+#include "viennafem/typelist.h"
+#include "viennafem/forwards.h"
+#include "viennafem/BFStock.hpp"
+#include "viennafem/assembling.hpp"
+#include "viennafem/mapping.hpp"
 
 int main()
 {

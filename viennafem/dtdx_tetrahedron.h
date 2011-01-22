@@ -1,0 +1,448 @@
+/* ====================================================================================
+   Copyright (c) 2010, Institute for Microelectronics, Vienna University of Technology.
+   http://www.iue.tuwien.ac.at
+                                  -----------------
+               ViennaFEM - The Vienna Finite Element Method Library
+                                  -----------------
+                            
+   authors:    Karl Rupp                          rupp@iue.tuwien.ac.at
+
+   license:    MIT (X11), see file LICENSE in the ViennaFEM base directory
+======================================================================================= */
+
+#ifndef VIENNAFEM_DTDX_TETRAHEDRON_HPP
+#define VIENNAFEM_DTDX_TETRAHEDRON_HPP
+
+#include <iostream>
+#include "viennagrid/celltags.h"
+#include "viennagrid/domain.hpp"
+#include "viennafem/forwards.h"
+
+
+namespace viennafem
+{
+  
+  template <typename T, typename U, typename V>
+  struct dt_dx_handler {};
+ 
+
+  //memory-intensive: Compute them once and store the computed values until next update
+  template <typename T_Configuration>
+  struct dt_dx_handler<T_Configuration, viennagrid::tetrahedron_tag, DtDxStoreAll>
+  {
+    typedef typename T_Configuration::CoordType                     ScalarType;
+    typedef typename viennagrid::DomainTypes<T_Configuration>::point_type        PointType;
+    typedef typename viennagrid::DomainTypes<T_Configuration>::vertex_type       VertexType;
+
+    public:
+
+      //returns the element dt_i/dx_j of the functional determinant induced by the mapping to the reference element. i and j start at 0.
+      ScalarType get_dt_dx(int i, int j) const
+      {
+        return dt_dx[3*i + j];
+      }
+
+      ScalarType get_det_dF_dt() const
+      {
+        return det_dF_dt;
+      }
+
+      template <typename CellType>
+      void update_dt_dx(CellType const & cell)
+      {
+        //checkOrientation();
+
+        PointType p0 = cell.getPoint(0);
+        PointType p1 = cell.getPoint(1) - p0;
+        PointType p2 = cell.getPoint(2) - p0;
+        PointType p3 = cell.getPoint(3) - p0;
+
+        //dt_1/dx_1
+        dt_dx[0] = (  + p2.get_y() * p3.get_z() - p2.get_z() * p3.get_y() ) / det_dF_dt;
+        //dt_1/dx_2
+        dt_dx[1] = (  - p2.get_x() * p3.get_z() + p2.get_z() * p3.get_x() ) / det_dF_dt;
+        //dt_1/dx_3
+        dt_dx[2] = (  + p2.get_x() * p3.get_y() - p2.get_y() * p3.get_x() ) / det_dF_dt;
+
+        //dt_2/dx_1
+        dt_dx[3] = (  - p1.get_y() * p3.get_z() + p1.get_z() * p3.get_y() ) / det_dF_dt;
+        //dt_2/dx_2
+        dt_dx[4] = (  + p1.get_x() * p3.get_z() - p1.get_z() * p3.get_x() ) / det_dF_dt;
+        //dt_2/dx_3
+        dt_dx[5] = (  - p1.get_x() * p3.get_y() + p1.get_y() * p3.get_x() ) / det_dF_dt;
+
+        //dt_3/dx_1
+        dt_dx[6] = (  + p1.get_y() * p2.get_z() - p1.get_z() * p2.get_y() ) / det_dF_dt;
+        //dt_3/dx_2
+        dt_dx[7] = (  - p1.get_x() * p2.get_z() + p1.get_z() * p2.get_x() ) / det_dF_dt;
+        //dt_3/dx_3
+        dt_dx[8] = (  + p1.get_x() * p2.get_y() - p1.get_y() * p2.get_x() ) / det_dF_dt;
+
+      }
+
+      void init_dt_dx() {}
+
+    protected:
+
+      /*
+      void checkOrientation()
+      {
+        PointType & p0 = cell.getPoint(0);
+        PointType & p1 = cell.getPoint(1) - p0;
+        PointType & p2 = cell.getPoint(2) - p0;
+        PointType & p3 = cell.getPoint(3) - p0;
+
+        //volume:
+        det_dF_dt = spannedVolume(p1 - p0, p2 - p0, p3 - p0);
+
+        if (det_dF_dt < 0)
+        {
+          det_dF_dt = - det_dF_dt;
+          VertexType *temp = Base::vertices_[0];
+          Base::vertices_[0] = Base::vertices_[1];
+          Base::vertices_[1] = temp;
+        }
+        else if (det_dF_dt == 0.0)
+          std::cout << "ERROR: detected degenerated element!" << std::endl;
+      } */
+
+      void print(long indent) const
+      {
+        for (long i = 0; i<indent; ++i)
+          std::cout << "   ";
+        std::cout << "* dt-dx-Handler: StoreAll" << std::endl;
+      }
+
+    private:
+      ScalarType dt_dx[9];                          //inverse of Jacobian matrix from mapping
+      ScalarType det_dF_dt;                         //determinant of Jacobian matrix
+  };
+
+  //memory-computation-tradeoff: Store value of Jacobian only
+  template <typename T_Configuration>
+  struct dt_dx_handler<T_Configuration, viennagrid::tetrahedron_tag, DtDxStoreDetOnly>
+  {
+    typedef typename T_Configuration::numeric_type                  ScalarType;
+    typedef typename viennagrid::DomainTypes<T_Configuration>::point_type        PointType;
+    typedef typename viennagrid::DomainTypes<T_Configuration>::vertex_type       VertexType;
+
+    public:
+
+      //returns the element dt_i/dx_j of the functional determinant induced by the mapping to the reference element. i and j start at 0.
+      template <typename CellType>
+      ScalarType get_dt_dx(CellType const & cell, int i, int j) const
+      {
+        PointType p0 = cell.getPoint(0);
+        PointType p1 = cell.getPoint(1) - p0;
+        PointType p2 = cell.getPoint(2) - p0;
+        PointType p3 = cell.getPoint(3) - p0;
+
+        double ret = 0.0;
+
+        //dt_1/dx_1
+        if (i==0)
+        {
+          if (j==0)
+            ret = (  + p2.get_y() * p3.get_z() - p2.get_z() * p3.get_y() ) / det_dF_dt;
+          else if (j==1)
+            ret = (  - p2.get_x() * p3.get_z() + p2.get_z() * p3.get_x() ) / det_dF_dt;
+          else if (j==2)
+            ret = (  + p2.get_x() * p3.get_y() - p2.get_y() * p3.get_x() ) / det_dF_dt;
+          else
+            std::cerr << "ERROR: Accessing invalid elements of functional determinant!!";
+        }
+        else if (i==1)
+        {
+          if (j==0)
+            ret = (  - p1.get_y() * p3.get_z() + p1.get_z() * p3.get_y() ) / det_dF_dt;
+          else if (j==1)
+            ret = (  + p1.get_x() * p3.get_z() - p1.get_z() * p3.get_x() ) / det_dF_dt;
+          else if (j==2)
+            ret = (  - p1.get_x() * p3.get_y() + p1.get_y() * p3.get_x() ) / det_dF_dt;
+          else
+            std::cerr << "ERROR: Accessing invalid elements of functional determinant!!";
+        }
+        else if (i==2)
+        {
+          if (j==0)
+            ret = (  + p1.get_y() * p2.get_z() - p1.get_z() * p2.get_y() ) / det_dF_dt;
+          else if (j==1)
+            ret = (  - p1.get_x() * p2.get_z() + p1.get_z() * p2.get_x() ) / det_dF_dt;
+          else if (j==2)
+            ret = (  + p1.get_x() * p2.get_y() - p1.get_y() * p2.get_x() ) / det_dF_dt;
+          else
+            std::cerr << "ERROR: Accessing invalid elements of functional determinant!!";
+        }
+        else
+            std::cerr << "ERROR: Accessing invalid elements of functional determinant!!";
+
+        return ret;
+      }
+
+      ScalarType get_det_dF_dt() const
+      {
+        return det_dF_dt;
+      }
+
+      void update_dt_dx()
+      {
+        //checkOrientation();
+      }
+
+      void init_dt_dx() {}
+
+    protected:
+
+      /*
+      void checkOrientation()
+      {
+        PointType & p0 = Base::vertices_[0]->getPoint();
+        PointType & p1 = Base::vertices_[1]->getPoint();
+        PointType & p2 = Base::vertices_[2]->getPoint();
+        PointType & p3 = Base::vertices_[3]->getPoint();
+
+        //volume:
+        det_dF_dt = spannedVolume(p1 - p0, p2 - p0, p3 - p0);
+
+        if (det_dF_dt < 0)
+        {
+          det_dF_dt = - det_dF_dt;
+          VertexType *temp = Base::vertices_[0];
+          Base::vertices_[0] = Base::vertices_[1];
+          Base::vertices_[1] = temp;
+        }
+        else if (det_dF_dt == 0.0)
+          std::cout << "ERROR: detected degenerated element!" << std::endl;
+      } */
+
+      void print(long indent) const
+      {
+        for (long i = 0; i<indent; ++i)
+          std::cout << "   ";
+        std::cout << "* dt-dx-Handler: StoreDetOnly"<< std::endl;
+      }
+
+    private:
+      ScalarType det_dF_dt;                         //determinant of Jacobian matrix
+  };
+
+  //save as much memory as possible: compute all values on access
+  //however, in general the DtDxStoreDetOnly is much faster while having only moderate additional memory requirements.
+  template <typename T_Configuration>
+  struct dt_dx_handler<T_Configuration, viennagrid::tetrahedron_tag, DtDxOnAccess>
+  {
+    typedef typename T_Configuration::numeric_type                     ScalarType;
+    typedef typename viennagrid::DomainTypes<T_Configuration>::point_type        PointType;
+    typedef typename viennagrid::DomainTypes<T_Configuration>::vertex_type       VertexType;
+
+    public:
+
+      //returns the element dt_i/dx_j of the functional determinant induced by the mapping to the reference element. i and j start at 0.
+      template <typename CellType>
+      ScalarType get_dt_dx(CellType const & cell, int i, int j) const
+      {
+        PointType p0 = cell.getPoint(0);
+        PointType p1 = cell.getPoint(1) - p0;
+        PointType p2 = cell.getPoint(2) - p0;
+        PointType p3 = cell.getPoint(3) - p0;
+
+        double ret = 0.0;
+        double det_dF_dt = get_det_dF_dt();
+
+        //dt_1/dx_1
+        if (i==0)
+        {
+          if (j==0)
+            ret = (  + p2.get_y() * p3.get_z() - p2.get_z() * p3.get_y() ) / det_dF_dt;
+          else if (j==1)
+            ret = (  - p2.get_x() * p3.get_z() + p2.get_z() * p3.get_x() ) / det_dF_dt;
+          else if (j==2)
+            ret = (  + p2.get_x() * p3.get_y() - p2.get_y() * p3.get_x() ) / det_dF_dt;
+          else
+            std::cerr << "ERROR: Accessing invalid elements of functional determinant!!";
+        }
+        else if (i==1)
+        {
+          if (j==0)
+            ret = (  - p1.get_y() * p3.get_z() + p1.get_z() * p3.get_y() ) / det_dF_dt;
+          else if (j==1)
+            ret = (  + p1.get_x() * p3.get_z() - p1.get_z() * p3.get_x() ) / det_dF_dt;
+          else if (j==2)
+            ret = (  - p1.get_x() * p3.get_y() + p1.get_y() * p3.get_x() ) / det_dF_dt;
+          else
+            std::cerr << "ERROR: Accessing invalid elements of functional determinant!!";
+        }
+        else if (i==2)
+        {
+          if (j==0)
+            ret = (  + p1.get_y() * p2.get_z() - p1.get_z() * p2.get_y() ) / det_dF_dt;
+          else if (j==1)
+            ret = (  - p1.get_x() * p2.get_z() + p1.get_z() * p2.get_x() ) / det_dF_dt;
+          else if (j==2)
+            ret = (  + p1.get_x() * p2.get_y() - p1.get_y() * p2.get_x() ) / det_dF_dt;
+          else
+            std::cerr << "ERROR: Accessing invalid elements of functional determinant!!";
+        }
+        else
+            std::cerr << "ERROR: Accessing invalid elements of functional determinant!!";
+
+        return ret;
+      }
+
+      template <typename CellType> 
+      ScalarType get_det_dF_dt(CellType const & cell) const
+      {
+        PointType p0 = cell.getPoint(0);
+        PointType p1 = cell.getPoint(1);
+        PointType p2 = cell.getPoint(2);
+        PointType p3 = cell.getPoint(3);
+
+        //volume:
+        return spannedVolume(p1 - p0, p2 - p0, p3 - p0);
+      }
+
+    protected:
+
+      /*
+      void checkOrientation()
+      {
+        PointType & p0 = Base::vertices_[0]->getPoint();
+        PointType & p1 = Base::vertices_[1]->getPoint();
+        PointType & p2 = Base::vertices_[2]->getPoint();
+        PointType & p3 = Base::vertices_[3]->getPoint();
+
+        //volume:
+        double det_dF_dt = spannedVolume(p1 - p0, p2 - p0, p3 - p0);
+
+        if (det_dF_dt < 0)
+        {
+          det_dF_dt = - det_dF_dt;
+          VertexType *temp = Base::vertices_[0];
+          Base::vertices_[0] = Base::vertices_[1];
+          Base::vertices_[1] = temp;
+        }
+        else if (det_dF_dt == 0.0)
+          std::cout << "ERROR: detected degenerated element!" << std::endl;
+      } */
+
+      void print(long indent) const
+      {
+        for (long i = 0; i<indent; ++i)
+          std::cout << "   ";
+        std::cout << "* dt-dx-Handler: OnAccess" << std::endl;
+      }
+
+  };
+
+/*  //fast and memory-saving: Compute an element's Jacobian as soon as the first entry is accessed. Use static memory, so that only one Jacobian set is stored at the same time. Must not be used in multi-threaded applications!!
+  template <typename T_Configuration>
+  struct dt_dx_handler<T_Configuration, TetrahedronTag, DtDxStoreStatically>
+  {
+    typedef typename T_Configuration::CoordType                     ScalarType;
+    typedef typename DomainTypes<T_Configuration>::PointType        PointType;
+    typedef typename DomainTypes<T_Configuration>::VertexType       VertexType;
+
+    public:
+      dt_dx_handler() : Base() {};
+      dt_dx_handler( const dt_dx_handler & ddh ) : Base(ddh) {};
+
+      //returns the element dt_i/dx_j of the functional determinant induced by the mapping to the reference element. i and j start at 0.
+      ScalarType get_dt_dx(int i, int j) const
+      {
+        return dt_dx[3*i + j];
+      }
+
+      ScalarType get_det_dF_dt() const
+      {
+        return det_dF_dt;
+      }
+
+      void update_dt_dx()
+      {
+        checkOrientation();
+      }
+
+      void print(long indent = 0) const
+      {
+        for (long i = 0; i<indent; ++i)
+          std::cout << "   ";
+        std::cout << "* dt-dx-Handler: StoreStatically" << std::endl;
+        Base::print(indent);
+      }
+
+      void init_dt_dx() { computeCellJacobian(); }
+
+    protected:
+
+      void computeCellJacobian() const
+      {
+        PointType & p0 = Base::vertices_[0]->getPoint();
+        PointType p1 = Base::vertices_[1]->getPoint() - p0;
+        PointType p2 = Base::vertices_[2]->getPoint() - p0;
+        PointType p3 = Base::vertices_[3]->getPoint() - p0;
+
+        det_dF_dt = spannedVolume(p1, p2, p3);
+
+        //dt_1/dx_1
+        dt_dx[0] = (  + p2.get_y() * p3.get_z() - p2.get_z() * p3.get_y() ) / det_dF_dt;
+        //dt_1/dx_2
+        dt_dx[1] = (  - p2.get_x() * p3.get_z() + p2.get_z() * p3.get_x() ) / det_dF_dt;
+        //dt_1/dx_3
+        dt_dx[2] = (  + p2.get_x() * p3.get_y() - p2.get_y() * p3.get_x() ) / det_dF_dt;
+
+        //dt_2/dx_1
+        dt_dx[3] = (  - p1.get_y() * p3.get_z() + p1.get_z() * p3.get_y() ) / det_dF_dt;
+        //dt_2/dx_2
+        dt_dx[4] = (  + p1.get_x() * p3.get_z() - p1.get_z() * p3.get_x() ) / det_dF_dt;
+        //dt_2/dx_3
+        dt_dx[5] = (  - p1.get_x() * p3.get_y() + p1.get_y() * p3.get_x() ) / det_dF_dt;
+
+        //dt_3/dx_1
+        dt_dx[6] = (  + p1.get_y() * p2.get_z() - p1.get_z() * p2.get_y() ) / det_dF_dt;
+        //dt_3/dx_2
+        dt_dx[7] = (  - p1.get_x() * p2.get_z() + p1.get_z() * p2.get_x() ) / det_dF_dt;
+        //dt_3/dx_3
+        dt_dx[8] = (  + p1.get_x() * p2.get_y() - p1.get_y() * p2.get_x() ) / det_dF_dt;
+
+      } //computeCellJacobian()
+
+      void checkOrientation()
+      {
+        PointType & p0 = Base::vertices_[0]->getPoint();
+        PointType & p1 = Base::vertices_[1]->getPoint();
+        PointType & p2 = Base::vertices_[2]->getPoint();
+        PointType & p3 = Base::vertices_[3]->getPoint();
+
+        //volume:
+        ScalarType detdFdt = spannedVolume(p1 - p0, p2 - p0, p3 - p0);
+
+        if (detdFdt < 0)
+        {
+          VertexType *temp = Base::vertices_[0];
+          Base::vertices_[0] = Base::vertices_[1];
+          Base::vertices_[1] = temp;
+        }
+        else if (detdFdt == 0.0)
+          std::cout << "ERROR: detected degenerated element!" << std::endl;
+      }
+
+    private:
+      static ScalarType dt_dx[9];                          //inverse of Jacobian matrix from mapping
+      static ScalarType det_dF_dt;                         //determinant of Jacobian matrix
+  };
+
+  //initialize static variables:
+  template <typename T_Configuration>
+  typename T_Configuration::CoordType
+  dt_dx_handler<T_Configuration, TetrahedronTag, DtDxStoreStatically>::det_dF_dt = 0;
+
+  template <typename T_Configuration>
+  typename T_Configuration::CoordType
+  dt_dx_handler<T_Configuration, TetrahedronTag, DtDxStoreStatically>::dt_dx[] = {0, 0, 0,
+                                   0, 0, 0,
+                                   0, 0, 0};
+
+                                   
+                                   */
+}
+#endif

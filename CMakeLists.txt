@@ -21,6 +21,7 @@ LINK_DIRECTORIES(${OPENCLPATH}/lib/x86)
 
 #specify include and source directory
 INCLUDE_DIRECTORIES(".")
+INCLUDE_DIRECTORIES("../ViennaGrid/")
 INCLUDE_DIRECTORIES(${BOOSTPATH})
 
 #add definitions, compiler switches, etc.
@@ -39,17 +40,17 @@ ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 ADD_EXECUTABLE(tut1 examples/tutorial/tut1.cpp)
 
 # Mac OS X specific linker part
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-   set(CMAKE_EXE_LINKER_FLAGS "-framework OpenCL")
-ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+#IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+#   set(CMAKE_EXE_LINKER_FLAGS "-framework OpenCL")
+#ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 # Linux specific linker part
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-   TARGET_LINK_LIBRARIES(tut1 OpenCL)
-ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+#IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+#   TARGET_LINK_LIBRARIES(tut1 OpenCL)
+#ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 # Windows specific linker part
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-   TARGET_LINK_LIBRARIES(tut1 OpenCL)
-ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+#IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+#   TARGET_LINK_LIBRARIES(tut1 OpenCL)
+#ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
