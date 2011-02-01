@@ -14,7 +14,7 @@
 #define VIENNAFEM_DTDX_TETRAHEDRON_HPP
 
 #include <iostream>
-#include "viennagrid/celltags.h"
+#include "viennagrid/celltags.hpp"
 #include "viennagrid/domain.hpp"
 #include "viennafem/forwards.h"
 

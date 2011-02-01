@@ -14,7 +14,7 @@
 #define VIENNAFEM_DTDX_TRIANGLE_HPP
 
 #include <iostream>
-#include "viennagrid/celltags.h"
+#include "viennagrid/celltags.hpp"
 #include "viennagrid/domain.hpp"
 #include "viennafem/forwards.h"
 
@@ -23,79 +23,33 @@ namespace viennafem
 {
 
   //memory-intensive: Compute them once and store the computed values until next update
-  template <typename T_Configuration>
-  struct dt_dx_handler<T_Configuration, viennagrid::triangle_tag, DtDxStoreAll>
+  template <>
+  struct dt_dx_handler<viennagrid::triangle_tag>
   {
-    typedef typename T_Configuration::numeric_type                              ScalarType;
-    typedef typename viennagrid::DomainTypes<T_Configuration>::point_type                 PointType;
-    typedef typename viennagrid::DomainTypes<T_Configuration>::vertex_type                VertexType;
-
     public:
-
-      //returns the element dt_i/dx_j of the functional determinant induced by the mapping to the reference element. i and j start at 0.
-      ScalarType get_dt_dx(int i, int j) const
-      {
-        return dt_dx[2*i + j];
-      }
-
-      ScalarType get_det_dF_dt() const
-      {
-        return det_dF_dt;
-      }
-
+      
       template <typename CellType>
-      void update_dt_dx(CellType const & cell)
+      static void apply(CellType const & cell)
       {
-        PointType & p0 = cell.getPoint(0);
-        PointType & p1 = cell.getPoint(0);
-        PointType & p2 = cell.getPoint(0);
-
-        checkOrientation(p0, p1, p2);
-
-        if (det_dF_dt != 0)
-        {
-          //dt_1/dx_1
-          dt_dx[0] = ( p2.get_y() - p0.get_y()) / det_dF_dt;
-          //dt_1/dx_2
-          dt_dx[1] = - (p2.get_x() - p0.get_x()) / det_dF_dt;
-
-          //dt_2/dx_1
-          dt_dx[2] = - (p1.get_y() - p0.get_y()) / det_dF_dt;
-          //dt_2/dx_2
-          dt_dx[3] = ( p1.get_x() - p0.get_x()) / det_dF_dt;
-        }
+        typedef typename CellType::config_type       Config;
+        typedef typename viennagrid::result_of::point_type<Config>::type   PointType;
+        
+        PointType const & p0 = cell.getPoint(0);
+        PointType const & p1 = cell.getPoint(1);
+        PointType const & p2 = cell.getPoint(2);
+        
+        //Step 1: store determinant:
+        double det_dF_dt = viennagrid::spannedVolume(p1 - p0, p2 - p0);
+        viennadata::access<det_dF_dt_key, numeric_type>()(cell) = det_dF_dt;
+        
+        //Step 2: store partial derivatives:
+        viennadata::access<dt_dx_key<0, 0>, numeric_type>()(cell) = ( p2.get_y() - p0.get_y()) / det_dF_dt;
+        viennadata::access<dt_dx_key<0, 1>, numeric_type>()(cell) = - (p2.get_x() - p0.get_x()) / det_dF_dt;
+        viennadata::access<dt_dx_key<1, 0>, numeric_type>()(cell) = - (p1.get_y() - p0.get_y()) / det_dF_dt;
+        viennadata::access<dt_dx_key<1, 1>, numeric_type>()(cell) = ( p1.get_x() - p0.get_x()) / det_dF_dt;
+        
       }
 
-      void init_dt_dx() {}
-
-    protected:      
-      void checkOrientation(PointType & p0, PointType & p1, PointType & p2)
-      {
-        //volume:
-        det_dF_dt = spannedVolume(p1 - p0, p2 - p0);
-
-        if (det_dF_dt < 0)
-        {
-          //swap two points:
-          //det_dF_dt = - det_dF_dt;
-          //VertexType *temp = Base::vertices_[0];
-          //Base::vertices_[0] = Base::vertices_[1];
-          //Base::vertices_[1] = temp;
-        }
-        else if (det_dF_dt == 0.0)
-          std::cout << "ERROR: detected degenerated element!" << std::endl;
-      }
-
-      void print(long indent = 0) const
-      {
-        for (long i = 0; i<indent; ++i)
-          std::cout << "   ";
-        std::cout << "* dt-dx-Handler: StoreAll" << std::endl;
-      }
-
-    private:
-      ScalarType dt_dx[4];                          //inverse of Jacobian matrix from mapping
-      ScalarType det_dF_dt;                         //determinant of Jacobian matrix
   };
 
   /*

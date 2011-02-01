@@ -18,7 +18,7 @@
 #include "viennafem/mapping.hpp"
 
 #include "viennagrid/domain.hpp"
-#include "viennagrid/iterators.h"
+#include "viennagrid/iterators.hpp"
 
 namespace viennafem
 {

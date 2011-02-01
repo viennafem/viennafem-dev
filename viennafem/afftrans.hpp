@@ -23,10 +23,11 @@
 
 //#include "typelist.h"
 
-#include "viennagrid/celltags.h"
+#include "viennagrid/celltags.hpp"
 #include "viennagrid/domain.hpp"
 
-namespace elfem{
+namespace viennafem
+{
 
   /******************* mapToElement: *****************************/
   //Transforms a point 'refpoint' given within the reference cell to the corresponding point in the cell.
@@ -36,9 +37,9 @@ namespace elfem{
 
     //cell is a triangle:
     template <typename CellType>
-    typename viennagrid::DomainTypes<typename CellType::config_type>::point_type 
+    typename viennagrid::result_of::point_type<typename CellType::config_type>::type 
     mapToElement_impl(CellType const & cell,
-                      typename viennagrid::DomainTypes<typename CellType::config_type>::point_type const & refpoint,
+                      typename viennagrid::result_of::point_type<typename CellType::config_type>::type const & refpoint,
                       viennagrid::line_tag)
     {
       //typename viennagrid::DomainTypes<typename CellType::Configuration>::PointType & point1 = cell.getPoint(0);

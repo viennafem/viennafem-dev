@@ -13,12 +13,18 @@
 #ifndef VIENNAFEM_FORWARDS_H
 #define VIENNAFEM_FORWARDS_H
 
+#include "viennadata/interface.hpp"
+#include "viennagrid/forwards.h"
+#include "viennamath/forwards.h"
+
 /** @file forwards.h
     @brief This file provides the forward declarations for the main types used within ViennaFEM
 */
 
 namespace viennafem
 {
+  
+  typedef double             numeric_type;
 
   //a tag for storing mapping indices on the grid
   template <long id>
@@ -102,7 +108,32 @@ namespace viennafem
   struct Gamma {};
   
   
+  
+  template <unsigned long local_index,
+            unsigned long global_index>
+  struct dt_dx_key {};
+  
+  template <unsigned long local_index,
+            unsigned long global_index>
+  std::ostream & operator<<(std::ostream & stream,
+                            dt_dx_key<local_index, global_index> const & dummy)
+  {
+    stream << "dt_dx_key<" << local_index << "," << global_index << ">";
+    return stream;
+  }
 
+
+  struct det_dF_dt_key {};
+  
+  std::ostream & operator<<(std::ostream & stream, det_dF_dt_key const & dummy)
+  {
+    stream << "det_dF_dt_key";
+    return stream;
+  }
+  
+  
+  template <typename CellTag>
+  struct dt_dx_handler;
   
   //Mapping Tags:
   
@@ -119,12 +150,31 @@ namespace viennafem
     template <typename Iterator, typename BoundaryKey>
     static bool apply(Iterator & it, BoundaryKey const & bk)
     {
-      return it->template retrieveQuantity<bool>(bk);
+      return viennadata::access<BoundaryKey, bool>(bk)(*it);
     }
   };
 
+}
 
+//configure vienndata for type-based dispatch on dt_dx and det_F
+namespace viennadata
+{
+  template <unsigned long local_index,
+            unsigned long global_index>
+  struct dispatch_traits<viennafem::dt_dx_key<local_index,
+                                              global_index>
+                        >
+  {
+    typedef type_key_dispatch_tag    tag;
+  };
+  
+  template <>
+  struct dispatch_traits<viennafem::det_dF_dt_key>
+  {
+    typedef type_key_dispatch_tag    tag;
+  };
   
 }
+
 
 #endif

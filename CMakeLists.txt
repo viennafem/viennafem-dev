@@ -22,6 +22,8 @@ LINK_DIRECTORIES(${OPENCLPATH}/lib/x86)
 #specify include and source directory
 INCLUDE_DIRECTORIES(".")
 INCLUDE_DIRECTORIES("../ViennaGrid/")
+INCLUDE_DIRECTORIES("../ViennaData/")
+INCLUDE_DIRECTORIES("../ViennaMath/")
 INCLUDE_DIRECTORIES(${BOOSTPATH})
 
 #add definitions, compiler switches, etc.
@@ -32,8 +34,8 @@ ELSE()
 ENDIF()
 
 IF(CMAKE_COMPILER_IS_GNUCXX)
-   #ADD_DEFINITIONS(-Wall -O0 -g -lpthread)
-   ADD_DEFINITIONS(-Wall -pedantic -O3)
+   ADD_DEFINITIONS(-Wall -O0 -g -lpthread)
+   #ADD_DEFINITIONS(-Wall -pedantic -O3)
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 #list all source files here

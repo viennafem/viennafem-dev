@@ -18,9 +18,9 @@
 #include "viennafem/forwards.h"
 #include "viennafem/BFStock.hpp"
 #include "viennagrid/forwards.h"
-#include "viennagrid/celltags.h"
+#include "viennagrid/celltags.hpp"
 #include "viennagrid/domain.hpp"
-#include "viennagrid/iterators.h"
+#include "viennagrid/iterators.hpp"
 
 namespace viennafem
 {

@@ -14,12 +14,56 @@
 #define VIENNAFEM_BFSTOCK_HPP
 
 #include <vector>
-#include "viennagrid/celltags.h"
+#include "viennagrid/celltags.hpp"
 #include "viennagrid/forwards.h"
-
+#include "viennamath/expression.hpp"
 
 namespace viennafem
 {
+  
+  //TODO: Has to be generalized for:
+  //       - different cell types
+  //       - different degrees of basis functions
+  //
+  // For now, returns the linear basis:
+  std::vector<viennamath::expr> get_basisfunctions(viennagrid::triangle_tag)
+  {
+    //std::cout << "get_basisfunctions: entry" << std::endl;
+    std::vector<viennamath::expr> ret(3);
+    
+    //std::cout << "get_basisfunctions: Creating variables" << std::endl;
+    viennamath::variable<0> x;
+    viennamath::variable<1> y;
+    
+    //std::cout << "get_basisfunctions: filling 0" << std::endl;
+    ret[0] = viennamath::expr(1 - x - y);
+    //std::cout << "get_basisfunctions: filling 1" << std::endl;
+    ret[1] = viennamath::expr(x);
+    //std::cout << "get_basisfunctions: filling 2" << std::endl;
+    ret[2] = viennamath::expr(y);
+    
+    //std::cout << "get_basisfunctions: return" << std::endl;
+    return ret;    
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  /////////////////// Old code to follow below this line ////////////////////////////////////////
+  
+  
+  
+  
+  
+  
+  
 
   //helper metafunction (that also offers runtime-version) for determination of degrees of freedom
   template <long degree = 0,
