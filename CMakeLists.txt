@@ -24,6 +24,7 @@ INCLUDE_DIRECTORIES(".")
 INCLUDE_DIRECTORIES("../ViennaGrid/")
 INCLUDE_DIRECTORIES("../ViennaData/")
 INCLUDE_DIRECTORIES("../ViennaMath/")
+INCLUDE_DIRECTORIES("../ViennaCL/ViennaCL-1.1.0/")
 INCLUDE_DIRECTORIES(${BOOSTPATH})
 
 #add definitions, compiler switches, etc.

@@ -37,6 +37,17 @@
 #include "viennamath/weak_form.hpp"
 #include "viennamath/apply_coordinate_system.hpp"
 
+
+//#include "viennacl/matrix.hpp"
+//#include "viennacl/vector.hpp"
+//#include "viennacl/linalg/direct_solve.hpp"
+
+#include <boost/numeric/ublas/io.hpp>
+#include <boost/numeric/ublas/triangular.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/matrix_proxy.hpp>
+#include <boost/numeric/ublas/lu.hpp>
+
 struct TriangleConfig
 {
   typedef double                                  numeric_type;
@@ -50,22 +61,23 @@ struct TriangleConfig
 
 
 // define a key and configure viennadata to use a type-based dispatch:
-struct example_key {};
-
-std::ostream & operator<<(std::ostream & stream, example_key const & dummy)
-{
-  stream << "example_key";
-  return stream;
-}
+struct boundary_key {};
+struct mapping_key {};
 
 namespace viennadata
 {
-  // tell ViennaData to use QuickKey:
   template <>
-  struct dispatch_traits<example_key>
+  struct dispatch_traits<boundary_key>
   {
     typedef type_key_dispatch_tag    tag;
   };
+  
+  template <>
+  struct dispatch_traits<mapping_key>
+  {
+    typedef type_key_dispatch_tag    tag;
+  };
+  
 }
 
 
@@ -208,14 +220,26 @@ namespace viennafem
   
   //evaluates the weak form on a triangle using 1-point-rule
   //TODO generalize!!
-  numeric_type eval_element_matrix_entry(viennamath::equation const & weak_form_substituted)
+  numeric_type eval_element_matrix_entry(viennamath::expr const & weak_form_lhs)
   {
     std::vector<numeric_type> p(2);
     p[0] = 1.0/3.0;
     p[1] = 1.0/3.0;
     
-    return 0.5 * weak_form_substituted.lhs().get()->lhs()->eval(p); //TODO: this is pretty ugly...
+    return 0.5 * weak_form_lhs.get()->lhs()->eval(p); //TODO: this is pretty ugly...
   }
+  
+  //evaluates the weak form on a triangle using 1-point-rule
+  //TODO generalize!!
+  numeric_type eval_element_vector_entry(viennamath::expr const & weak_form_rhs)
+  {
+    std::vector<numeric_type> p(2);
+    p[0] = 1.0/3.0;
+    p[1] = 1.0/3.0;
+    
+    return 0.5 * weak_form_rhs.get()->lhs()->eval(p); //TODO: this is pretty ugly...
+  }
+  
 }
 
 
@@ -229,7 +253,10 @@ void do_something(DomainType & domain)
   
   typedef typename viennagrid::result_of::point_type<Config>::type                            PointType;
   typedef typename viennagrid::result_of::ncell_type<Config, CellTag::topology_level>::type   CellType;
-  
+
+  typedef typename viennagrid::result_of::ncell_container<DomainType, 0>::type    VertexContainer;
+  typedef typename viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
+
   typedef typename viennagrid::result_of::ncell_container<DomainType, CellTag::topology_level>::type    CellContainer;
   typedef typename viennagrid::result_of::iterator<CellContainer>::type      CellIterator;
 
@@ -246,6 +273,20 @@ void do_something(DomainType & domain)
   std::cout << std::endl;
   std::cout << "Using weak form " << weak_form << std::endl;
   std::cout << std::endl;
+  
+  //setting some boundary flags:
+  VertexContainer vertices = viennagrid::ncells<0>(domain);
+  for (VertexIterator vit = vertices.begin();
+       vit != vertices.end();
+       ++vit)
+  {
+     if (vit->getPoint().get_x() == 0.0 || vit->getPoint().get_x() == 1.0 
+       || vit->getPoint().get_y() == 0.0 || vit->getPoint().get_y() == 1.0 )
+       viennadata::access<boundary_key, bool>()(*vit) = true;
+     else
+       viennadata::access<boundary_key, bool>()(*vit) = false;
+  }
+  
 
   std::cout << "*" << std::endl;
   std::cout << "* Phase 1: Write dt_dx coefficients" << std::endl;
@@ -260,10 +301,34 @@ void do_something(DomainType & domain)
     //viennadata::access<example_key, double>()(*cell_iter) = i; 
     viennafem::dt_dx_handler<CellTag>::apply(*cell_iter);
   }
+
+  std::cout << "*" << std::endl;
+  std::cout << "* Phase 2: Create Mapping:" << std::endl;
+  std::cout << "*" << std::endl;
   
+  long map_index = 0;
+  for (VertexIterator vit = vertices.begin();
+       vit != vertices.end();
+       ++vit)
+  {
+     if (viennadata::access<boundary_key, bool>()(*vit))
+       viennadata::access<mapping_key, long>()(*vit) = -1;
+     else
+       viennadata::access<mapping_key, long>()(*vit) = map_index++;
+  }
+  std::cout << "Assigned degrees of freedom: " << map_index << std::endl;
+  std::cout << std::endl;
+  
+  //build global system matrix and load vector:
+  std::vector< std::vector<viennafem::numeric_type> > global_matrix(map_index);
+  for (long i=0; i<map_index; ++i)
+    global_matrix[i].resize(map_index);
+  
+  std::vector< viennafem::numeric_type > global_rhs(map_index);
+
   
   std::cout << "*" << std::endl;
-  std::cout << "* Phase 2: Transform to reference element" << std::endl;
+  std::cout << "* Phase 3: Transform to reference element" << std::endl;
   std::cout << "*" << std::endl;
   
   viennamath::equation transformed_weak_form = viennafem::transform_to_reference_cell<CellType>(weak_form);
@@ -273,7 +338,7 @@ void do_something(DomainType & domain)
   std::cout << std::endl;
 
   std::cout << "*" << std::endl;
-  std::cout << "* Phase 3: Assemble local element matrix" << std::endl;
+  std::cout << "* Phase 4: Assemble local element matrix" << std::endl;
   std::cout << "*" << std::endl;
   
   //transfer cell quantities to vtk:
@@ -282,28 +347,30 @@ void do_something(DomainType & domain)
        ++cell_iter)
   {
     //get basis:
-    std::cout << "Getting basis..." << std::endl;
+    //std::cout << "Getting basis..." << std::endl;
     std::vector<viennamath::expr> trial_functions = viennafem::get_basisfunctions(CellTag());
     std::vector<viennamath::expr> test_functions = viennafem::get_basisfunctions(CellTag());
     
     //set up element matrix:
-    std::cout << "Creating element matrix..." << std::endl;
+    //std::cout << "Creating element matrix..." << std::endl;
     std::vector<std::vector< viennafem::numeric_type > >  element_matrix(3);
     element_matrix[0].resize(3);
     element_matrix[1].resize(3);
     element_matrix[2].resize(3);
     
+    std::vector<viennafem::numeric_type> element_vector(3);
+    
     //update cell_quantities:
-    std::cout << "Updating cell quantities..." << std::endl;
+    //std::cout << "Updating cell quantities..." << std::endl;
     viennamath::equation cell_expr = viennafem::update_cell_quantities(*cell_iter, 
                                                                        transformed_weak_form);
     
-    std::cout << "New cell_expr: " << cell_expr << std::endl;
+    //std::cout << "New cell_expr: " << cell_expr << std::endl;
 
     viennafem::cell_quan<CellType, viennafem::det_dF_dt_key> det_dF_dt(*cell_iter);
     
     //fill element_matrix:
-    std::cout << "Filling element matrix..." << std::endl;
+    //std::cout << "Filling element matrix..." << std::endl;
     for (size_t i = 0; i<test_functions.size(); ++i)
     {
       for (size_t j=0; j<trial_functions.size(); ++j)
@@ -311,23 +378,121 @@ void do_something(DomainType & domain)
         viennamath::equation temp = viennafem::insert_test_and_trial_functions(test_functions[i],
                                                                                trial_functions[j],
                                                                                cell_expr);
-        element_matrix[i][j] = viennafem::eval_element_matrix_entry(temp) * det_dF_dt.eval(1.0); 
+        element_matrix[i][j] = viennafem::eval_element_matrix_entry(temp.lhs()) * det_dF_dt.eval(1.0); 
       }
+      
+      viennamath::equation temp = viennafem::insert_test_and_trial_functions(test_functions[i],
+                                                                             trial_functions[0],
+                                                                             cell_expr);
+      element_vector[i] = viennafem::eval_element_vector_entry(temp.rhs()) * det_dF_dt.eval(1.0); 
     }
     
     //print element matrix:
-    for (size_t i = 0; i<test_functions.size(); ++i)
+    //for (size_t i = 0; i<test_functions.size(); ++i)
+    //{
+    //  for (size_t j=0; j<trial_functions.size(); ++j)
+    //    std::cout << element_matrix[i][j] << " ";
+    //  std::cout << " | " << element_vector[i] << std::endl;
+    //}
+    
+    //write back to global matrix:
+    VertexOnCellContainer vertices_on_cell = viennagrid::ncells<0>(*cell_iter);
+    long global_index_i = 0;
+    long global_index_j = 0;
+    long local_index_i = 0;
+    long local_index_j = 0;
+    for (VertexOnCellIterator vocit_i = vertices_on_cell.begin();
+         vocit_i != vertices_on_cell.end();
+         ++vocit_i, ++local_index_i)
     {
-      for (size_t j=0; j<trial_functions.size(); ++j)
+      global_index_i = viennadata::access<mapping_key, long>()(*vocit_i);
+      if (global_index_i == -1)
+        continue;
+      
+      local_index_j = 0;
+      for (VertexOnCellIterator vocit_j = vertices_on_cell.begin();
+           vocit_j != vertices_on_cell.end();
+           ++vocit_j, ++local_index_j)
       {
-        std::cout << element_matrix[i][j] << " ";
+         global_index_j = viennadata::access<mapping_key, long>()(*vocit_j);
+         
+         if (global_index_j == -1)
+           continue; //modify right-hand side here
+         
+         global_matrix[global_index_i][global_index_j] += element_matrix[local_index_i][local_index_j];
       }
-      std::cout << std::endl;
+      
+      global_rhs[global_index_i] += element_vector[local_index_i];
     }
     
-    //write back to global matrix: TODO
+  }
+  
+  std::cout << std::endl;
+  std::cout << "Done!" << std::endl;
+  std::cout << std::endl;
+
+  //print global matrix:
+  //std::cout << "Global system: " << std::endl;
+  //for (size_t i = 0; i<global_matrix.size(); ++i)
+  //{
+  // for (size_t j=0; j<global_matrix.size(); ++j)
+  //    std::cout << global_matrix[i][j] << " ";
+  //  std::cout << " | " << global_rhs[i] << std::endl;
+  //}
+    
+    
+  //TODO: Solve system
+  /*
+  viennacl::matrix<viennafem::numeric_type> vcl_matrix(map_index, map_index);
+  viennacl::vector<viennafem::numeric_type> vcl_rhs(map_index);
+  
+  viennacl::copy(global_matrix, vcl_matrix);
+  viennacl::copy(global_rhs, vcl_rhs);
+  
+  viennacl::linalg::lu_factorize(vcl_matrix);
+  viennacl::linalg::lu_substitute(vcl_matrix, vcl_rhs);
+  
+  viennacl::copy(vcl_rhs, global_rhs);
+  */
+  
+  std::cout << "*" << std::endl;
+  std::cout << "* Phase 5: Solving linear system" << std::endl;
+  std::cout << "*" << std::endl;
+  
+  boost::numeric::ublas::matrix<viennafem::numeric_type> ublas_matrix(map_index, map_index);
+  boost::numeric::ublas::vector<viennafem::numeric_type> ublas_rhs(map_index);
+  
+  for (size_t i = 0; i<global_matrix.size(); ++i)
+  {
+    for (size_t j=0; j<global_matrix.size(); ++j)
+      ublas_matrix(i, j) = global_matrix[i][j];
+    ublas_rhs(i) = global_rhs[i];
+  }
+  
+  boost::numeric::ublas::lu_factorize(ublas_matrix);
+  boost::numeric::ublas::inplace_solve(ublas_matrix, ublas_rhs, boost::numeric::ublas::unit_lower_tag ());
+  boost::numeric::ublas::inplace_solve(ublas_matrix, ublas_rhs, boost::numeric::ublas::upper_tag ());
+  
+  //print solution:
+  std::cout << "Solution: ";
+  for (size_t i=0; i<global_rhs.size(); ++i)
+    std::cout << ublas_rhs(i) << " ";
+  std::cout << std::endl;
+  std::cout << std::endl;
+  
+  //Writing solution back to mesh:
+  for (VertexIterator vit = vertices.begin();
+       vit != vertices.end();
+       ++vit)
+  {
+     long cur_index = viennadata::access<mapping_key, long>()(*vit);
+     if (cur_index > -1)
+       viennadata::access<std::string, double>("vtk_data")(*vit) = ublas_rhs(cur_index);
   }
 
+  std::cout << "*" << std::endl;
+  std::cout << "* Phase 6: Writing data to 'tut1.vtu' (can be viewed with e.g. Paraview)" << std::endl;
+  std::cout << "*" << std::endl;
 
   viennagrid::io::Vtk_writer<DomainType> my_vtk_writer;
   my_vtk_writer.writeDomain(domain, "tut1.vtu");  
@@ -342,7 +507,7 @@ int main()
   
   try{
     viennagrid::io::sgf_reader my_sgf_reader;
-    my_sgf_reader(my_domain, "../examples/data/square8.sgf");
+    my_sgf_reader(my_domain, "../examples/data/square128.sgf");
   } catch (...){
     std::cerr << "File-Reader failed. Aborting program..." << std::endl;
     exit(EXIT_FAILURE);
@@ -351,6 +516,8 @@ int main()
   
   do_something(my_domain);
   
-  
+  std::cout << "*****************************************" << std::endl;
+  std::cout << "* Poisson solver finished successfully! *" << std::endl;
+  std::cout << "*****************************************" << std::endl;
   return EXIT_SUCCESS;
 }
