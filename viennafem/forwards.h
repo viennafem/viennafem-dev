@@ -153,12 +153,30 @@ namespace viennafem
       return viennadata::access<BoundaryKey, bool>(bk)(*it);
     }
   };
+  
+  // define a key and configure viennadata to use a type-based dispatch:
+  struct boundary_key {};
+  struct mapping_key {};
+
+  
 
 }
 
-//configure vienndata for type-based dispatch on dt_dx and det_F
+//configure vienndata for type-based dispatch on boundary_key, mapping_key, dt_dx and det_F:
 namespace viennadata
 {
+  template <>
+  struct dispatch_traits<viennafem::boundary_key>
+  {
+    typedef type_key_dispatch_tag    tag;
+  };
+  
+  template <>
+  struct dispatch_traits<viennafem::mapping_key>
+  {
+    typedef type_key_dispatch_tag    tag;
+  };
+  
   template <unsigned long local_index,
             unsigned long global_index>
   struct dispatch_traits<viennafem::dt_dx_key<local_index,

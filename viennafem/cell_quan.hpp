@@ -10,11 +10,15 @@
    license:    MIT (X11), see file LICENSE in the ViennaFEM base directory
 ======================================================================================= */
 
-#ifndef VIENNAFEM_CELL_QUAN_GUARD
-#define VIENNAFEM_CELL_QUAN_GUARD
+#ifndef VIENNAFEM_CELL_QUAN_HPP
+#define VIENNAFEM_CELL_QUAN_HPP
+
+#include "viennafem/forwards.h"
 
 #include "viennamath/forwards.h"
+#include "viennamath/substitute.hpp"
 #include "viennamath/expression.hpp"
+#include "viennamath/equation.hpp"
 #include "viennadata/interface.hpp"
 
 namespace viennafem
@@ -90,6 +94,43 @@ namespace viennafem
                                                         new viennamath::op_mult(),
                                                         rhs.clone())); 
   }
+  
+  
+  
+  
+  template <typename CellType>
+  viennamath::equation update_cell_quantities(CellType const & cell,
+                                              viennamath::equation const & weak_form)
+  {
+    //step 1: update det_dF_dt
+    viennamath::expr new_lhs =
+       viennamath::substitute(viennamath::expr(new viennafem::cell_quan<CellType,
+                                                                        viennafem::det_dF_dt_key>()),
+                              viennamath::expr(new viennafem::cell_quan<CellType,
+                                                                        viennafem::det_dF_dt_key>(cell)),
+                              weak_form.lhs());
+                              
+    //step 2: update dt_dx<j, i>       
+    new_lhs = viennamath::substitute(viennamath::expr(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<0, 0> >()),
+                                     viennamath::expr(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<0, 0> >(cell)),
+                                     new_lhs);
+
+    new_lhs = viennamath::substitute(viennamath::expr(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<0, 1> >()),
+                                     viennamath::expr(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<0, 1> >(cell)),
+                                     new_lhs);
+
+    new_lhs = viennamath::substitute(viennamath::expr(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<1, 0> >()),
+                                     viennamath::expr(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<1, 0> >(cell)),
+                                     new_lhs);
+
+    new_lhs = viennamath::substitute(viennamath::expr(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<1, 1> >()),
+                                     viennamath::expr(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<1, 1> >(cell)),
+                                     new_lhs);
+    
+    return viennamath::equation(new_lhs,
+                                weak_form.rhs());
+  }
+  
   
 }
 #endif

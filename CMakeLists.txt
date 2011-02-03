@@ -13,18 +13,24 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    INCLUDE_DIRECTORIES("/opt/local/include") 
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
-# ATI stream sdk:
+#
+# ATI Stream SDK:
 # add include and lib path to build environment
+# The linker will most likely pick the correct link directory
+# Otherwise, feel free to comment the wrong link directory for your machine.
+#
 SET(OPENCLPATH $ENV{ATISTREAMSDKROOT})
 INCLUDE_DIRECTORIES(${OPENCLPATH}/include) 
-LINK_DIRECTORIES(${OPENCLPATH}/lib/x86) 
+LINK_DIRECTORIES(${OPENCLPATH}/lib/x86)       #use this on 32 bit systems
+LINK_DIRECTORIES(${OPENCLPATH}/lib/x86_64)    #use this on 64 bit systems
+
 
 #specify include and source directory
 INCLUDE_DIRECTORIES(".")
 INCLUDE_DIRECTORIES("../ViennaGrid/")
 INCLUDE_DIRECTORIES("../ViennaData/")
 INCLUDE_DIRECTORIES("../ViennaMath/")
-INCLUDE_DIRECTORIES("../ViennaCL/ViennaCL-1.1.0/")
+INCLUDE_DIRECTORIES("../ViennaCL/")
 INCLUDE_DIRECTORIES(${BOOSTPATH})
 
 #add definitions, compiler switches, etc.
@@ -35,12 +41,14 @@ ELSE()
 ENDIF()
 
 IF(CMAKE_COMPILER_IS_GNUCXX)
-   ADD_DEFINITIONS(-Wall -O0 -g -lpthread)
-   #ADD_DEFINITIONS(-Wall -pedantic -O3)
+   #ADD_DEFINITIONS(-Wall -O0 -g -lpthread)
+   ADD_DEFINITIONS(-Wall -pedantic -O3)
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 #list all source files here
-ADD_EXECUTABLE(tut1 examples/tutorial/tut1.cpp)
+ADD_EXECUTABLE(poisson examples/tutorial/poisson.cpp)
+#TARGET_LINK_LIBRARIES(poisson OpenCL)
+
 
 # Mac OS X specific linker part
 #IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
