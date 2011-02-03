@@ -62,10 +62,10 @@ template <typename DomainType,
           typename PDEConfig>
 void write_solution_to_VTK_file(std::vector<viennafem::numeric_type> const & result,
                                 std::string filename,
-                                DomainType & domain,
+                                DomainType const & domain,
                                 PDEConfig const & config)
 {
-  typedef typename viennagrid::result_of::ncell_container<DomainType, 0>::type    VertexContainer;
+  typedef typename viennagrid::result_of::const_ncell_container<DomainType, 0>::type    VertexContainer;
   typedef typename viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
   
   typedef typename PDEConfig::mapping_key_type          MappingType;

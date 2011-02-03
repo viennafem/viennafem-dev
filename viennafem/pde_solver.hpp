@@ -246,17 +246,17 @@ namespace viennafem
     viennacl::copy(vcl_result, ublas_result);
   #else
     ublas_result = viennacl::linalg::solve(ublas_matrix, ublas_rhs, viennacl::linalg::cg_tag());
-    std::cout << "Residual: " << norm_2(prod(ublas_matrix, ublas_result) - ublas_rhs) << std::endl;
+    std::cout << "* pde_solver::operator(): Residual: " << norm_2(prod(ublas_matrix, ublas_result) - ublas_rhs) << std::endl;
   #endif
       
-    std::cout << ublas_rhs << std::endl;
+    //std::cout << ublas_rhs << std::endl;
     
     //print solution:
-    std::cout << "Solution: ";
-    for (size_t i=0; i<ublas_result.size(); ++i)
-      std::cout << ublas_result(i) << " ";
-    std::cout << std::endl;
-    std::cout << std::endl;
+    //std::cout << "Solution: ";
+    //for (size_t i=0; i<ublas_result.size(); ++i)
+    //  std::cout << ublas_result(i) << " ";
+    //std::cout << std::endl;
+    //std::cout << std::endl;
   
     std::vector<numeric_type> result(map_index);
     for (size_t i=0; i<ublas_result.size(); ++i)
