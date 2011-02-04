@@ -25,7 +25,7 @@
 #include "viennafem/cell_quan.hpp"
 #include "viennafem/transform.hpp"
 #include "viennafem/eval.hpp"
-#include "viennafem/pde_config.hpp"
+#include "viennafem/unknown_config.hpp"
 #include "viennafem/pde_solver.hpp"
 
 // ViennaGrid includes:
@@ -41,6 +41,29 @@
 #include "viennamath/equation.hpp"
 #include "viennamath/unknown_func.hpp"
 #include "viennamath/op_tags.hpp"
+
+//ViennaCL includes:
+#ifndef VIENNACL_HAVE_UBLAS
+ #define VIENNACL_HAVE_UBLAS
+#endif
+    
+#ifdef USE_OPENCL
+  #include "viennacl/matrix.hpp"
+  #include "viennacl/vector.hpp"
+#endif
+#include "viennacl/linalg/cg.hpp"
+#include "viennacl/linalg/norm_2.hpp"
+#include "viennacl/linalg/prod.hpp"
+
+#include <boost/numeric/ublas/io.hpp>
+#include <boost/numeric/ublas/triangular.hpp>
+#include <boost/numeric/ublas/matrix_sparse.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/matrix_proxy.hpp>
+#include <boost/numeric/ublas/operation.hpp>
+#include <boost/numeric/ublas/operation_sparse.hpp>
+#include <boost/numeric/ublas/io.hpp>
+#include <boost/numeric/ublas/lu.hpp>
 
 
 //
@@ -58,9 +81,50 @@ struct TriangleConfig
 };
 
 
-template <typename DomainType,
+//      
+// Solve system of linear equations:
+//
+template <typename MatrixType, typename VectorType>
+VectorType solve(MatrixType const & system_matrix,
+                 VectorType const & load_vector)
+{
+  typedef typename VectorType::value_type        numeric_type;
+  VectorType result(load_vector.size());
+  
+  std::cout << "* solve(): Solving linear system" << std::endl;
+
+#ifdef USE_OPENCL
+  viennacl::matrix<viennafem::numeric_type> vcl_matrix(load_vector.size(), load_vector.size());
+  viennacl::vector<viennafem::numeric_type> vcl_rhs(load_vector.size());
+  viennacl::vector<viennafem::numeric_type> vcl_result(load_vector.size());
+  
+  viennacl::copy(system_matrix, vcl_matrix);
+  viennacl::copy(load_vector, vcl_rhs);
+  
+  vcl_result = viennacl::linalg::solve(vcl_matrix, vcl_rhs, viennacl::linalg::cg_tag());
+  
+  viennacl::copy(vcl_result, result);
+#else
+  result = viennacl::linalg::solve(system_matrix, load_vector, viennacl::linalg::cg_tag());
+  std::cout << "* solve(): Residual: " << norm_2(prod(system_matrix, result) - load_vector) << std::endl;
+#endif
+    
+  std::cout << load_vector << std::endl;
+  
+  //print solution:
+  //std::cout << "Solution: ";
+  //for (size_t i=0; i<ublas_result.size(); ++i)
+  //  std::cout << ublas_result(i) << " ";
+  //std::cout << std::endl;
+  //std::cout << std::endl;
+
+  return result;
+}
+
+template <typename VectorType,
+          typename DomainType,
           typename PDEConfig>
-void write_solution_to_VTK_file(std::vector<viennafem::numeric_type> const & result,
+void write_solution_to_VTK_file(VectorType const & result,
                                 std::string filename,
                                 DomainType const & domain,
                                 PDEConfig const & config)
@@ -102,6 +166,8 @@ int main()
   typedef viennagrid::result_of::ncell_container<DomainType, 0>::type    VertexContainer;
   typedef viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
   
+  typedef boost::numeric::ublas::compressed_matrix<viennafem::numeric_type>  MatrixType;
+  typedef boost::numeric::ublas::vector<viennafem::numeric_type>             VectorType;
   
   //
   // Create a domain from file
@@ -130,10 +196,14 @@ int main()
   //
   // Create PDE config (where to find boundary information, where to store mapping indices, etc.)
   //
-  typedef viennafem::pde_config<viennafem::boundary_key,
-                                viennafem::mapping_key>          MyPDEConfigType_1;
+  typedef viennafem::unknown_config<MatrixType,
+                                    VectorType,
+                                    viennafem::boundary_key,
+                                    viennafem::mapping_key>          MyPDEConfigType_1;
 
-  typedef viennafem::pde_config<long, char>   MyPDEConfigType_2;  //using keys of type 'long' for boundary, keys of type 'char' for mapping
+  typedef viennafem::unknown_config<MatrixType,
+                                    VectorType,
+                                    long, char>   MyPDEConfigType_2;  //using keys of type 'long' for boundary, keys of type 'char' for mapping
                                 
   MyPDEConfigType_1  poisson_config_1;
   MyPDEConfigType_2  poisson_config_2;
@@ -170,15 +240,18 @@ int main()
   //
   // Create PDE solver functors: (discussion about proper interface required)
   //
-  viennafem::pde_solver<MyPDEConfigType_1> my_solver_1(poisson_config_1);
-  viennafem::pde_solver<MyPDEConfigType_2> my_solver_2(poisson_config_2);
+  viennafem::pde_solver fem_solver;
 
+  
   //
   // Solve system and write solution vector to pde_result:
   // (discussion about proper interface required. Introduce a pde_result class?)
   //
-  std::vector<viennafem::numeric_type> pde_result_1 = my_solver_1(poisson_equ_1, my_domain);
-  std::vector<viennafem::numeric_type> pde_result_2 = my_solver_2(poisson_equ_2, my_domain);
+  fem_solver(poisson_equ_1, poisson_config_1, my_domain);
+  fem_solver(poisson_equ_2, poisson_config_2, my_domain);
+  
+  VectorType pde_result_1 = solve(poisson_config_1.system_matrix(), poisson_config_1.load_vector());
+  VectorType pde_result_2 = solve(poisson_config_2.system_matrix(), poisson_config_2.load_vector());
   
   //
   // Writing solution back to domain (discussion about proper way of returning a solution required...)

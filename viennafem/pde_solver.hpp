@@ -23,55 +23,29 @@
 //ViennaData includes:
 #include "viennadata/interface.hpp"
 
-//ViennaCL includes:
-#ifndef VIENNACL_HAVE_UBLAS
- #define VIENNACL_HAVE_UBLAS
-#endif
-    
-#ifdef USE_OPENCL
-  #include "viennacl/matrix.hpp"
-  #include "viennacl/vector.hpp"
-#endif
-#include "viennacl/linalg/cg.hpp"
-
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/ublas/triangular.hpp>
-#include <boost/numeric/ublas/matrix_sparse.hpp>
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/matrix_proxy.hpp>
-#include <boost/numeric/ublas/operation.hpp>
-#include <boost/numeric/ublas/operation_sparse.hpp>
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/ublas/lu.hpp>
-
 
 namespace viennafem
 {
 
-  template <typename PDEConfig>
   class pde_solver
   {
     public:
-      pde_solver(PDEConfig const & conf) : conf_(conf) {} 
       
-      template <typename PDEDomain>
-      std::vector<numeric_type> operator()(viennamath::equation const & strong_form,
-                                           PDEDomain & domain) const;
+      template <typename EquationType, typename ConfigType, typename PDEDomain>
+      void operator()(EquationType & strong_form,
+                      ConfigType & conf,
+                      PDEDomain & domain) const;
       
-    private:
-      PDEConfig conf_;    
   };
 
 
 
 
-  template <typename PDEConfig>  //template for class
-  template <typename PDEDomain>  //template for operator()
-  std::vector<numeric_type> pde_solver<PDEConfig>::operator()(viennamath::equation const & strong_form,
-                                                              PDEDomain & domain) const
+  template <typename EquationType, typename ConfigType, typename DomainType>  //template for operator()
+  void pde_solver::operator()(EquationType & strong_form,
+                              ConfigType & config,
+                              DomainType & domain) const
   {
-    typedef PDEDomain                                     DomainType;
-    
     typedef typename DomainType::config_type              Config;
     typedef typename Config::cell_tag                     CellTag;
     
@@ -87,8 +61,13 @@ namespace viennafem
     typedef typename viennagrid::result_of::ncell_container<CellType, 0>::type                  VertexOnCellContainer;
     typedef typename viennagrid::result_of::iterator<VertexOnCellContainer>::type               VertexOnCellIterator;
     
-    typedef typename PDEConfig::mapping_key_type          MappingKeyType;
-    typedef typename PDEConfig::boundary_key_type         BoundaryKeyType;
+    typedef typename ConfigType::matrix_type               MatrixType;
+    typedef typename ConfigType::vector_type               VectorType;
+    typedef typename ConfigType::mapping_key_type          MappingKeyType;
+    typedef typename ConfigType::boundary_key_type         BoundaryKeyType;
+    
+    MatrixType & system_matrix = config.system_matrix();
+    VectorType & load_vector = config.load_vector();
     
     
     viennamath::equation weak_form_general = viennamath::weak_form(strong_form);  
@@ -113,24 +92,33 @@ namespace viennafem
 
     std::cout << "* pde_solver::operator(): Create Mapping:" << std::endl;
    
-    long map_index = 0;
+    size_t map_index = 0;
     VertexContainer vertices = viennagrid::ncells<0>(domain);
     for (VertexIterator vit = vertices.begin();
         vit != vertices.end();
         ++vit)
     {
-      if (viennadata::access<BoundaryKeyType, bool>(conf_.boundary_key())(*vit))
-        viennadata::access<MappingKeyType, long>(conf_.mapping_key())(*vit) = -1;
+      if (viennadata::access<BoundaryKeyType, bool>(config.boundary_key())(*vit))
+        viennadata::access<MappingKeyType, long>(config.mapping_key())(*vit) = -1;
       else
-        viennadata::access<MappingKeyType, long>(conf_.mapping_key())(*vit) = map_index++;
+        viennadata::access<MappingKeyType, long>(config.mapping_key())(*vit) = map_index++;
     }
     std::cout << "* pde_solver::operator(): Assigned degrees of freedom: " << map_index << std::endl;
     
-    //build global system matrix and load vector:
-    boost::numeric::ublas::compressed_matrix<viennafem::numeric_type> ublas_matrix(map_index, map_index);
-    boost::numeric::ublas::vector<viennafem::numeric_type> ublas_rhs(map_index);
-    ublas_rhs.clear(); ublas_rhs.resize(map_index); //mind that ublas-vector may not be initialized to zero!!
-    boost::numeric::ublas::vector<viennafem::numeric_type> ublas_result(map_index);
+    //resize global system matrix and load vector if needed:
+    if (map_index > system_matrix.size1())
+    {
+      system_matrix.resize(map_index, map_index, false);
+      system_matrix.clear();
+      system_matrix.resize(map_index, map_index, false);
+    }
+    
+    if (map_index > load_vector.size())
+    {
+      load_vector.resize(map_index, false);
+      load_vector.clear();
+      load_vector.resize(map_index, false);
+    }
     
     std::cout << "* pde_solver::operator(): Transform to reference element" << std::endl;
     
@@ -164,7 +152,7 @@ namespace viennafem
       //update cell_quantities:
       //std::cout << "Updating cell quantities..." << std::endl;
       viennamath::equation cell_expr = viennafem::update_cell_quantities(*cell_iter, 
-                                                                        transformed_weak_form);
+                                                                         transformed_weak_form);
       
       //std::cout << "New cell_expr: " << cell_expr << std::endl;
 
@@ -206,7 +194,7 @@ namespace viennafem
           vocit_i != vertices_on_cell.end();
           ++vocit_i, ++local_index_i)
       {
-        global_index_i = viennadata::access<MappingKeyType, long>(conf_.mapping_key())(*vocit_i);
+        global_index_i = viennadata::access<MappingKeyType, long>(config.mapping_key())(*vocit_i);
         if (global_index_i == -1)
           continue;
         
@@ -215,54 +203,19 @@ namespace viennafem
             vocit_j != vertices_on_cell.end();
             ++vocit_j, ++local_index_j)
         {
-          global_index_j = viennadata::access<MappingKeyType, long>(conf_.mapping_key())(*vocit_j);
+          global_index_j = viennadata::access<MappingKeyType, long>(config.mapping_key())(*vocit_j);
           
           if (global_index_j == -1)
             continue; //modify right-hand side here
           
-          ublas_matrix(global_index_i, global_index_j) += element_matrix[local_index_i][local_index_j];
+          system_matrix(global_index_i, global_index_j) += element_matrix[local_index_i][local_index_j];
         }
         
-        ublas_rhs(global_index_i) += element_vector[local_index_i];
+        load_vector(global_index_i) += element_vector[local_index_i];
       }
       
     }
     
-    //      
-    // Solve system of linear equations:
-    //
-    std::cout << "* pde_solver::operator(): Solving linear system" << std::endl;
-
-  #ifdef USE_OPENCL
-    viennacl::matrix<viennafem::numeric_type> vcl_matrix(map_index, map_index);
-    viennacl::vector<viennafem::numeric_type> vcl_rhs(map_index);
-    viennacl::vector<viennafem::numeric_type> vcl_result(map_index);
-    
-    viennacl::copy(global_matrix, vcl_matrix);
-    viennacl::copy(global_rhs, vcl_rhs);
-    
-    vcl_result = viennacl::linalg::solve(vcl_matrix, vcl_rhs, viennacl::linalg::cg_tag());
-    
-    viennacl::copy(vcl_result, ublas_result);
-  #else
-    ublas_result = viennacl::linalg::solve(ublas_matrix, ublas_rhs, viennacl::linalg::cg_tag());
-    std::cout << "* pde_solver::operator(): Residual: " << norm_2(prod(ublas_matrix, ublas_result) - ublas_rhs) << std::endl;
-  #endif
-      
-    //std::cout << ublas_rhs << std::endl;
-    
-    //print solution:
-    //std::cout << "Solution: ";
-    //for (size_t i=0; i<ublas_result.size(); ++i)
-    //  std::cout << ublas_result(i) << " ";
-    //std::cout << std::endl;
-    //std::cout << std::endl;
-  
-    std::vector<numeric_type> result(map_index);
-    for (size_t i=0; i<ublas_result.size(); ++i)
-      result[i] = ublas_result(i);
-    
-    return result;
   }
 }
 #endif
