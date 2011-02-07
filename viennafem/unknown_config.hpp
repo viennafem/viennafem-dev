@@ -35,6 +35,8 @@ namespace viennafem
       typedef BoundaryKeyType    boundary_key_type;
       typedef MappingKeyType     mapping_key_type;
     
+      unknown_config(MatrixType & matrix, VectorType & vector) : m(matrix),v(vector) {}
+      
       BoundaryKeyType boundary_key() const { return BoundaryKeyType(); } 
       MappingKeyType mapping_key() const { return MappingKeyType(); } 
     
@@ -42,8 +44,8 @@ namespace viennafem
       VectorType & load_vector() { return v; }
     
     private:
-      MatrixType m;
-      VectorType v;
+      MatrixType & m;
+      VectorType & v;
   };  
 
 }

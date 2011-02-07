@@ -204,9 +204,12 @@ int main()
   typedef viennafem::unknown_config<MatrixType,
                                     VectorType,
                                     long, char>   MyPDEConfigType_2;  //using keys of type 'long' for boundary, keys of type 'char' for mapping
-                                
-  MyPDEConfigType_1  poisson_config_1;
-  MyPDEConfigType_2  poisson_config_2;
+
+  MatrixType matrix;
+  VectorType rhs;
+
+  MyPDEConfigType_1  poisson_config_1(matrix,rhs);
+  MyPDEConfigType_2  poisson_config_2(matrix,rhs);
   
   //
   // Setting boundary information on domain (this should come from device specification)
