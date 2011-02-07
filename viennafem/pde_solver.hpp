@@ -15,6 +15,10 @@
 
 //ViennaFEM includes:
 #include "viennafem/forwards.h"
+#include "viennafem/transform.hpp"
+#include "viennafem/BFStock.hpp"
+#include "viennafem/eval.hpp"
+#include "viennafem/dtdx_triangle.h"
 
 //ViennaMath includes:
 #include "viennamath/weak_form.hpp"
@@ -23,6 +27,8 @@
 //ViennaData includes:
 #include "viennadata/interface.hpp"
 
+//ViennaGrid includes:
+#include "viennagrid/domain.hpp"
 
 namespace viennafem
 {
