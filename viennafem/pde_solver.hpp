@@ -105,10 +105,18 @@ namespace viennafem
         ++vit)
     {  
       if (viennadata::access<BoundaryKeyType, bool>(config.boundary_key())(*vit))
+      {
+        //std::cout << "boundary vertex" << std::endl;
         viennadata::access<MappingKeyType, long>(config.mapping_key())(*vit) = -1;
+      }
       else
+      {
+        //std::cout << "interior vertex" << std::endl;
         viennadata::access<MappingKeyType, long>(config.mapping_key())(*vit) = map_index++;
+      }
     }
+    std::cout << "---------------------------" << std::endl;
+    
     std::cout << "* pde_solver::operator(): Assigned degrees of freedom: " << map_index << std::endl;
     
     //resize global system matrix and load vector if needed:
@@ -190,6 +198,7 @@ namespace viennafem
       //  std::cout << " | " << element_vector[i] << std::endl;
       //}
       
+      
       //write back to global matrix:
       VertexOnCellContainer vertices_on_cell = viennagrid::ncells<0>(*cell_iter);
       long global_index_i = 0;
@@ -199,8 +208,9 @@ namespace viennafem
       for (VertexOnCellIterator vocit_i = vertices_on_cell.begin();
           vocit_i != vertices_on_cell.end();
           ++vocit_i, ++local_index_i)
-      {
+      {                  
         global_index_i = viennadata::access<MappingKeyType, long>(config.mapping_key())(*vocit_i);
+        //std::cout << "glob_i: " << global_index_i << std::endl;
         if (global_index_i == -1)
           continue;
         
@@ -210,10 +220,11 @@ namespace viennafem
             ++vocit_j, ++local_index_j)
         {
           global_index_j = viennadata::access<MappingKeyType, long>(config.mapping_key())(*vocit_j);
-          
+          //std::cout << "glob_j: " << global_index_j << std::endl;
           if (global_index_j == -1)
             continue; //modify right-hand side here
           
+          //std::cout << "incrementing sys matrix at " << global_index_i << " " << global_index_j << " by " << element_matrix[local_index_i][local_index_j] << std::endl;
           system_matrix(global_index_i, global_index_j) += element_matrix[local_index_i][local_index_j];
         }
         
@@ -221,7 +232,6 @@ namespace viennafem
       }
       
     }
-    
   }
 }
 #endif

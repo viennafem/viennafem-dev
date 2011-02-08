@@ -24,20 +24,16 @@ namespace viennafem
 template<typename DomainT>
 struct assemble
 {
-   assemble(DomainT& domain) : domain(domain)
-   {}
+   assemble(DomainT& domain) : domain(domain) {}
 
    template<typename ConfigT>
    void operator()(viennamath::equation const& equ, 
                    ConfigT                   & config)
    {
-
       viennafem::pde_solver assembler;
       assembler(equ, config, domain);
-      //std::cout << "FEM ASSEMBLER" << std::endl;
-      //std::cout << config.system_matrix() << std::endl;
    }
-   DomainT domain;
+   DomainT & domain;
 };
 
 }

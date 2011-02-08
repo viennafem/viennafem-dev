@@ -208,11 +208,11 @@ int main()
                                     VectorType,
                                     long, char>   MyPDEConfigType_2;  //using keys of type 'long' for boundary, keys of type 'char' for mapping
 
-  MatrixType matrix;
-  VectorType rhs;
+  MatrixType matrix1, matrix2;
+  VectorType rhs1, rhs2;
 
-  MyPDEConfigType_1  poisson_config_1(matrix,rhs);
-  MyPDEConfigType_2  poisson_config_2(matrix,rhs);
+  MyPDEConfigType_1  poisson_config_1(matrix1,rhs1);
+  MyPDEConfigType_2  poisson_config_2(matrix2,rhs2);
   
   //
   // Setting boundary information on domain (this should come from device specification)
@@ -256,9 +256,13 @@ int main()
   fem_solver(poisson_equ_1, poisson_config_1, my_domain);
   fem_solver(poisson_equ_2, poisson_config_2, my_domain);
   
+  //std::cout << poisson_config_1.load_vector() << std::endl;
+  
   VectorType pde_result_1 = solve(poisson_config_1.system_matrix(), poisson_config_1.load_vector());
   VectorType pde_result_2 = solve(poisson_config_2.system_matrix(), poisson_config_2.load_vector());
-  
+
+  std::cout << "RESULT" << std::endl;
+  std::cout << pde_result_1 << std::endl;
   //
   // Writing solution back to domain (discussion about proper way of returning a solution required...)
   //
