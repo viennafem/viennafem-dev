@@ -32,9 +32,10 @@ struct assemble
                    ConfigT                   & config)
    {
 
-      viennafem::pde_solver fem_assembler;
-      fem_assembler(equ, config, domain);
-
+      viennafem::pde_solver assembler;
+      assembler(equ, config, domain);
+      //std::cout << "FEM ASSEMBLER" << std::endl;
+      //std::cout << config.system_matrix() << std::endl;
    }
    DomainT domain;
 };

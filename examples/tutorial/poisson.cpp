@@ -42,6 +42,17 @@
 #include "viennamath/unknown_func.hpp"
 #include "viennamath/op_tags.hpp"
 
+#include <boost/numeric/ublas/io.hpp>
+#include <boost/numeric/ublas/triangular.hpp>
+#include <boost/numeric/ublas/matrix_sparse.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/matrix_proxy.hpp>
+#include <boost/numeric/ublas/operation.hpp>
+#include <boost/numeric/ublas/operation_sparse.hpp>
+#include <boost/numeric/ublas/io.hpp>
+#include <boost/numeric/ublas/lu.hpp>
+
+
 //ViennaCL includes:
 #ifndef VIENNACL_HAVE_UBLAS
  #define VIENNACL_HAVE_UBLAS
@@ -55,15 +66,7 @@
 #include "viennacl/linalg/norm_2.hpp"
 #include "viennacl/linalg/prod.hpp"
 
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/ublas/triangular.hpp>
-#include <boost/numeric/ublas/matrix_sparse.hpp>
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/matrix_proxy.hpp>
-#include <boost/numeric/ublas/operation.hpp>
-#include <boost/numeric/ublas/operation_sparse.hpp>
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/ublas/lu.hpp>
+
 
 
 //

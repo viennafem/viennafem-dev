@@ -103,7 +103,7 @@ namespace viennafem
     for (VertexIterator vit = vertices.begin();
         vit != vertices.end();
         ++vit)
-    {
+    {  
       if (viennadata::access<BoundaryKeyType, bool>(config.boundary_key())(*vit))
         viennadata::access<MappingKeyType, long>(config.mapping_key())(*vit) = -1;
       else
