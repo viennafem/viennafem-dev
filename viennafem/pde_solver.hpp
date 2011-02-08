@@ -19,6 +19,7 @@
 #include "viennafem/BFStock.hpp"
 #include "viennafem/eval.hpp"
 #include "viennafem/dtdx_triangle.h"
+#include "viennafem/dtdx_tetrahedron.h"
 
 //ViennaMath includes:
 #include "viennamath/weak_form.hpp"
@@ -156,12 +157,11 @@ namespace viennafem
       
       //set up element matrix:
       //std::cout << "Creating element matrix..." << std::endl;
-      std::vector<std::vector< viennafem::numeric_type > >  element_matrix(3);
-      element_matrix[0].resize(3);
-      element_matrix[1].resize(3);
-      element_matrix[2].resize(3);
+      std::vector<std::vector< viennafem::numeric_type > >  element_matrix(viennagrid::subcell_traits<CellTag, 0>::num_elements);
+      for (size_t i=0; i<viennagrid::subcell_traits<CellTag, 0>::num_elements; ++i)
+        element_matrix[i].resize(viennagrid::subcell_traits<CellTag, 0>::num_elements);
       
-      std::vector<viennafem::numeric_type> element_vector(3);
+      std::vector<viennafem::numeric_type> element_vector(viennagrid::subcell_traits<CellTag, 0>::num_elements);
       
       //update cell_quantities:
       //std::cout << "Updating cell quantities..." << std::endl;
@@ -174,6 +174,7 @@ namespace viennafem
       
       //fill element_matrix:
       //std::cout << "Filling element matrix..." << std::endl;
+      //cell_iter->print_short();
       for (size_t i = 0; i<test_functions.size(); ++i)
       {
         for (size_t j=0; j<trial_functions.size(); ++j)
@@ -181,13 +182,13 @@ namespace viennafem
           viennamath::equation temp = viennafem::insert_test_and_trial_functions(test_functions[i],
                                                                                 trial_functions[j],
                                                                                 cell_expr);
-          element_matrix[i][j] = viennafem::eval_element_matrix_entry(temp.lhs()) * det_dF_dt.eval(1.0); 
+          element_matrix[i][j] = viennafem::eval_element_matrix_entry(temp.lhs(), CellTag()) * det_dF_dt.eval(1.0); 
         }
         
         viennamath::equation temp = viennafem::insert_test_and_trial_functions(test_functions[i],
                                                                               trial_functions[0],
                                                                               cell_expr);
-        element_vector[i] = viennafem::eval_element_vector_entry(temp.rhs()) * det_dF_dt.eval(1.0); 
+        element_vector[i] = viennafem::eval_element_vector_entry(temp.rhs(), CellTag()) * det_dF_dt.eval(1.0); 
       }
       
       //print element matrix:

@@ -40,6 +40,10 @@ namespace viennafem
         
         //Step 1: store determinant:
         double det_dF_dt = viennagrid::spannedVolume(p1 - p0, p2 - p0);
+        
+        assert(det_dF_dt > 0);
+        
+        
         viennadata::access<det_dF_dt_key, numeric_type>()(cell) = det_dF_dt;
         
         //Step 2: store partial derivatives:

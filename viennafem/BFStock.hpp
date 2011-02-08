@@ -47,6 +47,28 @@ namespace viennafem
   }
   
   
+  std::vector<viennamath::expr> get_basisfunctions(viennagrid::tetrahedron_tag)
+  {
+    //std::cout << "get_basisfunctions: entry" << std::endl;
+    std::vector<viennamath::expr> ret(4);
+    
+    //std::cout << "get_basisfunctions: Creating variables" << std::endl;
+    viennamath::variable<0> x;
+    viennamath::variable<1> y;
+    viennamath::variable<2> z;
+    
+    //std::cout << "get_basisfunctions: filling 0" << std::endl;
+    ret[0] = viennamath::expr(1 - x - y - z);
+    //std::cout << "get_basisfunctions: filling 1" << std::endl;
+    ret[1] = viennamath::expr(x);
+    //std::cout << "get_basisfunctions: filling 2" << std::endl;
+    ret[2] = viennamath::expr(y);
+    //std::cout << "get_basisfunctions: filling 3" << std::endl;
+    ret[3] = viennamath::expr(z);
+    
+    //std::cout << "get_basisfunctions: return" << std::endl;
+    return ret;    
+  }
   
   
   

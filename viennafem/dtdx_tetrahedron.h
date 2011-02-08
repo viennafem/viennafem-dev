@@ -22,8 +22,47 @@
 namespace viennafem
 {
   
-  template <typename T, typename U, typename V>
-  struct dt_dx_handler {};
+  //memory-intensive: Compute them once and store the computed values until next update
+  template <>
+  struct dt_dx_handler<viennagrid::tetrahedron_tag>
+  {
+    public:
+      
+      template <typename CellType>
+      static void apply(CellType const & cell)
+      {
+        typedef typename CellType::config_type       Config;
+        typedef typename viennagrid::result_of::point_type<Config>::type   PointType;
+        
+        PointType const & p0 = cell.getPoint(0);
+        PointType const & p1 = cell.getPoint(1);
+        PointType const & p2 = cell.getPoint(2);
+        PointType const & p3 = cell.getPoint(3);
+        
+        //Step 1: store determinant:
+        numeric_type det_dF_dt = spannedVolume(p1 - p0, p2 - p0, p3 - p0);
+        
+        viennadata::access<det_dF_dt_key, numeric_type>()(cell) = det_dF_dt;
+        
+        //Step 2: store partial derivatives:
+        viennadata::access<dt_dx_key<0, 0>, numeric_type>()(cell) = (  + p2.get_y() * p3.get_z() - p2.get_z() * p3.get_y() ) / det_dF_dt;
+        viennadata::access<dt_dx_key<0, 1>, numeric_type>()(cell) = (  - p2.get_x() * p3.get_z() + p2.get_z() * p3.get_x() ) / det_dF_dt;
+        viennadata::access<dt_dx_key<0, 2>, numeric_type>()(cell) = (  + p2.get_x() * p3.get_y() - p2.get_y() * p3.get_x() ) / det_dF_dt;
+        
+        viennadata::access<dt_dx_key<1, 0>, numeric_type>()(cell) = (  - p1.get_y() * p3.get_z() + p1.get_z() * p3.get_y() ) / det_dF_dt;
+        viennadata::access<dt_dx_key<1, 1>, numeric_type>()(cell) = (  + p1.get_x() * p3.get_z() - p1.get_z() * p3.get_x() ) / det_dF_dt;
+        viennadata::access<dt_dx_key<1, 2>, numeric_type>()(cell) = (  - p1.get_x() * p3.get_y() + p1.get_y() * p3.get_x() ) / det_dF_dt;
+        
+        viennadata::access<dt_dx_key<2, 0>, numeric_type>()(cell) = (  + p1.get_y() * p2.get_z() - p1.get_z() * p2.get_y() ) / det_dF_dt;
+        viennadata::access<dt_dx_key<2, 1>, numeric_type>()(cell) = (  - p1.get_x() * p2.get_z() + p1.get_z() * p2.get_x() ) / det_dF_dt;
+        viennadata::access<dt_dx_key<2, 2>, numeric_type>()(cell) = (  + p1.get_x() * p2.get_y() - p1.get_y() * p2.get_x() ) / det_dF_dt;
+      }
+
+  };
+  
+  
+  
+/*  Old code to follow...
  
 
   //memory-intensive: Compute them once and store the computed values until next update
@@ -84,7 +123,7 @@ namespace viennafem
 
     protected:
 
-      /*
+      / *
       void checkOrientation()
       {
         PointType & p0 = cell.getPoint(0);
@@ -104,7 +143,7 @@ namespace viennafem
         }
         else if (det_dF_dt == 0.0)
           std::cout << "ERROR: detected degenerated element!" << std::endl;
-      } */
+      } * /
 
       void print(long indent) const
       {
@@ -193,7 +232,7 @@ namespace viennafem
 
     protected:
 
-      /*
+      / *
       void checkOrientation()
       {
         PointType & p0 = Base::vertices_[0]->getPoint();
@@ -213,7 +252,7 @@ namespace viennafem
         }
         else if (det_dF_dt == 0.0)
           std::cout << "ERROR: detected degenerated element!" << std::endl;
-      } */
+      } * /
 
       void print(long indent) const
       {
@@ -303,7 +342,7 @@ namespace viennafem
 
     protected:
 
-      /*
+      / *
       void checkOrientation()
       {
         PointType & p0 = Base::vertices_[0]->getPoint();
@@ -323,7 +362,7 @@ namespace viennafem
         }
         else if (det_dF_dt == 0.0)
           std::cout << "ERROR: detected degenerated element!" << std::endl;
-      } */
+      } * /
 
       void print(long indent) const
       {
@@ -334,7 +373,7 @@ namespace viennafem
 
   };
 
-/*  //fast and memory-saving: Compute an element's Jacobian as soon as the first entry is accessed. Use static memory, so that only one Jacobian set is stored at the same time. Must not be used in multi-threaded applications!!
+/ *  //fast and memory-saving: Compute an element's Jacobian as soon as the first entry is accessed. Use static memory, so that only one Jacobian set is stored at the same time. Must not be used in multi-threaded applications!!
   template <typename T_Configuration>
   struct dt_dx_handler<T_Configuration, TetrahedronTag, DtDxStoreStatically>
   {
