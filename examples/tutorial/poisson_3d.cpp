@@ -180,7 +180,7 @@ int main()
   try
   {
     viennagrid::io::sgf_reader my_sgf_reader;
-    my_sgf_reader(my_domain, "../examples/data/cube384.sgf");
+    my_sgf_reader(my_domain, "../examples/data/cube3072.sgf");
   }
   catch (...)
   {
@@ -239,7 +239,6 @@ int main()
     else
       viennadata::access<MyPDEConfigType_2::boundary_key_type,
                          bool>(poisson_config_2.boundary_key())(*vit) = false;
-    
   }
   
   

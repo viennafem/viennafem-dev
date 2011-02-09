@@ -171,6 +171,32 @@ namespace viennafem
       //std::cout << "New cell_expr: " << cell_expr << std::endl;
 
       viennafem::cell_quan<CellType, viennafem::det_dF_dt_key> det_dF_dt(*cell_iter);
+
+      /*
+      viennafem::cell_quan<CellType, viennafem::dt_dx_key<0,0> >  dr_dx(*cell_iter);
+      viennafem::cell_quan<CellType, viennafem::dt_dx_key<1,0> >  ds_dx(*cell_iter);
+      viennafem::cell_quan<CellType, viennafem::dt_dx_key<2,0> >  dt_dx(*cell_iter);
+      
+      viennafem::cell_quan<CellType, viennafem::dt_dx_key<0,1> >  dr_dy(*cell_iter);
+      viennafem::cell_quan<CellType, viennafem::dt_dx_key<1,1> >  ds_dy(*cell_iter);
+      viennafem::cell_quan<CellType, viennafem::dt_dx_key<2,1> >  dt_dy(*cell_iter);
+
+      viennafem::cell_quan<CellType, viennafem::dt_dx_key<0,2> >  dr_dz(*cell_iter);
+      viennafem::cell_quan<CellType, viennafem::dt_dx_key<1,2> >  ds_dz(*cell_iter);
+      viennafem::cell_quan<CellType, viennafem::dt_dx_key<2,2> >  dt_dz(*cell_iter);
+      
+      std::cout << det_dF_dt.eval(1.0) << std::endl;
+      std::cout << dr_dx.eval(0.0) << std::endl;
+      std::cout << dr_dy.eval(0.0) << std::endl;
+      std::cout << dr_dz.eval(0.0) << std::endl;
+      
+      std::cout << ds_dx.eval(0.0) << std::endl;
+      std::cout << ds_dy.eval(0.0) << std::endl;
+      std::cout << ds_dz.eval(0.0) << std::endl;
+      
+      std::cout << dt_dx.eval(0.0) << std::endl;
+      std::cout << dt_dy.eval(0.0) << std::endl;
+      std::cout << dt_dz.eval(0.0) << std::endl; */
       
       //fill element_matrix:
       //std::cout << "Filling element matrix..." << std::endl;
@@ -189,6 +215,8 @@ namespace viennafem
                                                                               trial_functions[0],
                                                                               cell_expr);
         element_vector[i] = viennafem::eval_element_vector_entry(temp.rhs(), CellTag()) * det_dF_dt.eval(1.0); 
+        
+        //std::cout << std::endl;
       }
       
       //print element matrix:

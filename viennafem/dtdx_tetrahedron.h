@@ -34,13 +34,13 @@ namespace viennafem
         typedef typename CellType::config_type       Config;
         typedef typename viennagrid::result_of::point_type<Config>::type   PointType;
         
-        PointType const & p0 = cell.getPoint(0);
-        PointType const & p1 = cell.getPoint(1);
-        PointType const & p2 = cell.getPoint(2);
-        PointType const & p3 = cell.getPoint(3);
+        PointType p0 = cell.getPoint(0);
+        PointType p1 = cell.getPoint(1) - p0;
+        PointType p2 = cell.getPoint(2) - p0;
+        PointType p3 = cell.getPoint(3) - p0;
         
         //Step 1: store determinant:
-        numeric_type det_dF_dt = spannedVolume(p1 - p0, p2 - p0, p3 - p0);
+        numeric_type det_dF_dt = spannedVolume(p1, p2, p3);
         
         viennadata::access<det_dF_dt_key, numeric_type>()(cell) = det_dF_dt;
         
