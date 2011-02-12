@@ -34,6 +34,8 @@ namespace viennafem
     p[0] = 1.0/3.0;
     p[1] = 1.0/3.0;
     
+    //std::cout << weak_form_lhs.get()->lhs()->str() << std::endl;
+    
     return 0.5 * weak_form_lhs.get()->lhs()->eval(p); //TODO: this is pretty ugly...
   }
   
@@ -44,6 +46,8 @@ namespace viennafem
     std::vector<numeric_type> p(2);
     p[0] = 1.0/3.0;
     p[1] = 1.0/3.0;
+    
+    //std::cout << weak_form_rhs.get()->lhs()->str() << std::endl;
     
     return 0.5 * weak_form_rhs.get()->lhs()->eval(p); //TODO: this is pretty ugly...
   }

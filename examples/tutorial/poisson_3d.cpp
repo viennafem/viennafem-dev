@@ -39,7 +39,7 @@
 // ViennaMath includes:
 #include "viennamath/expression.hpp"
 #include "viennamath/equation.hpp"
-#include "viennamath/unknown_func.hpp"
+#include "viennamath/function_symbol.hpp"
 #include "viennamath/op_tags.hpp"
 
 #include <boost/numeric/ublas/io.hpp>
@@ -112,7 +112,7 @@ VectorType solve(MatrixType const & system_matrix,
   std::cout << "* solve(): Residual: " << norm_2(prod(system_matrix, result) - load_vector) << std::endl;
 #endif
     
-  std::cout << load_vector << std::endl;
+  //std::cout << load_vector << std::endl;
   
   //print solution:
   //std::cout << "Solution: ";
@@ -192,7 +192,7 @@ int main()
   //
   // Specify two PDEs:
   //
-  viennamath::unknown_func<0> u;   //an unknown function used for PDE specification
+  viennamath::function_symbol<viennamath::unknown_tag<0> > u;   //an unknown function used for PDE specification
   viennamath::equation poisson_equ_1 = viennamath::make_equation( viennamath::laplace(u), -1);
   viennamath::equation poisson_equ_2 = viennamath::make_equation( viennamath::laplace(u), -1);
   
@@ -260,8 +260,8 @@ int main()
   VectorType pde_result_1 = solve(poisson_config_1.system_matrix(), poisson_config_1.load_vector());
 //  VectorType pde_result_2 = solve(poisson_config_2.system_matrix(), poisson_config_2.load_vector());
 
-  std::cout << "RESULT" << std::endl;
-  std::cout << pde_result_1 << std::endl;
+  //std::cout << "RESULT" << std::endl;
+  //std::cout << pde_result_1 << std::endl;
   //
   // Writing solution back to domain (discussion about proper way of returning a solution required...)
   //

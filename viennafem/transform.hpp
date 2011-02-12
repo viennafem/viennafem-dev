@@ -20,6 +20,7 @@
 #include "viennamath/op_tags.hpp"
 #include "viennamath/substitute.hpp"
 #include "viennamath/diff.hpp"
+#include "viennamath/function_symbol.hpp"
 
 #include "viennagrid/celltags.hpp"
 
@@ -30,8 +31,8 @@ namespace viennafem
   template <typename CellType>
   viennamath::equation transform_to_reference_cell(viennamath::equation const & weak_form, viennagrid::triangle_tag)
   {
-    viennamath::unknown_func<0>  u;
-    viennamath::test_func<0>     v;
+    viennamath::function_symbol<viennamath::unknown_tag<0> >  u;
+    viennamath::function_symbol<viennamath::test_tag<0> >     v;
     viennamath::variable<0>      r;
     viennamath::variable<1>      s;
     viennamath::variable<10>     s_temp;
@@ -97,8 +98,8 @@ namespace viennafem
   template <typename CellType>
   viennamath::equation transform_to_reference_cell(viennamath::equation const & weak_form, viennagrid::tetrahedron_tag)
   {
-    viennamath::unknown_func<0>  u;
-    viennamath::test_func<0>     v;
+    viennamath::function_symbol<viennamath::unknown_tag<0> >  u;
+    viennamath::function_symbol<viennamath::test_tag<0> >     v;
     viennamath::variable<0>      r;
     viennamath::variable<1>      s;
     viennamath::variable<2>      t;
@@ -228,8 +229,8 @@ namespace viennafem
                                                        viennamath::expr trial_func,
                                                        viennamath::equation weak_form)
   {
-    viennamath::unknown_func<0>  u;
-    viennamath::test_func<0>     v;
+    viennamath::function_symbol<viennamath::unknown_tag<0> >  u;
+    viennamath::function_symbol<viennamath::test_tag<0> >     v;
     viennamath::expr new_lhs = weak_form.lhs();
     viennamath::expr new_rhs = weak_form.rhs();
     
