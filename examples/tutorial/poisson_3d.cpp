@@ -40,7 +40,6 @@
 #include "viennamath/expression.hpp"
 #include "viennamath/equation.hpp"
 #include "viennamath/function_symbol.hpp"
-#include "viennamath/op_tags.hpp"
 
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/triangular.hpp>
@@ -193,8 +192,8 @@ int main()
   // Specify two PDEs:
   //
   viennamath::function_symbol<viennamath::unknown_tag<0> > u;   //an unknown function used for PDE specification
-  viennamath::equation poisson_equ_1 = viennamath::make_equation( viennamath::laplace(u), -1);
-  viennamath::equation poisson_equ_2 = viennamath::make_equation( viennamath::laplace(u), -1);
+  viennamath::equation<> poisson_equ_1 = viennamath::make_equation( viennamath::laplace(u), -1);
+  viennamath::equation<> poisson_equ_2 = viennamath::make_equation( viennamath::laplace(u), -1);
   
   //
   // Create PDE config (where to find boundary information, where to store mapping indices, etc.)

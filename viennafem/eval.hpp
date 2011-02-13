@@ -17,7 +17,7 @@
 #include "viennafem/cell_quan.hpp"
 
 #include "viennamath/equation.hpp"
-#include "viennamath/op_tags.hpp"
+#include "viennamath/expression.hpp"
 #include "viennamath/substitute.hpp"
 #include "viennamath/diff.hpp"
 
@@ -28,7 +28,7 @@ namespace viennafem
   
   //evaluates the weak form on a triangle using 1-point-rule
   //TODO generalize!!
-  numeric_type eval_element_matrix_entry(viennamath::expr const & weak_form_lhs, viennagrid::triangle_tag)
+  numeric_type eval_element_matrix_entry(viennamath::expr<> const & weak_form_lhs, viennagrid::triangle_tag)
   {
     std::vector<numeric_type> p(2);
     p[0] = 1.0/3.0;
@@ -41,7 +41,7 @@ namespace viennafem
   
   //evaluates the weak form on a triangle using 1-point-rule
   //TODO generalize!!
-  numeric_type eval_element_vector_entry(viennamath::expr const & weak_form_rhs, viennagrid::triangle_tag)
+  numeric_type eval_element_vector_entry(viennamath::expr<> const & weak_form_rhs, viennagrid::triangle_tag)
   {
     std::vector<numeric_type> p(2);
     p[0] = 1.0/3.0;
@@ -55,7 +55,7 @@ namespace viennafem
 
 
   ////////////// tetrahedron /////////////////
-  numeric_type eval_element_matrix_entry(viennamath::expr const & weak_form_lhs, viennagrid::tetrahedron_tag)
+  numeric_type eval_element_matrix_entry(viennamath::expr<> const & weak_form_lhs, viennagrid::tetrahedron_tag)
   {
     std::vector<numeric_type> p(3);
     p[0] = 1.0/4.0;
@@ -69,7 +69,7 @@ namespace viennafem
   
   //evaluates the weak form on a triangle using 1-point-rule
   //TODO generalize!!
-  numeric_type eval_element_vector_entry(viennamath::expr const & weak_form_rhs, viennagrid::tetrahedron_tag)
+  numeric_type eval_element_vector_entry(viennamath::expr<> const & weak_form_rhs, viennagrid::tetrahedron_tag)
   {
     std::vector<numeric_type> p(3);
     p[0] = 1.0/4.0;

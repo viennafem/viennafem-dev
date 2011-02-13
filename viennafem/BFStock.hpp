@@ -26,31 +26,31 @@ namespace viennafem
   //       - different degrees of basis functions
   //
   // For now, returns the linear basis:
-  std::vector<viennamath::expr> get_basisfunctions(viennagrid::triangle_tag)
+  std::vector<viennamath::expr<> > get_basisfunctions(viennagrid::triangle_tag)
   {
     //std::cout << "get_basisfunctions: entry" << std::endl;
-    std::vector<viennamath::expr> ret(3);
+    std::vector<viennamath::expr<> > ret(3);
     
     //std::cout << "get_basisfunctions: Creating variables" << std::endl;
     viennamath::variable<0> x;
     viennamath::variable<1> y;
     
     //std::cout << "get_basisfunctions: filling 0" << std::endl;
-    ret[0] = viennamath::expr(1 - x - y);
+    ret[0] = viennamath::expr<>(1 - x - y);
     //std::cout << "get_basisfunctions: filling 1" << std::endl;
-    ret[1] = viennamath::expr(x);
+    ret[1] = viennamath::expr<>(x);
     //std::cout << "get_basisfunctions: filling 2" << std::endl;
-    ret[2] = viennamath::expr(y);
+    ret[2] = viennamath::expr<>(y);
     
     //std::cout << "get_basisfunctions: return" << std::endl;
     return ret;    
   }
   
   
-  std::vector<viennamath::expr> get_basisfunctions(viennagrid::tetrahedron_tag)
+  std::vector<viennamath::expr<> > get_basisfunctions(viennagrid::tetrahedron_tag)
   {
     //std::cout << "get_basisfunctions: entry" << std::endl;
-    std::vector<viennamath::expr> ret(4);
+    std::vector<viennamath::expr<> > ret(4);
     
     //std::cout << "get_basisfunctions: Creating variables" << std::endl;
     viennamath::variable<0> x;
@@ -58,13 +58,13 @@ namespace viennafem
     viennamath::variable<2> z;
     
     //std::cout << "get_basisfunctions: filling 0" << std::endl;
-    ret[0] = viennamath::expr(1 - x - y - z);
+    ret[0] = viennamath::expr<>(1 - x - y - z);
     //std::cout << "get_basisfunctions: filling 1" << std::endl;
-    ret[1] = viennamath::expr(x);
+    ret[1] = viennamath::expr<>(x);
     //std::cout << "get_basisfunctions: filling 2" << std::endl;
-    ret[2] = viennamath::expr(y);
+    ret[2] = viennamath::expr<>(y);
     //std::cout << "get_basisfunctions: filling 3" << std::endl;
-    ret[3] = viennamath::expr(z);
+    ret[3] = viennamath::expr<>(z);
     
     //std::cout << "get_basisfunctions: return" << std::endl;
     return ret;    

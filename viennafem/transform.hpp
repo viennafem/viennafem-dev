@@ -17,7 +17,7 @@
 #include "viennafem/cell_quan.hpp"
 
 #include "viennamath/equation.hpp"
-#include "viennamath/op_tags.hpp"
+#include "viennamath/expression.hpp"
 #include "viennamath/substitute.hpp"
 #include "viennamath/diff.hpp"
 #include "viennamath/function_symbol.hpp"
@@ -29,7 +29,7 @@ namespace viennafem
 
   
   template <typename CellType>
-  viennamath::equation transform_to_reference_cell(viennamath::equation const & weak_form, viennagrid::triangle_tag)
+  viennamath::equation<> transform_to_reference_cell(viennamath::equation<> const & weak_form, viennagrid::triangle_tag)
   {
     viennamath::function_symbol<viennamath::unknown_tag<0> >  u;
     viennamath::function_symbol<viennamath::test_tag<0> >     v;
@@ -43,60 +43,60 @@ namespace viennafem
     viennafem::cell_quan<CellType, viennafem::dt_dx_key<0,1> >  dr_dy;
     viennafem::cell_quan<CellType, viennafem::dt_dx_key<1,1> >  ds_dy;
     
-    viennamath::expr new_lhs = weak_form.lhs();
-    viennamath::expr new_rhs = weak_form.rhs();
+    viennamath::expr<> new_lhs = weak_form.lhs();
+    viennamath::expr<> new_rhs = weak_form.rhs();
     
     //transform du/dx:
-    new_lhs = viennamath::substitute(viennamath::unary_expr(u.clone(),
-                                                            new viennamath::op_unary<viennamath::op_partial_deriv<0> >()
+    new_lhs = viennamath::substitute(viennamath::unary_expr<>(u.clone(),
+                                                            new viennamath::op_unary<viennamath::op_partial_deriv<0, viennamath::default_numeric_type> >()
                                                            ),
                                      viennamath::diff(u, r) * dr_dx + viennamath::diff(u, s_temp) * ds_dx,
                                      new_lhs);
 
     //transform du/dy:
-    new_lhs = viennamath::substitute(viennamath::unary_expr(u.clone(),
-                                                            new viennamath::op_unary<viennamath::op_partial_deriv<1> >()
+    new_lhs = viennamath::substitute(viennamath::unary_expr<>(u.clone(),
+                                                            new viennamath::op_unary<viennamath::op_partial_deriv<1, viennamath::default_numeric_type> >()
                                                            ),
                                      viennamath::diff(u, r) * dr_dy + viennamath::diff(u, s) * ds_dy,
                                      new_lhs);
 
-    new_lhs = viennamath::substitute(viennamath::unary_expr(v.clone(),
-                                                            new viennamath::op_unary<viennamath::op_partial_deriv<0> >()
+    new_lhs = viennamath::substitute(viennamath::unary_expr<>(v.clone(),
+                                                            new viennamath::op_unary<viennamath::op_partial_deriv<0, viennamath::default_numeric_type> >()
                                                            ),
                                      viennamath::diff(v, r) * dr_dx + viennamath::diff(v, s_temp) * ds_dx,
                                      new_lhs);
 
     //transform du/dy:
-    new_lhs = viennamath::substitute(viennamath::unary_expr(v.clone(),
-                                                            new viennamath::op_unary<viennamath::op_partial_deriv<1> >()
+    new_lhs = viennamath::substitute(viennamath::unary_expr<>(v.clone(),
+                                                            new viennamath::op_unary<viennamath::op_partial_deriv<1, viennamath::default_numeric_type> >()
                                                            ),
                                      viennamath::diff(v, r) * dr_dy + viennamath::diff(v, s) * ds_dy,
                                      new_lhs);
     
     //replace s_temp by s;
-    new_lhs = viennamath::substitute(viennamath::unary_expr(u.clone(),
-                                                            new viennamath::op_unary<viennamath::op_partial_deriv<10> >()
+    new_lhs = viennamath::substitute(viennamath::unary_expr<>(u.clone(),
+                                                            new viennamath::op_unary<viennamath::op_partial_deriv<10, viennamath::default_numeric_type> >()
                                                            ),
-                                     viennamath::unary_expr(u.clone(),
-                                                            new viennamath::op_unary<viennamath::op_partial_deriv<1> >()
+                                     viennamath::unary_expr<>(u.clone(),
+                                                            new viennamath::op_unary<viennamath::op_partial_deriv<1, viennamath::default_numeric_type> >()
                                                            ),
                                      new_lhs);
 
-    new_lhs = viennamath::substitute(viennamath::unary_expr(v.clone(),
-                                                            new viennamath::op_unary<viennamath::op_partial_deriv<10> >()
+    new_lhs = viennamath::substitute(viennamath::unary_expr<>(v.clone(),
+                                                            new viennamath::op_unary<viennamath::op_partial_deriv<10, viennamath::default_numeric_type> >()
                                                            ),
-                                     viennamath::unary_expr(v.clone(),
-                                                            new viennamath::op_unary<viennamath::op_partial_deriv<1> >()
+                                     viennamath::unary_expr<>(v.clone(),
+                                                            new viennamath::op_unary<viennamath::op_partial_deriv<1, viennamath::default_numeric_type> >()
                                                            ),
                                      new_lhs);
     
-    return viennamath::equation(new_lhs, new_rhs);
+    return viennamath::equation<>(new_lhs, new_rhs);
   }
 
 
 
   template <typename CellType>
-  viennamath::equation transform_to_reference_cell(viennamath::equation const & weak_form, viennagrid::tetrahedron_tag)
+  viennamath::equation<> transform_to_reference_cell(viennamath::equation<> const & weak_form, viennagrid::tetrahedron_tag)
   {
     viennamath::function_symbol<viennamath::unknown_tag<0> >  u;
     viennamath::function_symbol<viennamath::test_tag<0> >     v;
@@ -119,29 +119,29 @@ namespace viennafem
     viennafem::cell_quan<CellType, viennafem::dt_dx_key<1,2> >  ds_dz;
     viennafem::cell_quan<CellType, viennafem::dt_dx_key<2,2> >  dt_dz;
     
-    viennamath::expr new_lhs = weak_form.lhs();
-    viennamath::expr new_rhs = weak_form.rhs();
+    viennamath::expr<> new_lhs = weak_form.lhs();
+    viennamath::expr<> new_rhs = weak_form.rhs();
 
     
     ////// Step 1: Transform partial derivatives of u
     
     //transform du/dx:
-    new_lhs = viennamath::substitute(viennamath::unary_expr(u.clone(),
-                                                            new viennamath::op_unary<viennamath::op_partial_deriv<0> >()
+    new_lhs = viennamath::substitute(viennamath::unary_expr<>(u.clone(),
+                                                            new viennamath::op_unary<viennamath::op_partial_deriv<0, viennamath::default_numeric_type> >()
                                                            ),
                                      viennamath::diff(u, r) * dr_dx + viennamath::diff(u, s_temp) * ds_dx + viennamath::diff(u, t_temp) * dt_dx,
                                      new_lhs);
 
     //transform du/dy:
-    new_lhs = viennamath::substitute(viennamath::unary_expr(u.clone(),
-                                                            new viennamath::op_unary<viennamath::op_partial_deriv<1> >()
+    new_lhs = viennamath::substitute(viennamath::unary_expr<>(u.clone(),
+                                                            new viennamath::op_unary<viennamath::op_partial_deriv<1, viennamath::default_numeric_type> >()
                                                            ),
                                      viennamath::diff(u, r) * dr_dy + viennamath::diff(u, s_temp) * ds_dy + viennamath::diff(u, t_temp) * dt_dy,
                                      new_lhs);
 
     //transform du/dz:
-    new_lhs = viennamath::substitute(viennamath::unary_expr(u.clone(),
-                                                            new viennamath::op_unary<viennamath::op_partial_deriv<2> >()
+    new_lhs = viennamath::substitute(viennamath::unary_expr<>(u.clone(),
+                                                            new viennamath::op_unary<viennamath::op_partial_deriv<2, viennamath::default_numeric_type> >()
                                                            ),
                                      viennamath::diff(u, r) * dr_dz + viennamath::diff(u, s) * ds_dz + viennamath::diff(u, t) * dt_dz,
                                      new_lhs);
@@ -150,22 +150,22 @@ namespace viennafem
     ////// Step 2: Transform partial derivatives of v
     
     //transform dv/dx:
-    new_lhs = viennamath::substitute(viennamath::unary_expr(v.clone(),
-                                                            new viennamath::op_unary<viennamath::op_partial_deriv<0> >()
+    new_lhs = viennamath::substitute(viennamath::unary_expr<>(v.clone(),
+                                                            new viennamath::op_unary<viennamath::op_partial_deriv<0, viennamath::default_numeric_type> >()
                                                            ),
                                      viennamath::diff(v, r) * dr_dx + viennamath::diff(v, s_temp) * ds_dx + viennamath::diff(v, t_temp) * dt_dx,
                                      new_lhs);
     
     //transform dv/dy:
-    new_lhs = viennamath::substitute(viennamath::unary_expr(v.clone(),
-                                                            new viennamath::op_unary<viennamath::op_partial_deriv<1> >()
+    new_lhs = viennamath::substitute(viennamath::unary_expr<>(v.clone(),
+                                                            new viennamath::op_unary<viennamath::op_partial_deriv<1, viennamath::default_numeric_type> >()
                                                            ),
                                      viennamath::diff(v, r) * dr_dy + viennamath::diff(v, s_temp) * ds_dy + viennamath::diff(v, t_temp) * dt_dy,
                                      new_lhs);
 
     //transform dv/dz:
-    new_lhs = viennamath::substitute(viennamath::unary_expr(v.clone(),
-                                                            new viennamath::op_unary<viennamath::op_partial_deriv<2> >()
+    new_lhs = viennamath::substitute(viennamath::unary_expr<>(v.clone(),
+                                                            new viennamath::op_unary<viennamath::op_partial_deriv<2, viennamath::default_numeric_type> >()
                                                            ),
                                      viennamath::diff(v, r) * dr_dz + viennamath::diff(v, s) * ds_dz + viennamath::diff(v, t) * dt_dz,
                                      new_lhs);
@@ -177,44 +177,44 @@ namespace viennafem
     
     
     //replace s_temp by s;
-    new_lhs = viennamath::substitute(viennamath::unary_expr(u.clone(),
-                                                            new viennamath::op_unary<viennamath::op_partial_deriv<10> >()
+    new_lhs = viennamath::substitute(viennamath::unary_expr<>(u.clone(),
+                                                            new viennamath::op_unary<viennamath::op_partial_deriv<10, viennamath::default_numeric_type> >()
                                                            ),
-                                     viennamath::unary_expr(u.clone(),
-                                                            new viennamath::op_unary<viennamath::op_partial_deriv<1> >()
+                                     viennamath::unary_expr<>(u.clone(),
+                                                            new viennamath::op_unary<viennamath::op_partial_deriv<1, viennamath::default_numeric_type> >()
                                                            ),
                                      new_lhs);
 
-    new_lhs = viennamath::substitute(viennamath::unary_expr(v.clone(),
-                                                            new viennamath::op_unary<viennamath::op_partial_deriv<10> >()
+    new_lhs = viennamath::substitute(viennamath::unary_expr<>(v.clone(),
+                                                            new viennamath::op_unary<viennamath::op_partial_deriv<10, viennamath::default_numeric_type> >()
                                                            ),
-                                     viennamath::unary_expr(v.clone(),
-                                                            new viennamath::op_unary<viennamath::op_partial_deriv<1> >()
+                                     viennamath::unary_expr<>(v.clone(),
+                                                            new viennamath::op_unary<viennamath::op_partial_deriv<1, viennamath::default_numeric_type> >()
                                                            ),
                                      new_lhs);
 
     //replace t_temp by t
-    new_lhs = viennamath::substitute(viennamath::unary_expr(u.clone(),
-                                                            new viennamath::op_unary<viennamath::op_partial_deriv<11> >()
+    new_lhs = viennamath::substitute(viennamath::unary_expr<>(u.clone(),
+                                                            new viennamath::op_unary<viennamath::op_partial_deriv<11, viennamath::default_numeric_type> >()
                                                            ),
-                                     viennamath::unary_expr(u.clone(),
-                                                            new viennamath::op_unary<viennamath::op_partial_deriv<2> >()
+                                     viennamath::unary_expr<>(u.clone(),
+                                                            new viennamath::op_unary<viennamath::op_partial_deriv<2, viennamath::default_numeric_type> >()
                                                            ),
                                      new_lhs);
 
-    new_lhs = viennamath::substitute(viennamath::unary_expr(v.clone(),
-                                                            new viennamath::op_unary<viennamath::op_partial_deriv<11> >()
+    new_lhs = viennamath::substitute(viennamath::unary_expr<>(v.clone(),
+                                                            new viennamath::op_unary<viennamath::op_partial_deriv<11, viennamath::default_numeric_type> >()
                                                            ),
-                                     viennamath::unary_expr(v.clone(),
-                                                            new viennamath::op_unary<viennamath::op_partial_deriv<2> >()
+                                     viennamath::unary_expr<>(v.clone(),
+                                                            new viennamath::op_unary<viennamath::op_partial_deriv<2, viennamath::default_numeric_type> >()
                                                            ),
                                      new_lhs);
     
-    return viennamath::equation(new_lhs, new_rhs);
+    return viennamath::equation<>(new_lhs, new_rhs);
   }
 
   template <typename CellType>
-  viennamath::equation transform_to_reference_cell(viennamath::equation const & weak_form)
+  viennamath::equation<> transform_to_reference_cell(viennamath::equation<> const & weak_form)
   {
     return  transform_to_reference_cell<CellType>(weak_form, typename CellType::element_tag());
   }
@@ -225,47 +225,47 @@ namespace viennafem
 
 
   
-  viennamath::equation insert_test_and_trial_functions(viennamath::expr test_func,
-                                                       viennamath::expr trial_func,
-                                                       viennamath::equation weak_form)
+  viennamath::equation<> insert_test_and_trial_functions(viennamath::expr<> test_func,
+                                                       viennamath::expr<> trial_func,
+                                                       viennamath::equation<> weak_form)
   {
     viennamath::function_symbol<viennamath::unknown_tag<0> >  u;
     viennamath::function_symbol<viennamath::test_tag<0> >     v;
-    viennamath::expr new_lhs = weak_form.lhs();
-    viennamath::expr new_rhs = weak_form.rhs();
+    viennamath::expr<> new_lhs = weak_form.lhs();
+    viennamath::expr<> new_rhs = weak_form.rhs();
     
     //step 1: substitute derivatives: 
-    new_lhs = viennamath::substitute(viennamath::unary_expr(u.clone(), new viennamath::op_unary<viennamath::op_partial_deriv<0> >()),
+    new_lhs = viennamath::substitute(viennamath::unary_expr<>(u.clone(), new viennamath::op_unary<viennamath::op_partial_deriv<0, viennamath::default_numeric_type> >()),
                                      viennamath::diff(trial_func, viennamath::variable<0>()),
                                      new_lhs);
-    new_lhs = viennamath::substitute(viennamath::unary_expr(v.clone(), new viennamath::op_unary<viennamath::op_partial_deriv<0> >()),
+    new_lhs = viennamath::substitute(viennamath::unary_expr<>(v.clone(), new viennamath::op_unary<viennamath::op_partial_deriv<0, viennamath::default_numeric_type> >()),
                                      viennamath::diff(test_func, viennamath::variable<0>()),
                                      new_lhs);
     
-    new_lhs = viennamath::substitute(viennamath::unary_expr(u.clone(), new viennamath::op_unary<viennamath::op_partial_deriv<1> >()),
+    new_lhs = viennamath::substitute(viennamath::unary_expr<>(u.clone(), new viennamath::op_unary<viennamath::op_partial_deriv<1, viennamath::default_numeric_type> >()),
                                      viennamath::diff(trial_func, viennamath::variable<1>()),
                                      new_lhs);
-    new_lhs = viennamath::substitute(viennamath::unary_expr(v.clone(), new viennamath::op_unary<viennamath::op_partial_deriv<1> >()),
+    new_lhs = viennamath::substitute(viennamath::unary_expr<>(v.clone(), new viennamath::op_unary<viennamath::op_partial_deriv<1, viennamath::default_numeric_type> >()),
                                      viennamath::diff(test_func, viennamath::variable<1>()),
                                      new_lhs);
     
-    new_lhs = viennamath::substitute(viennamath::unary_expr(u.clone(), new viennamath::op_unary<viennamath::op_partial_deriv<2> >()),
+    new_lhs = viennamath::substitute(viennamath::unary_expr<>(u.clone(), new viennamath::op_unary<viennamath::op_partial_deriv<2, viennamath::default_numeric_type> >()),
                                      viennamath::diff(trial_func, viennamath::variable<2>()),
                                      new_lhs);
-    new_lhs = viennamath::substitute(viennamath::unary_expr(v.clone(), new viennamath::op_unary<viennamath::op_partial_deriv<2> >()),
+    new_lhs = viennamath::substitute(viennamath::unary_expr<>(v.clone(), new viennamath::op_unary<viennamath::op_partial_deriv<2, viennamath::default_numeric_type> >()),
                                      viennamath::diff(test_func, viennamath::variable<2>()),
                                      new_lhs);
     
     //step 2: substitute non-derivaties:
     //TODO  (not necessary for Poisson equation)
     
-    new_rhs = viennamath::substitute(viennamath::expr(v.clone()),
+    new_rhs = viennamath::substitute(viennamath::expr<>(v.clone()),
                                      test_func,
                                      new_rhs);
     
     
     //step 3: return result:
-    return viennamath::equation(new_lhs, new_rhs);
+    return viennamath::equation<>(new_lhs, new_rhs);
   }
   
 
