@@ -71,11 +71,11 @@
 //
 // Configuration class for a triangular domain
 //
-struct TriangleConfig
+struct TetrahedronConfig
 {
-  typedef double                                  numeric_type;
-  typedef viennagrid::two_dimensions_tag          dimension_tag;
-  typedef viennagrid::triangle_tag                cell_tag;
+  typedef double                                    numeric_type;
+  typedef viennagrid::three_dimensions_tag          dimension_tag;
+  typedef viennagrid::tetrahedron_tag               cell_tag;
 
   //multigrid:
   //typedef viennagrid::full_multigrid_tag                       multigrid_tag;
@@ -163,7 +163,7 @@ void write_solution_to_VTK_file(VectorType const & result,
 
 int main()
 {
-  typedef viennagrid::domain<TriangleConfig>         DomainType;
+  typedef viennagrid::domain<TetrahedronConfig>         DomainType;
 
   typedef viennagrid::result_of::ncell_container<DomainType, 0>::type    VertexContainer;
   typedef viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
@@ -179,12 +179,12 @@ int main()
   try
   {
     viennagrid::io::sgf_reader my_sgf_reader;
-    my_sgf_reader(my_domain, "../examples/data/square128.sgf");
+    my_sgf_reader(my_domain, "../../examples/data/cube3072.sgf");
   }
   catch (...)
   {
     std::cerr << "File-Reader failed. Aborting program..." << std::endl;
-    return EXIT_FAILURE;
+    exit(EXIT_FAILURE);
   }
   
   
@@ -238,7 +238,6 @@ int main()
     else
       viennadata::access<MyPDEConfigType_2::boundary_key_type,
                          bool>(poisson_config_2.boundary_key())(*vit) = false;
-    
   }
   
   
@@ -253,12 +252,12 @@ int main()
   // (discussion about proper interface required. Introduce a pde_result class?)
   //
   fem_solver(poisson_equ_1, poisson_config_1, my_domain);
-  fem_solver(poisson_equ_2, poisson_config_2, my_domain);
+  //fem_solver(poisson_equ_2, poisson_config_2, my_domain);
   
   //std::cout << poisson_config_1.load_vector() << std::endl;
   
   VectorType pde_result_1 = solve(poisson_config_1.system_matrix(), poisson_config_1.load_vector());
-  VectorType pde_result_2 = solve(poisson_config_2.system_matrix(), poisson_config_2.load_vector());
+//  VectorType pde_result_2 = solve(poisson_config_2.system_matrix(), poisson_config_2.load_vector());
 
   //std::cout << "RESULT" << std::endl;
   //std::cout << pde_result_1 << std::endl;
@@ -266,7 +265,7 @@ int main()
   // Writing solution back to domain (discussion about proper way of returning a solution required...)
   //
   write_solution_to_VTK_file(pde_result_1, "poisson_1.vtu", my_domain, poisson_config_1);
-  write_solution_to_VTK_file(pde_result_2, "poisson_2.vtu", my_domain, poisson_config_2);
+//  write_solution_to_VTK_file(pde_result_2, "poisson_2.vtu", my_domain, poisson_config_2);
   
   std::cout << "*****************************************" << std::endl;
   std::cout << "* Poisson solver finished successfully! *" << std::endl;
