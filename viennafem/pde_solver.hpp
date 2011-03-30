@@ -77,7 +77,7 @@ namespace viennafem
     VectorType & load_vector = config.load_vector();
     
     
-    viennamath::equation<> weak_form_general = viennamath::weak_form(strong_form);  
+    viennamath::equation<> weak_form_general = viennamath::make_weak_form(strong_form);  
     viennamath::equation<> weak_form = viennamath::apply_coordinate_system(viennamath::cartesian<Config::dimension_tag::value>(),
                                                                          weak_form_general);
     

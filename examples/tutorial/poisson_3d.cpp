@@ -252,12 +252,12 @@ int main()
   // (discussion about proper interface required. Introduce a pde_result class?)
   //
   fem_solver(poisson_equ_1, poisson_config_1, my_domain);
-  //fem_solver(poisson_equ_2, poisson_config_2, my_domain);
+  fem_solver(poisson_equ_2, poisson_config_2, my_domain);
   
   //std::cout << poisson_config_1.load_vector() << std::endl;
   
   VectorType pde_result_1 = solve(poisson_config_1.system_matrix(), poisson_config_1.load_vector());
-//  VectorType pde_result_2 = solve(poisson_config_2.system_matrix(), poisson_config_2.load_vector());
+  VectorType pde_result_2 = solve(poisson_config_2.system_matrix(), poisson_config_2.load_vector());
 
   //std::cout << "RESULT" << std::endl;
   //std::cout << pde_result_1 << std::endl;
@@ -265,7 +265,7 @@ int main()
   // Writing solution back to domain (discussion about proper way of returning a solution required...)
   //
   write_solution_to_VTK_file(pde_result_1, "poisson_1.vtu", my_domain, poisson_config_1);
-//  write_solution_to_VTK_file(pde_result_2, "poisson_2.vtu", my_domain, poisson_config_2);
+  write_solution_to_VTK_file(pde_result_2, "poisson_2.vtu", my_domain, poisson_config_2);
   
   std::cout << "*****************************************" << std::endl;
   std::cout << "* Poisson solver finished successfully! *" << std::endl;
