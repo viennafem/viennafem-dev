@@ -16,10 +16,8 @@
 #include "viennafem/forwards.h"
 
 #include "viennamath/forwards.h"
-#include "viennamath/substitute.hpp"
+#include "viennamath/manipulation/substitute.hpp"
 #include "viennamath/expression.hpp"
-#include "viennamath/expression_interface.hpp"
-#include "viennamath/equation.hpp"
 #include "viennadata/interface.hpp"
 
 namespace viennafem
@@ -76,9 +74,8 @@ namespace viennafem
       const CellType * current_cell;
   };
 
-  template <unsigned long id,
-            typename CellType, typename KeyType>
-  viennamath::expr<> operator*(viennamath::variable<id> const & lhs,
+  template <typename CellType, typename KeyType>
+  viennamath::expr<> operator*(viennamath::variable<> const & lhs,
                              cell_quan<CellType, KeyType> const & rhs)
   {
     return viennamath::expr<>(new viennamath::binary_expr<>(lhs.clone(),

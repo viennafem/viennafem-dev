@@ -16,10 +16,9 @@
 #include "viennafem/forwards.h"
 #include "viennafem/cell_quan.hpp"
 
-#include "viennamath/equation.hpp"
 #include "viennamath/expression.hpp"
-#include "viennamath/substitute.hpp"
-#include "viennamath/diff.hpp"
+#include "viennamath/manipulation/substitute.hpp"
+#include "viennamath/manipulation/diff.hpp"
 
 #include "viennagrid/celltags.hpp"
 

@@ -23,7 +23,7 @@
 
 //ViennaMath includes:
 #include "viennamath/weak_form.hpp"
-#include "viennamath/apply_coordinate_system.hpp"
+#include "viennamath/manipulation/apply_coordinate_system.hpp"
 
 //ViennaData includes:
 #include "viennadata/interface.hpp"

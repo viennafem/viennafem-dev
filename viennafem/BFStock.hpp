@@ -32,8 +32,8 @@ namespace viennafem
     std::vector<viennamath::expr<> > ret(3);
     
     //std::cout << "get_basisfunctions: Creating variables" << std::endl;
-    viennamath::variable<0> x;
-    viennamath::variable<1> y;
+    viennamath::variable<> x(0);
+    viennamath::variable<> y(1);
     
     //std::cout << "get_basisfunctions: filling 0" << std::endl;
     ret[0] = viennamath::expr<>(1 - x - y);
@@ -53,9 +53,9 @@ namespace viennafem
     std::vector<viennamath::expr<> > ret(4);
     
     //std::cout << "get_basisfunctions: Creating variables" << std::endl;
-    viennamath::variable<0> x;
-    viennamath::variable<1> y;
-    viennamath::variable<2> z;
+    viennamath::variable<> x(0);
+    viennamath::variable<> y(1);
+    viennamath::variable<> z(2);
     
     //std::cout << "get_basisfunctions: filling 0" << std::endl;
     ret[0] = viennamath::expr<>(1 - x - y - z);
