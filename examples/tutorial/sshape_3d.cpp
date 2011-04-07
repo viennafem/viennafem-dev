@@ -177,7 +177,7 @@ int main()
   try
   {
     viennagrid::io::sgf_reader my_sgf_reader;
-    my_sgf_reader(my_domain, "../examples/data/sshape3d.sgf");
+    my_sgf_reader(my_domain, "../examples/data/sshape3d-pimped.sgf");
   }
   catch (...)
   {
