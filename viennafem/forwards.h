@@ -13,7 +13,7 @@
 #ifndef VIENNAFEM_FORWARDS_H
 #define VIENNAFEM_FORWARDS_H
 
-#include "viennadata/interface.hpp"
+#include "viennadata/api.hpp"
 #include "viennagrid/forwards.h"
 #include "viennamath/forwards.h"
 
@@ -165,33 +165,35 @@ namespace viennafem
 //configure vienndata for type-based dispatch on boundary_key, mapping_key, dt_dx and det_F:
 namespace viennadata
 {
-  template <>
-  struct dispatch_traits<viennafem::boundary_key>
+  namespace config
   {
-    typedef type_key_dispatch_tag    tag;
-  };
-  
-  template <>
-  struct dispatch_traits<viennafem::mapping_key>
-  {
-    typedef type_key_dispatch_tag    tag;
-  };
-  
-  template <unsigned long local_index,
-            unsigned long global_index>
-  struct dispatch_traits<viennafem::dt_dx_key<local_index,
-                                              global_index>
-                        >
-  {
-    typedef type_key_dispatch_tag    tag;
-  };
-  
-  template <>
-  struct dispatch_traits<viennafem::det_dF_dt_key>
-  {
-    typedef type_key_dispatch_tag    tag;
-  };
-  
+    template <>
+    struct key_dispatch<viennafem::boundary_key>
+    {
+      typedef type_key_dispatch_tag    tag;
+    };
+    
+    template <>
+    struct key_dispatch<viennafem::mapping_key>
+    {
+      typedef type_key_dispatch_tag    tag;
+    };
+    
+    template <unsigned long local_index,
+              unsigned long global_index>
+    struct key_dispatch<viennafem::dt_dx_key<local_index,
+                                             global_index>
+                       >
+    {
+      typedef type_key_dispatch_tag    tag;
+    };
+    
+    template <>
+    struct key_dispatch<viennafem::det_dF_dt_key>
+    {
+      typedef type_key_dispatch_tag    tag;
+    };
+  }
 }
 
 

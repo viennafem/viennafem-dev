@@ -34,7 +34,7 @@
 #include "viennagrid/io/vtk_writer.hpp"
 
 // ViennaData includes:
-#include "viennadata/interface.hpp"
+#include "viennadata/api.hpp"
 
 // ViennaMath includes:
 #include "viennamath/expression.hpp"

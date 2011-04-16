@@ -26,7 +26,7 @@
 #include "viennamath/manipulation/apply_coordinate_system.hpp"
 
 //ViennaData includes:
-#include "viennadata/interface.hpp"
+#include "viennadata/api.hpp"
 
 //ViennaGrid includes:
 #include "viennagrid/domain.hpp"

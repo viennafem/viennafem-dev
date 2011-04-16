@@ -22,7 +22,7 @@
 #include "viennagrid/io/vtk_writer.hpp"
 
 // ViennaData includes:
-#include "viennadata/interface.hpp"
+#include "viennadata/api.hpp"
 
 #include "viennamath/expression.hpp"
 #include "viennamath/manipulation/eval.hpp"

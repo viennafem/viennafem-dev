@@ -18,7 +18,7 @@
 #include "viennamath/forwards.h"
 #include "viennamath/manipulation/substitute.hpp"
 #include "viennamath/expression.hpp"
-#include "viennadata/interface.hpp"
+#include "viennadata/api.hpp"
 
 namespace viennafem
 {
