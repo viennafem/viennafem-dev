@@ -49,6 +49,8 @@ ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 ADD_EXECUTABLE(poisson_2d examples/tutorial/poisson_2d.cpp)
 ADD_EXECUTABLE(poisson_3d examples/tutorial/poisson_3d.cpp)
 ADD_EXECUTABLE(lame_3d examples/tutorial/lame_3d.cpp)
+ADD_EXECUTABLE(sshape_2d examples/tutorial/sshape_2d.cpp)
+ADD_EXECUTABLE(sshape_3d examples/tutorial/sshape_3d.cpp)
 #TARGET_LINK_LIBRARIES(poisson OpenCL)
 
 
