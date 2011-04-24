@@ -23,23 +23,25 @@
 namespace viennafem
 {
 
-  template <typename CellType, typename KeyType>
-  class cell_quan : public viennamath::default_interface_type
+  template <typename CellType, typename KeyType, typename InterfaceType>
+  class cell_quan : public InterfaceType
   {
-      typedef cell_quan<CellType, KeyType>     self_type;
+      typedef cell_quan<CellType, KeyType, InterfaceType>     self_type;
+      typedef typename InterfaceType::numeric_type            numeric_type;
     public:
+      
       explicit cell_quan(CellType const & cell) : current_cell(&cell) {};
       explicit cell_quan() : current_cell(NULL) {}
 
       //interface requirements:
-      viennamath::default_interface_type * clone() const { return new self_type(*current_cell); }
-      viennamath::default_numeric_type eval(std::vector<double> const & v) const
+      InterfaceType * clone() const { return new self_type(*current_cell); }
+      numeric_type eval(std::vector<numeric_type> const & v) const
       {
-        return viennadata::access<KeyType, viennamath::default_numeric_type>()(*current_cell);
+        return viennadata::access<KeyType, numeric_type>()(*current_cell);
       }
-      viennamath::default_numeric_type eval(viennamath::default_numeric_type v) const 
+      numeric_type eval(numeric_type v) const 
       {
-        return viennadata::access<KeyType, viennamath::default_numeric_type>()(*current_cell);
+        return viennadata::access<KeyType, numeric_type>()(*current_cell);
       }
       
       std::string str() const
@@ -48,10 +50,10 @@ namespace viennafem
         ss << "cell_quan<" << KeyType() << ">(" << current_cell << ")";
         return ss.str();      
       }
-      viennamath::default_numeric_type unwrap() const { throw "Cannot evaluate unknown_func!"; }
+      numeric_type unwrap() const { throw "Cannot evaluate unknown_func!"; }
       
-      viennamath::default_interface_type * substitute(const viennamath::default_interface_type * e,
-                                                      const viennamath::default_interface_type * repl) const
+      InterfaceType * substitute(const InterfaceType * e,
+                                 const InterfaceType * repl) const
       {
         if (dynamic_cast<const self_type *>(e) != NULL)
           return repl->clone();
@@ -59,46 +61,51 @@ namespace viennafem
         return clone();
       };    
       
-      bool equal(const viennamath::default_interface_type * other) const
+      bool equal(const InterfaceType * other) const
       {
         return dynamic_cast< const self_type *>(other) != NULL;
       }
       
-      viennamath::default_interface_type * diff(const viennamath::default_interface_type * diff_var) const
+      InterfaceType * diff(const InterfaceType * diff_var) const
       {
         throw "Cannot differentiate cell_quan!";
         return NULL;
       }
       
+      
+      
+      //additional members:
+      void update(CellType const & cell) const { current_cell = &cell; }
+      
     private:
-      const CellType * current_cell;
+      mutable const CellType * current_cell;
   };
 
-  template <typename CellType, typename KeyType>
-  viennamath::expr<> operator*(viennamath::variable<> const & lhs,
-                             cell_quan<CellType, KeyType> const & rhs)
+  template <typename CellType, typename KeyType, typename InterfaceType>
+  viennamath::expr<InterfaceType> operator*(viennamath::variable<InterfaceType> const & lhs,
+                               cell_quan<CellType, KeyType, InterfaceType> const & rhs)
   {
-    return viennamath::expr<>(new viennamath::binary_expr<>(lhs.clone(),
-                                                            new viennamath::op_binary<viennamath::op_mult<viennamath::default_numeric_type> >(),
+    return viennamath::expr<InterfaceType>(new viennamath::binary_expr<InterfaceType>(lhs.clone(),
+                                                            new viennamath::op_binary<viennamath::op_mult<viennamath::default_numeric_type>, InterfaceType >(),
                                                             rhs.clone())); 
   }
   
   
-  template <typename CellType, typename KeyType>
-  viennamath::expr<> operator*(viennamath::expr<> const & lhs,
-                               cell_quan<CellType, KeyType> const & rhs)
+  template <typename CellType, typename KeyType, typename InterfaceType>
+  viennamath::expr<InterfaceType> operator*(viennamath::expr<InterfaceType> const & lhs,
+                               cell_quan<CellType, KeyType, InterfaceType> const & rhs)
   {
-    return viennamath::expr<>(new viennamath::binary_expr<>(lhs.get()->clone(),
-                                                            new viennamath::op_binary<viennamath::op_mult<viennamath::default_numeric_type> >(),
+    return viennamath::expr<InterfaceType>(new viennamath::binary_expr<InterfaceType>(lhs.get()->clone(),
+                                                            new viennamath::op_binary<viennamath::op_mult<viennamath::default_numeric_type>, InterfaceType >(),
                                                             rhs.clone())); 
   }
   
   
   
-  
-  template <typename CellType>
+  /*
+  template <typename CellType, typename EquationType>
   viennamath::equation<> update_cell_quantities(CellType const & cell,
-                                                viennamath::equation<> const & weak_form)
+                                                EquationType const & weak_form)
   {
     //step 1: update det_dF_dt
     viennamath::expr<> new_lhs =
@@ -148,7 +155,7 @@ namespace viennafem
     
     
     return viennamath::equation<>(new_lhs, weak_form.rhs());
-  }
+  } */
   
   
 }

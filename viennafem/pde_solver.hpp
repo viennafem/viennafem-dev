@@ -20,9 +20,9 @@
 #include "viennafem/eval.hpp"
 #include "viennafem/dtdx_triangle.h"
 #include "viennafem/dtdx_tetrahedron.h"
+#include "viennafem/weak_form.hpp"
 
 //ViennaMath includes:
-#include "viennamath/weak_form.hpp"
 #include "viennamath/manipulation/apply_coordinate_system.hpp"
 
 //ViennaData includes:
@@ -73,13 +73,16 @@ namespace viennafem
     typedef typename ConfigType::mapping_key_type          MappingKeyType;
     typedef typename ConfigType::boundary_key_type         BoundaryKeyType;
     
+    
+    typedef typename EquationType::value_type      Expression;
+    
+    
     MatrixType & system_matrix = config.system_matrix();
     VectorType & load_vector = config.load_vector();
     
     
-    viennamath::equation<> weak_form_general = viennamath::make_weak_form(strong_form);  
-    viennamath::equation<> weak_form = viennamath::apply_coordinate_system(viennamath::cartesian<Config::dimension_tag::value>(),
-                                                                         weak_form_general);
+    EquationType weak_form_general = viennafem::make_weak_form(strong_form);  
+    EquationType weak_form = viennamath::apply_coordinate_system(viennamath::cartesian<Config::dimension_tag::value>(), weak_form_general);
     
     std::cout << "* pde_solver::operator(): Using weak form " << weak_form << std::endl;
     
@@ -137,23 +140,36 @@ namespace viennafem
     
     std::cout << "* pde_solver::operator(): Transform to reference element" << std::endl;
     
-    viennamath::equation<> transformed_weak_form = viennafem::transform_to_reference_cell<CellType>(weak_form);
+    EquationType transformed_weak_form = viennafem::transform_to_reference_cell<CellType>(weak_form);
     
     std::cout << "* pde_solver::operator(): Transformed weak form:" << std::endl;
     std::cout << transformed_weak_form << std::endl;
     std::cout << std::endl;
 
     std::cout << "* pde_solver::operator(): Assemble local element matrix" << std::endl;
+
+    //get basis:
+    //std::cout << "Getting basis..." << std::endl;
+    std::vector<Expression> trial_functions = viennafem::get_basisfunctions<Expression>(CellTag());
+    std::vector<Expression> test_functions = viennafem::get_basisfunctions<Expression>(CellTag());
+    
+    
+    std::vector<std::vector< EquationType > >  local_weak_form(viennagrid::subcell_traits<CellTag, 0>::num_elements);
+    for (size_t i=0; i<viennagrid::subcell_traits<CellTag, 0>::num_elements; ++i)
+      local_weak_form[i].resize(viennagrid::subcell_traits<CellTag, 0>::num_elements);
+    
+    for (size_t i = 0; i<test_functions.size(); ++i)
+      for (size_t j=0; j<trial_functions.size(); ++j)
+        local_weak_form[i][j] = viennafem::insert_test_and_trial_functions(test_functions[i],
+                                                                           trial_functions[j],
+                                                                           transformed_weak_form);
+    
     
     //transfer cell quantities to vtk:
     for (CellIterator cell_iter = cells.begin();
         cell_iter != cells.end();
         ++cell_iter)
     {
-      //get basis:
-      //std::cout << "Getting basis..." << std::endl;
-      std::vector<viennamath::expr<> > trial_functions = viennafem::get_basisfunctions(CellTag());
-      std::vector<viennamath::expr<> > test_functions = viennafem::get_basisfunctions(CellTag());
       
       //set up element matrix:
       //std::cout << "Creating element matrix..." << std::endl;
@@ -165,12 +181,14 @@ namespace viennafem
       
       //update cell_quantities:
       //std::cout << "Updating cell quantities..." << std::endl;
-      viennamath::equation<> cell_expr = viennafem::update_cell_quantities(*cell_iter, 
-                                                                         transformed_weak_form);
+      //EquationType cell_expr = viennafem::update_cell_quantities(*cell_iter, transformed_weak_form);
+      transformed_weak_form.lhs().get()->update_cell(*cell_iter);
+      transformed_weak_form.rhs().get()->update_cell(*cell_iter);
+      //EquationType & cell_expr = transformed_weak_form;
       
       //std::cout << "New cell_expr: " << cell_expr << std::endl;
 
-      viennafem::cell_quan<CellType, viennafem::det_dF_dt_key> det_dF_dt(*cell_iter);
+      viennafem::cell_quan<CellType, viennafem::det_dF_dt_key, typename EquationType::interface_type> det_dF_dt(*cell_iter);
 
       /*
       viennafem::cell_quan<CellType, viennafem::dt_dx_key<0,0> >  dr_dx(*cell_iter);
@@ -205,16 +223,19 @@ namespace viennafem
       {
         for (size_t j=0; j<trial_functions.size(); ++j)
         {
-          viennamath::equation<> temp = viennafem::insert_test_and_trial_functions(test_functions[i],
-                                                                                trial_functions[j],
-                                                                                cell_expr);
-          element_matrix[i][j] = viennafem::eval_element_matrix_entry(temp.lhs(), CellTag()) * det_dF_dt.eval(1.0); 
+          local_weak_form[i][j].lhs().get()->update_cell(*cell_iter);
+          
+          //EquationType temp = viennafem::insert_test_and_trial_functions(test_functions[i],
+          //                                                                         trial_functions[j],
+          //                                                                         cell_expr);
+          element_matrix[i][j] = viennafem::eval_element_matrix_entry(local_weak_form[i][j].lhs(), CellTag()) * det_dF_dt.eval(1.0); 
         }
         
-        viennamath::equation<> temp = viennafem::insert_test_and_trial_functions(test_functions[i],
-                                                                              trial_functions[0],
-                                                                              cell_expr);
-        element_vector[i] = viennafem::eval_element_vector_entry(temp.rhs(), CellTag()) * det_dF_dt.eval(1.0); 
+        //EquationType temp = viennafem::insert_test_and_trial_functions(test_functions[i],
+        //                                                                         trial_functions[0],
+        //                                                                         cell_expr);
+        local_weak_form[i][0].rhs().get()->update_cell(*cell_iter);
+        element_vector[i] = viennafem::eval_element_vector_entry(local_weak_form[i][0].rhs(), CellTag()) * det_dF_dt.eval(1.0); 
         
         //std::cout << std::endl;
       }

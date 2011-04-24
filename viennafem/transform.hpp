@@ -22,35 +22,44 @@
 
 #include "viennagrid/celltags.hpp"
 
+#include "viennafem/fem_expression_interface.hpp"
+
 namespace viennafem
 {
 
   
-  template <typename CellType>
-  viennamath::equation<> transform_to_reference_cell(viennamath::equation<> const & weak_form, viennagrid::triangle_tag)
+  template <typename CellType, typename EquationType>
+  EquationType transform_to_reference_cell(EquationType const & weak_form, viennagrid::triangle_tag)
   {
-    typedef viennamath::op_unary<viennamath::op_partial_deriv<viennamath::default_numeric_type> >   d_dx;
+    typedef typename EquationType::interface_type             InterfaceType;
+    typedef viennamath::function_symbol<InterfaceType>   FunctionSymbol;
+    typedef viennamath::expr<InterfaceType>              Expression;
+    typedef viennamath::unary_expr<InterfaceType>        UnaryExpression;
+    typedef viennamath::variable<InterfaceType>          Variable;
+    typedef viennamath::op_unary<viennamath::op_partial_deriv<viennamath::default_numeric_type>, InterfaceType >   d_dx;
     
-    viennamath::function_symbol<>  u(0, viennamath::unknown_tag<>());
-    viennamath::function_symbol<>  v(0, viennamath::test_tag<>());
-    viennamath::variable<>      r(0);
-    viennamath::variable<>      s(1);
-    viennamath::variable<>     s_temp(10);
+    
+    
+    FunctionSymbol  u(0, viennamath::unknown_tag<>());
+    FunctionSymbol  v(0, viennamath::test_tag<>());
+    Variable        r(0);
+    Variable        s(1);
+    Variable        s_temp(10);
     
     //using local coordinates (r, s) and global coordinates (x, y)
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<0,0> >  dr_dx;
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<1,0> >  ds_dx;
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<0,1> >  dr_dy;
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<1,1> >  ds_dy;
+    viennafem::cell_quan<CellType, viennafem::dt_dx_key<0,0>, InterfaceType>  dr_dx;
+    viennafem::cell_quan<CellType, viennafem::dt_dx_key<1,0>, InterfaceType>  ds_dx;
+    viennafem::cell_quan<CellType, viennafem::dt_dx_key<0,1>, InterfaceType>  dr_dy;
+    viennafem::cell_quan<CellType, viennafem::dt_dx_key<1,1>, InterfaceType>  ds_dy;
     
-    viennamath::expr<> new_lhs = weak_form.lhs();
-    viennamath::expr<> new_rhs = weak_form.rhs();
+    Expression new_lhs = weak_form.lhs();
+    Expression new_rhs = weak_form.rhs();
     
     std::cout << "New lhs init: " << std::endl;
     std::cout << new_lhs << std::endl;
     
     //transform du/dx:
-    new_lhs = viennamath::substitute(viennamath::unary_expr<>(u.clone(), new d_dx(0)),
+    new_lhs = viennamath::substitute(UnaryExpression(u.clone(), new d_dx(0)),
                                      viennamath::diff(u, r) * dr_dx + viennamath::diff(u, s_temp) * ds_dx,
                                      new_lhs);
     std::cout << "New lhs: " << std::endl;
@@ -58,79 +67,85 @@ namespace viennafem
     //exit(0);
 
     //transform du/dy:
-    new_lhs = viennamath::substitute(viennamath::unary_expr<>(u.clone(), new d_dx(1) ),
+    new_lhs = viennamath::substitute(UnaryExpression(u.clone(), new d_dx(1) ),
                                      viennamath::diff(u, r) * dr_dy + viennamath::diff(u, s) * ds_dy,
                                      new_lhs);
 
     
     //transform dv/dx:
-    new_lhs = viennamath::substitute(viennamath::unary_expr<>(v.clone(), new d_dx(0) ),
+    new_lhs = viennamath::substitute(UnaryExpression(v.clone(), new d_dx(0) ),
                                      viennamath::diff(v, r) * dr_dx + viennamath::diff(v, s_temp) * ds_dx,
                                      new_lhs);
 
     //transform dv/dy:
-    new_lhs = viennamath::substitute(viennamath::unary_expr<>(v.clone(), new d_dx(1) ),
+    new_lhs = viennamath::substitute(UnaryExpression(v.clone(), new d_dx(1) ),
                                      viennamath::diff(v, r) * dr_dy + viennamath::diff(v, s) * ds_dy,
                                      new_lhs);
     
     //replace s_temp by s;
-    new_lhs = viennamath::substitute(viennamath::unary_expr<>(u.clone(), new d_dx(10) ),
-                                     viennamath::unary_expr<>(u.clone(), new d_dx(1) ),
+    new_lhs = viennamath::substitute(UnaryExpression(u.clone(), new d_dx(10) ),
+                                     UnaryExpression(u.clone(), new d_dx(1) ),
                                      new_lhs);
 
-    new_lhs = viennamath::substitute(viennamath::unary_expr<>(v.clone(), new d_dx(10) ),
-                                     viennamath::unary_expr<>(v.clone(), new d_dx(1) ),
+    new_lhs = viennamath::substitute(UnaryExpression(v.clone(), new d_dx(10) ),
+                                     UnaryExpression(v.clone(), new d_dx(1) ),
                                      new_lhs);
     
-    return viennamath::equation<>(new_lhs, new_rhs);
+    return EquationType(new_lhs, new_rhs);
   }
 
 
 
-  template <typename CellType>
-  viennamath::equation<> transform_to_reference_cell(viennamath::equation<> const & weak_form, viennagrid::tetrahedron_tag)
+  template <typename CellType, typename EquationType>
+  EquationType transform_to_reference_cell(EquationType const & weak_form, viennagrid::tetrahedron_tag)
   {
-    typedef viennamath::op_unary<viennamath::op_partial_deriv<viennamath::default_numeric_type> >   d_dx;
+    typedef typename EquationType::interface_type             InterfaceType;
+    typedef viennamath::function_symbol<InterfaceType>   FunctionSymbol;
+    typedef viennamath::expr<InterfaceType>              Expression;
+    typedef viennamath::unary_expr<InterfaceType>        UnaryExpression;
+    typedef viennamath::variable<InterfaceType>          Variable;
+    typedef viennamath::op_unary<viennamath::op_partial_deriv<viennamath::default_numeric_type>, InterfaceType >   d_dx;
+
     
-    viennamath::function_symbol<>  u(0, viennamath::unknown_tag<>());
-    viennamath::function_symbol<>  v(0, viennamath::test_tag<>());
-    viennamath::variable<>      r(0);
-    viennamath::variable<>      s(1);
-    viennamath::variable<>      t(2);
-    viennamath::variable<>      s_temp(10);
-    viennamath::variable<>      t_temp(11);
+    FunctionSymbol  u(0, viennamath::unknown_tag<>());
+    FunctionSymbol  v(0, viennamath::test_tag<>());
+    Variable      r(0);
+    Variable      s(1);
+    Variable      t(2);
+    Variable      s_temp(10);
+    Variable      t_temp(11);
     
     //using local coordinates (r, s) and global coordinates (x, y)
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<0,0> >  dr_dx;
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<1,0> >  ds_dx;
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<2,0> >  dt_dx;
+    viennafem::cell_quan<CellType, viennafem::dt_dx_key<0,0>, InterfaceType>  dr_dx;
+    viennafem::cell_quan<CellType, viennafem::dt_dx_key<1,0>, InterfaceType>  ds_dx;
+    viennafem::cell_quan<CellType, viennafem::dt_dx_key<2,0>, InterfaceType>  dt_dx;
     
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<0,1> >  dr_dy;
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<1,1> >  ds_dy;
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<2,1> >  dt_dy;
+    viennafem::cell_quan<CellType, viennafem::dt_dx_key<0,1>, InterfaceType>  dr_dy;
+    viennafem::cell_quan<CellType, viennafem::dt_dx_key<1,1>, InterfaceType>  ds_dy;
+    viennafem::cell_quan<CellType, viennafem::dt_dx_key<2,1>, InterfaceType>  dt_dy;
 
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<0,2> >  dr_dz;
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<1,2> >  ds_dz;
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<2,2> >  dt_dz;
+    viennafem::cell_quan<CellType, viennafem::dt_dx_key<0,2>, InterfaceType>  dr_dz;
+    viennafem::cell_quan<CellType, viennafem::dt_dx_key<1,2>, InterfaceType>  ds_dz;
+    viennafem::cell_quan<CellType, viennafem::dt_dx_key<2,2>, InterfaceType>  dt_dz;
     
-    viennamath::expr<> new_lhs = weak_form.lhs();
-    viennamath::expr<> new_rhs = weak_form.rhs();
+    Expression new_lhs = weak_form.lhs();
+    Expression new_rhs = weak_form.rhs();
 
     
     ////// Step 1: Transform partial derivatives of u
     
     //transform du/dx:
-    new_lhs = viennamath::substitute(viennamath::unary_expr<>(u.clone(), new d_dx(0) ),
+    new_lhs = viennamath::substitute(UnaryExpression(u.clone(), new d_dx(0) ),
                                      viennamath::diff(u, r) * dr_dx + viennamath::diff(u, s_temp) * ds_dx + viennamath::diff(u, t_temp) * dt_dx,
                                      new_lhs);
 
     //transform du/dy:
-    new_lhs = viennamath::substitute(viennamath::unary_expr<>(u.clone(), new d_dx(1) ),
+    new_lhs = viennamath::substitute(UnaryExpression(u.clone(), new d_dx(1) ),
                                      viennamath::diff(u, r) * dr_dy + viennamath::diff(u, s_temp) * ds_dy + viennamath::diff(u, t_temp) * dt_dy,
                                      new_lhs);
 
     //transform du/dz:
-    new_lhs = viennamath::substitute(viennamath::unary_expr<>(u.clone(), new d_dx(2) ),
+    new_lhs = viennamath::substitute(UnaryExpression(u.clone(), new d_dx(2) ),
                                      viennamath::diff(u, r) * dr_dz + viennamath::diff(u, s) * ds_dz + viennamath::diff(u, t) * dt_dz,
                                      new_lhs);
 
@@ -138,17 +153,17 @@ namespace viennafem
     ////// Step 2: Transform partial derivatives of v
     
     //transform dv/dx:
-    new_lhs = viennamath::substitute(viennamath::unary_expr<>(v.clone(), new d_dx(0) ),
+    new_lhs = viennamath::substitute(UnaryExpression(v.clone(), new d_dx(0) ),
                                      viennamath::diff(v, r) * dr_dx + viennamath::diff(v, s_temp) * ds_dx + viennamath::diff(v, t_temp) * dt_dx,
                                      new_lhs);
     
     //transform dv/dy:
-    new_lhs = viennamath::substitute(viennamath::unary_expr<>(v.clone(), new d_dx(1) ),
+    new_lhs = viennamath::substitute(UnaryExpression(v.clone(), new d_dx(1) ),
                                      viennamath::diff(v, r) * dr_dy + viennamath::diff(v, s_temp) * ds_dy + viennamath::diff(v, t_temp) * dt_dy,
                                      new_lhs);
 
     //transform dv/dz:
-    new_lhs = viennamath::substitute(viennamath::unary_expr<>(v.clone(), new d_dx(2) ),
+    new_lhs = viennamath::substitute(UnaryExpression(v.clone(), new d_dx(2) ),
                                      viennamath::diff(v, r) * dr_dz + viennamath::diff(v, s) * ds_dz + viennamath::diff(v, t) * dt_dz,
                                      new_lhs);
     
@@ -159,28 +174,28 @@ namespace viennafem
     
     
     //replace s_temp by s;
-    new_lhs = viennamath::substitute(viennamath::unary_expr<>(u.clone(), new d_dx(10) ),
-                                     viennamath::unary_expr<>(u.clone(), new d_dx(1) ),
+    new_lhs = viennamath::substitute(UnaryExpression(u.clone(), new d_dx(10) ),
+                                     UnaryExpression(u.clone(), new d_dx(1) ),
                                      new_lhs);
 
-    new_lhs = viennamath::substitute(viennamath::unary_expr<>(v.clone(), new d_dx(10) ),
-                                     viennamath::unary_expr<>(v.clone(), new d_dx(1) ),
+    new_lhs = viennamath::substitute(UnaryExpression(v.clone(), new d_dx(10) ),
+                                     UnaryExpression(v.clone(), new d_dx(1) ),
                                      new_lhs);
 
     //replace t_temp by t
-    new_lhs = viennamath::substitute(viennamath::unary_expr<>(u.clone(), new d_dx(11) ),
-                                     viennamath::unary_expr<>(u.clone(), new d_dx(2) ),
+    new_lhs = viennamath::substitute(UnaryExpression(u.clone(), new d_dx(11) ),
+                                     UnaryExpression(u.clone(), new d_dx(2) ),
                                      new_lhs);
 
-    new_lhs = viennamath::substitute(viennamath::unary_expr<>(v.clone(), new d_dx(11) ),
-                                     viennamath::unary_expr<>(v.clone(), new d_dx(2) ),
+    new_lhs = viennamath::substitute(UnaryExpression(v.clone(), new d_dx(11) ),
+                                     UnaryExpression(v.clone(), new d_dx(2) ),
                                      new_lhs);
     
-    return viennamath::equation<>(new_lhs, new_rhs);
+    return EquationType(new_lhs, new_rhs);
   }
 
-  template <typename CellType>
-  viennamath::equation<> transform_to_reference_cell(viennamath::equation<> const & weak_form)
+  template <typename CellType, typename EquationType>
+  EquationType transform_to_reference_cell(EquationType const & weak_form)
   {
     return  transform_to_reference_cell<CellType>(weak_form, typename CellType::element_tag());
   }
@@ -190,53 +205,58 @@ namespace viennafem
 
 
 
-  
-  viennamath::equation<> insert_test_and_trial_functions(viennamath::expr<> test_func,
-                                                       viennamath::expr<> trial_func,
-                                                       viennamath::equation<> weak_form)
+  template <typename ExpressionType, typename EquationType>
+  EquationType insert_test_and_trial_functions(ExpressionType test_func,
+                                               ExpressionType trial_func,
+                                               EquationType weak_form)
   {
-    typedef viennamath::op_unary<viennamath::op_partial_deriv<viennamath::default_numeric_type> >   dt_dx;
+    typedef typename EquationType::interface_type             InterfaceType;
+    typedef viennamath::function_symbol<InterfaceType>   FunctionSymbol;
+    typedef viennamath::unary_expr<InterfaceType>        UnaryExpression;
+    typedef viennamath::variable<InterfaceType>          Variable;
+    typedef viennamath::op_unary<viennamath::op_partial_deriv<viennamath::default_numeric_type>, InterfaceType >   dt_dx;
     
-    viennamath::function_symbol<>  u(0, viennamath::unknown_tag<>());
-    viennamath::function_symbol<>  v(0, viennamath::test_tag<>());
-    viennamath::variable<>      r(0);
-    viennamath::variable<>      s(1);
-    viennamath::variable<>      t(2);
-    viennamath::expr<> new_lhs = weak_form.lhs();
-    viennamath::expr<> new_rhs = weak_form.rhs();
+    
+    FunctionSymbol  u(0, viennamath::unknown_tag<>());
+    FunctionSymbol  v(0, viennamath::test_tag<>());
+    Variable      r(0);
+    Variable      s(1);
+    Variable      t(2);
+    ExpressionType new_lhs = weak_form.lhs();
+    ExpressionType new_rhs = weak_form.rhs();
     
     //step 1: substitute derivatives: 
-    new_lhs = viennamath::substitute(viennamath::unary_expr<>(u.clone(), new dt_dx(0)),
+    new_lhs = viennamath::substitute(UnaryExpression(u.clone(), new dt_dx(0)),
                                      viennamath::diff(trial_func, r),
                                      new_lhs);
-    new_lhs = viennamath::substitute(viennamath::unary_expr<>(v.clone(), new dt_dx(0)),
+    new_lhs = viennamath::substitute(UnaryExpression(v.clone(), new dt_dx(0)),
                                      viennamath::diff(test_func, r),
                                      new_lhs);
     
-    new_lhs = viennamath::substitute(viennamath::unary_expr<>(u.clone(), new dt_dx(1)),
+    new_lhs = viennamath::substitute(UnaryExpression(u.clone(), new dt_dx(1)),
                                      viennamath::diff(trial_func, s),
                                      new_lhs);
-    new_lhs = viennamath::substitute(viennamath::unary_expr<>(v.clone(), new dt_dx(1)),
+    new_lhs = viennamath::substitute(UnaryExpression(v.clone(), new dt_dx(1)),
                                      viennamath::diff(test_func, s),
                                      new_lhs);
     
-    new_lhs = viennamath::substitute(viennamath::unary_expr<>(u.clone(), new dt_dx(2)),
+    new_lhs = viennamath::substitute(UnaryExpression(u.clone(), new dt_dx(2)),
                                      viennamath::diff(trial_func, t),
                                      new_lhs);
-    new_lhs = viennamath::substitute(viennamath::unary_expr<>(v.clone(), new dt_dx(2)),
+    new_lhs = viennamath::substitute(UnaryExpression(v.clone(), new dt_dx(2)),
                                      viennamath::diff(test_func, t),
                                      new_lhs);
     
     //step 2: substitute non-derivaties:
     //TODO  (not necessary for Poisson equation)
     
-    new_rhs = viennamath::substitute(viennamath::expr<>(v.clone()),
+    new_rhs = viennamath::substitute(ExpressionType(v.clone()),
                                      test_func,
                                      new_rhs);
     
     
     //step 3: return result:
-    return viennamath::equation<>(new_lhs, new_rhs);
+    return EquationType(new_lhs, new_rhs);
   }
   
 

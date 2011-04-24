@@ -165,9 +165,13 @@ int main()
 
   typedef viennagrid::result_of::ncell_container<DomainType, 0>::type    VertexContainer;
   typedef viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
+  typedef viennagrid::result_of::ncell_type<TetrahedronConfig, 3>::type              CellType;
   
   typedef boost::numeric::ublas::compressed_matrix<viennafem::numeric_type>  MatrixType;
   typedef boost::numeric::ublas::vector<viennafem::numeric_type>             VectorType;
+  
+  typedef viennamath::function_symbol<viennafem::fem_expression_interface<viennafem::numeric_type, CellType> >   FunctionSymbol;
+  typedef viennamath::equation<viennafem::fem_expression_interface<viennafem::numeric_type, CellType> >          Equation;
   
   //
   // Create a domain from file
@@ -189,9 +193,9 @@ int main()
   //
   // Specify two PDEs:
   //
-  viennamath::function_symbol<> u(0, viennamath::unknown_tag<>());   //an unknown function used for PDE specification
-  viennamath::equation<> poisson_equ_1 = viennamath::make_equation( viennamath::laplace(u), -1);
-  viennamath::equation<> poisson_equ_2 = viennamath::make_equation( viennamath::laplace(u), -1);
+  FunctionSymbol u(0, viennamath::unknown_tag<>());   //an unknown function used for PDE specification
+  Equation poisson_equ_1 = viennamath::make_equation( viennamath::laplace(u), -1);
+  Equation poisson_equ_2 = viennamath::make_equation( viennamath::laplace(u), -1);
   
   //
   // Create PDE config (where to find boundary information, where to store mapping indices, etc.)

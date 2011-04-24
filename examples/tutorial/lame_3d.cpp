@@ -15,6 +15,7 @@
 #include "viennafem/eval.hpp"
 #include "viennafem/unknown_config.hpp"
 #include "viennafem/pde_solver.hpp"
+#include "viennafem/weak_form.hpp"
 
 // ViennaGrid includes:
 #include "viennagrid/domain.hpp"
@@ -31,7 +32,6 @@
 
 #include "viennamath/runtime/equation.hpp"
 #include "viennamath/manipulation/integral.hpp"
-#include "viennamath/weak_form.hpp"
 #include "viennamath/manipulation/apply_coordinate_system.hpp"
 
 
@@ -64,16 +64,19 @@ using namespace viennamath;
 //
 // The strain tensor: eps_ij = 0.5 * (du_i/dx_j + du_j/dx_i)
 // 
-std::vector< expr<> > strain_tensor(std::vector< function_symbol<> > const & u)
+template <typename InterfaceType>
+std::vector< expr<InterfaceType> > strain_tensor(std::vector< function_symbol<InterfaceType> > const & u)
 {
+  typedef variable<InterfaceType>     Variable;
+  
   //
   // a 3x3 matrix representing the strain tensor
   //
-  std::vector< expr<> > result(9);
+  std::vector< expr<InterfaceType> > result(9);
   
-  variable<> x(0);
-  variable<> y(1);
-  variable<> z(2);
+  Variable x(0);
+  Variable y(1);
+  Variable z(2);
   
   //first row:
   result[0] =        diff(u[0], x);
@@ -98,13 +101,14 @@ std::vector< expr<> > strain_tensor(std::vector< function_symbol<> > const & u)
 // The stress tensor: sigma = 2 \mu eps + \lambda trace(eps) Id  for St. Venent-Kirchhoff material
 // can be replaced with other expressions for plasticity and the like
 // 
-std::vector< expr<> > stress_tensor(std::vector< function_symbol<> > const & v)
+template <typename InterfaceType>
+std::vector< expr<InterfaceType> > stress_tensor(std::vector< function_symbol<InterfaceType> > const & v)
 {
   //
   // a 3x3 matrix representing the stress tensor
   //
-  std::vector< expr<> > result(9);
-  std::vector< expr<> > strain = strain_tensor(v);
+  std::vector< expr<InterfaceType> > result(9);
+  std::vector< expr<InterfaceType> > strain = strain_tensor(v);
 
   double mu = 1;
   double lambda = 1;
@@ -124,9 +128,10 @@ std::vector< expr<> > stress_tensor(std::vector< function_symbol<> > const & v)
 }
 
 
-expr<> tensor_reduce(std::vector< expr<> > lhs, std::vector< expr<> > rhs)
+template <typename InterfaceType>
+expr<InterfaceType> tensor_reduce(std::vector< expr<InterfaceType> > lhs, std::vector< expr<InterfaceType> > rhs)
 {
-  expr<> ret = constant<double>(0);
+  expr<InterfaceType> ret = constant<double, InterfaceType>(0);
   
   for (size_t i=0; i<rhs.size(); ++i)
     ret = ret + lhs[i] * rhs[i];
@@ -233,9 +238,15 @@ int main()
 
   typedef viennagrid::result_of::ncell_container<DomainType, 0>::type    VertexContainer;
   typedef viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
+  typedef viennagrid::result_of::ncell_type<TetrahedronConfig, 3>::type              CellType;
   
   typedef boost::numeric::ublas::compressed_matrix<viennafem::numeric_type>  MatrixType;
   typedef boost::numeric::ublas::vector<viennafem::numeric_type>             VectorType;
+  
+  typedef viennamath::function_symbol<viennafem::fem_expression_interface<viennafem::numeric_type, CellType> >   FunctionSymbol;
+  typedef viennamath::equation<viennafem::fem_expression_interface<viennafem::numeric_type, CellType> >          Equation;
+  typedef viennamath::expr<viennafem::fem_expression_interface<viennafem::numeric_type, CellType> >              Expression;
+
   
   std::cout << "*********************************************************" << std::endl;
   std::cout << "*****     Demo for LAME equation with ViennaFEM     *****" << std::endl;
@@ -266,15 +277,15 @@ int main()
                                     
                                     
   // the unknown function (vector valued, so one for each of the three components..
-  std::vector< function_symbol<> > u(3);
-  u[0] = function_symbol<>(0, unknown_tag<>());
-  u[1] = function_symbol<>(1, unknown_tag<>());
-  u[2] = function_symbol<>(2, unknown_tag<>());
+  std::vector< FunctionSymbol > u(3);
+  u[0] = FunctionSymbol(0, unknown_tag<>());
+  u[1] = FunctionSymbol(1, unknown_tag<>());
+  u[2] = FunctionSymbol(2, unknown_tag<>());
   
-  std::vector< function_symbol<> > v(3);
-  v[0] = function_symbol<>(0, test_tag<>());
-  v[1] = function_symbol<>(1, test_tag<>());
-  v[2] = function_symbol<>(2, test_tag<>());
+  std::vector< FunctionSymbol > v(3);
+  v[0] = FunctionSymbol(0, test_tag<>());
+  v[1] = FunctionSymbol(1, test_tag<>());
+  v[2] = FunctionSymbol(2, test_tag<>());
   
   
 
@@ -286,13 +297,12 @@ int main()
   // Minimization problem: \int eps : sigma dx = \int F \cdot u dx
   //
 
-  std::vector< expr<> > strain = strain_tensor(u);
-  std::vector< expr<> > stress = stress_tensor(v);
+  std::vector< Expression > strain = strain_tensor(u);
+  std::vector< Expression > stress = stress_tensor(v);
   
-  equation<> weak_form_lame = make_equation( 
-                                 integral(Omega(), tensor_reduce( strain, stress ), symbolic_tag()),
-                                 //=                                         
-                                 0); //force is set to zero for now...
+  Equation weak_form_lame = make_equation( integral(Omega(), tensor_reduce( strain, stress ), symbolic_tag()),
+                                           //=                                         
+                                           0); //force is set to zero for now...
   
   
   std::cout << "Weak form of Lame equation: " << std::endl;

@@ -46,8 +46,10 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 #list all source files here
+ADD_EXECUTABLE(basic_poisson examples/tutorial/basic_poisson.cpp)
 ADD_EXECUTABLE(poisson_2d examples/tutorial/poisson_2d.cpp)
 ADD_EXECUTABLE(poisson_3d examples/tutorial/poisson_3d.cpp)
+ADD_EXECUTABLE(basic_lame examples/tutorial/basic_lame.cpp)
 ADD_EXECUTABLE(lame_3d examples/tutorial/lame_3d.cpp)
 ADD_EXECUTABLE(sshape_2d examples/tutorial/sshape_2d.cpp)
 ADD_EXECUTABLE(sshape_3d examples/tutorial/sshape_3d.cpp)
