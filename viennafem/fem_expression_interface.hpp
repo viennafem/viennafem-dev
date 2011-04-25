@@ -125,7 +125,8 @@ namespace viennafem
       virtual ~fem_expression_interface() {}
       
       virtual interface_type * clone() const = 0;  //receiver owns pointer!
-      virtual std::string str() const = 0;
+      virtual std::string deep_str() const = 0;
+      virtual std::string shallow_str() const { return this->deep_str(); }
       virtual NumericT eval(std::vector<NumericT> const & v) const = 0;
       virtual NumericT eval(NumericT val) const = 0;
       virtual interface_type * optimize() const { return clone(); }  //receiver owns pointer!
@@ -140,12 +141,12 @@ namespace viennafem
       virtual interface_type * substitute(const interface_type * e,
                                           const interface_type * repl) const = 0;  //receiver owns pointer! Function parameters must not be manipulated!
                                                 
-      virtual bool equal(const interface_type * other) const = 0;
+      /** @brief Checks the current expression for being equal to 'other'. Checks for same type only, does not check members. */
+      virtual bool shallow_equal(const interface_type * other) const = 0;
       
-      virtual const interface_type               * lhs() const { return this; };
-      //virtual const op_interface<expression_interface> *          op() const { return NULL; }  //primitives do not have an operator   //TODO: This is a showstopper! Provide something better here!
-      //virtual const expression_interface               * rhs() const { return NULL; } //unary expressions do not have a right-hand side
-
+      /** @brief Checks the current expression for being equal to 'other'. Performs a deep check for equality of members. */
+      virtual bool deep_equal(const interface_type * other) const = 0;
+      
 
       virtual interface_type * diff(const interface_type * diff_var) const = 0;   //receiver owns pointer! Function parameter diff_var not be manipulated!
       

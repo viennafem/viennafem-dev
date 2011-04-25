@@ -36,7 +36,7 @@ namespace viennafem
     
     //std::cout << weak_form_lhs.get()->lhs()->str() << std::endl;
     
-    return 0.5 * weak_form_lhs.get()->lhs()->eval(p); //TODO: this is pretty ugly...
+    return 0.5 * weak_form_lhs.get()->eval(p); //TODO: this is pretty ugly...
   }
   
   //evaluates the weak form on a triangle using 1-point-rule
@@ -50,7 +50,7 @@ namespace viennafem
     
     //std::cout << weak_form_rhs.get()->lhs()->str() << std::endl;
     
-    return 0.5 * weak_form_rhs.get()->lhs()->eval(p); //TODO: this is pretty ugly...
+    return 0.5 * weak_form_rhs.get()->eval(p); //TODO: this is pretty ugly...
   }
 
 
@@ -66,7 +66,7 @@ namespace viennafem
     
     //std::cout << weak_form_lhs.get()->lhs()->str() << std::endl;
     
-    return weak_form_lhs.get()->lhs()->eval(p) / 6.0; //TODO: this is pretty ugly...
+    return weak_form_lhs.get()->eval(p) / 6.0; //TODO: this is pretty ugly...
   }
   
   //evaluates the weak form on a triangle using 1-point-rule
@@ -81,7 +81,7 @@ namespace viennafem
     
     //std::cout << weak_form_rhs.get()->lhs()->str() << std::endl;
     
-    return weak_form_rhs.get()->lhs()->eval(p) / 6.0; //TODO: this is pretty ugly...
+    return weak_form_rhs.get()->eval(p) / 6.0; //TODO: this is pretty ugly...
   }
 
 }

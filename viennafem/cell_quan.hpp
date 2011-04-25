@@ -44,7 +44,7 @@ namespace viennafem
         return viennadata::access<KeyType, numeric_type>()(*current_cell);
       }
       
-      std::string str() const
+      std::string deep_str() const
       {
         std::stringstream ss;
         ss << "cell_quan<" << KeyType() << ">(" << current_cell << ")";
@@ -61,7 +61,12 @@ namespace viennafem
         return clone();
       };    
       
-      bool equal(const InterfaceType * other) const
+      bool deep_equal(const InterfaceType * other) const
+      {
+        return dynamic_cast< const self_type *>(other) != NULL;
+      }
+      
+      bool shallow_equal(const InterfaceType * other) const
       {
         return dynamic_cast< const self_type *>(other) != NULL;
       }
