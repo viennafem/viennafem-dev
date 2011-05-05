@@ -14,7 +14,8 @@
 #define VIENNAFEM_BFSTOCK_HPP
 
 #include <vector>
-#include "viennagrid/celltags.hpp"
+#include "viennagrid/topology/triangle.hpp"
+#include "viennagrid/topology/tetrahedron.hpp"
 #include "viennagrid/forwards.h"
 #include "viennamath/expression.hpp"
 #include "viennafem/fem_expression_interface.hpp"
@@ -421,9 +422,9 @@ namespace viennafem
   template <typename AssemblyCellType,
               long topolevel, long current_element_id,
               bool increment_possible =
-                  (viennagrid::subcell_traits< typename AssemblyCellType::ElementTag,
+                  (viennagrid::traits::subcell_desc< typename AssemblyCellType::ElementTag,
                                   topolevel
-                                >::ElementNum - current_element_id > 1)
+                                >::num_elements - current_element_id > 1)
             >
   struct BfIDIncrementer_element_id
   {

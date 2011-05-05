@@ -20,7 +20,8 @@
 #include "viennamath/manipulation/substitute.hpp"
 #include "viennamath/manipulation/diff.hpp"
 
-#include "viennagrid/celltags.hpp"
+#include "viennagrid/topology/triangle.hpp"
+#include "viennagrid/topology/tetrahedron.hpp"
 
 namespace viennafem
 {

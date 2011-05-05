@@ -30,6 +30,7 @@
 
 // ViennaGrid includes:
 #include "viennagrid/domain.hpp"
+#include <viennagrid/config/simplex.hpp>
 #include "viennagrid/io/sgf_reader.hpp"
 #include "viennagrid/io/vtk_writer.hpp"
 
@@ -161,11 +162,12 @@ void write_solution_to_VTK_file(VectorType const & result,
 
 int main()
 {
-  typedef viennagrid::domain<TetrahedronConfig>         DomainType;
+  typedef viennagrid::config::tetrahedral_3d                             ConfigType;
+  typedef viennagrid::domain<ConfigType>         DomainType;
 
   typedef viennagrid::result_of::ncell_container<DomainType, 0>::type    VertexContainer;
   typedef viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
-  typedef viennagrid::result_of::ncell_type<TetrahedronConfig, 3>::type              CellType;
+  typedef viennagrid::result_of::ncell_type<ConfigType, 3>::type              CellType;
   
   typedef boost::numeric::ublas::compressed_matrix<viennafem::numeric_type>  MatrixType;
   typedef boost::numeric::ublas::vector<viennafem::numeric_type>             VectorType;

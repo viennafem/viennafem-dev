@@ -14,7 +14,7 @@
 #define VIENNAFEM_DTDX_TRIANGLE_HPP
 
 #include <iostream>
-#include "viennagrid/celltags.hpp"
+#include "viennagrid/topology/triangle.hpp"
 #include "viennagrid/domain.hpp"
 #include "viennafem/forwards.h"
 

@@ -30,6 +30,7 @@
 
 // ViennaGrid includes:
 #include "viennagrid/domain.hpp"
+#include <viennagrid/config/simplex.hpp>
 #include "viennagrid/io/sgf_reader.hpp"
 #include "viennagrid/io/vtk_writer.hpp"
 
@@ -161,7 +162,8 @@ void write_solution_to_VTK_file(VectorType const & result,
 
 int main()
 {
-  typedef viennagrid::domain<TriangleConfig>         DomainType;
+  typedef viennagrid::config::triangular_2d                             ConfigType;
+  typedef viennagrid::domain<ConfigType>         DomainType;
 
   typedef viennagrid::result_of::ncell_container<DomainType, 0>::type    VertexContainer;
   typedef viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
