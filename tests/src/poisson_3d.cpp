@@ -211,8 +211,8 @@ int main()
       ++vit)
   {
     //boundary for first equation: Homogeneous Dirichlet everywhere
-    if (vit->getPoint().get_x() == 0.0 || vit->getPoint().get_x() == 1.0 
-      || vit->getPoint().get_y() == 0.0 || vit->getPoint().get_y() == 1.0 )
+    if (vit->getPoint()[0] == 0.0 || vit->getPoint()[0] == 1.0 
+      || vit->getPoint()[1] == 0.0 || vit->getPoint()[1] == 1.0 )
       viennadata::access<MyPDEConfigType_1::boundary_key_type,
                          bool>(poisson_config_1.boundary_key())(*vit) = true;
     else
@@ -220,7 +220,7 @@ int main()
                          bool>(poisson_config_1.boundary_key())(*vit) = false;
     
     //boundary for second equation: Homogeneous Dirichlet at (x == 0) and (x == 1)
-    if (vit->getPoint().get_x() == 0.0 || vit->getPoint().get_x() == 1.0 )
+    if (vit->getPoint()[0] == 0.0 || vit->getPoint()[0] == 1.0 )
       viennadata::access<MyPDEConfigType_2::boundary_key_type,
                          bool>(poisson_config_2.boundary_key())(*vit) = true;
     else

@@ -40,22 +40,22 @@ namespace viennafem
         PointType p3 = cell.getPoint(3) - p0;
         
         //Step 1: store determinant:
-        numeric_type det_dF_dt = spannedVolume(p1, p2, p3);
+        numeric_type det_dF_dt = 6.0 * viennagrid::spanned_volume(cell.getPoint(0), cell.getPoint(1), cell.getPoint(2), cell.getPoint(3));
         
         viennadata::access<det_dF_dt_key, numeric_type>()(cell) = det_dF_dt;
         
         //Step 2: store partial derivatives:
-        viennadata::access<dt_dx_key<0, 0>, numeric_type>()(cell) = (  + p2.get_y() * p3.get_z() - p2.get_z() * p3.get_y() ) / det_dF_dt;
-        viennadata::access<dt_dx_key<0, 1>, numeric_type>()(cell) = (  - p2.get_x() * p3.get_z() + p2.get_z() * p3.get_x() ) / det_dF_dt;
-        viennadata::access<dt_dx_key<0, 2>, numeric_type>()(cell) = (  + p2.get_x() * p3.get_y() - p2.get_y() * p3.get_x() ) / det_dF_dt;
+        viennadata::access<dt_dx_key<0, 0>, numeric_type>()(cell) = (  + p2[1] * p3[2] - p2[2] * p3[1] ) / det_dF_dt;
+        viennadata::access<dt_dx_key<0, 1>, numeric_type>()(cell) = (  - p2[0] * p3[2] + p2[2] * p3[0] ) / det_dF_dt;
+        viennadata::access<dt_dx_key<0, 2>, numeric_type>()(cell) = (  + p2[0] * p3[1] - p2[1] * p3[0] ) / det_dF_dt;
         
-        viennadata::access<dt_dx_key<1, 0>, numeric_type>()(cell) = (  - p1.get_y() * p3.get_z() + p1.get_z() * p3.get_y() ) / det_dF_dt;
-        viennadata::access<dt_dx_key<1, 1>, numeric_type>()(cell) = (  + p1.get_x() * p3.get_z() - p1.get_z() * p3.get_x() ) / det_dF_dt;
-        viennadata::access<dt_dx_key<1, 2>, numeric_type>()(cell) = (  - p1.get_x() * p3.get_y() + p1.get_y() * p3.get_x() ) / det_dF_dt;
+        viennadata::access<dt_dx_key<1, 0>, numeric_type>()(cell) = (  - p1[1] * p3[2] + p1[2] * p3[1] ) / det_dF_dt;
+        viennadata::access<dt_dx_key<1, 1>, numeric_type>()(cell) = (  + p1[0] * p3[2] - p1[2] * p3[0] ) / det_dF_dt;
+        viennadata::access<dt_dx_key<1, 2>, numeric_type>()(cell) = (  - p1[0] * p3[1] + p1[1] * p3[0] ) / det_dF_dt;
         
-        viennadata::access<dt_dx_key<2, 0>, numeric_type>()(cell) = (  + p1.get_y() * p2.get_z() - p1.get_z() * p2.get_y() ) / det_dF_dt;
-        viennadata::access<dt_dx_key<2, 1>, numeric_type>()(cell) = (  - p1.get_x() * p2.get_z() + p1.get_z() * p2.get_x() ) / det_dF_dt;
-        viennadata::access<dt_dx_key<2, 2>, numeric_type>()(cell) = (  + p1.get_x() * p2.get_y() - p1.get_y() * p2.get_x() ) / det_dF_dt;
+        viennadata::access<dt_dx_key<2, 0>, numeric_type>()(cell) = (  + p1[1] * p2[2] - p1[2] * p2[1] ) / det_dF_dt;
+        viennadata::access<dt_dx_key<2, 1>, numeric_type>()(cell) = (  - p1[0] * p2[2] + p1[2] * p2[0] ) / det_dF_dt;
+        viennadata::access<dt_dx_key<2, 2>, numeric_type>()(cell) = (  + p1[0] * p2[1] - p1[1] * p2[0] ) / det_dF_dt;
       }
 
   };
@@ -97,25 +97,25 @@ namespace viennafem
         PointType p3 = cell.getPoint(3) - p0;
 
         //dt_1/dx_1
-        dt_dx[0] = (  + p2.get_y() * p3.get_z() - p2.get_z() * p3.get_y() ) / det_dF_dt;
+        dt_dx[0] = (  + p2[1] * p3[2] - p2[2] * p3[1] ) / det_dF_dt;
         //dt_1/dx_2
-        dt_dx[1] = (  - p2.get_x() * p3.get_z() + p2.get_z() * p3.get_x() ) / det_dF_dt;
+        dt_dx[1] = (  - p2[0] * p3[2] + p2[2] * p3[0] ) / det_dF_dt;
         //dt_1/dx_3
-        dt_dx[2] = (  + p2.get_x() * p3.get_y() - p2.get_y() * p3.get_x() ) / det_dF_dt;
+        dt_dx[2] = (  + p2[0] * p3[1] - p2[1] * p3[0] ) / det_dF_dt;
 
         //dt_2/dx_1
-        dt_dx[3] = (  - p1.get_y() * p3.get_z() + p1.get_z() * p3.get_y() ) / det_dF_dt;
+        dt_dx[3] = (  - p1[1] * p3[2] + p1[2] * p3[1] ) / det_dF_dt;
         //dt_2/dx_2
-        dt_dx[4] = (  + p1.get_x() * p3.get_z() - p1.get_z() * p3.get_x() ) / det_dF_dt;
+        dt_dx[4] = (  + p1[0] * p3[2] - p1[2] * p3[0] ) / det_dF_dt;
         //dt_2/dx_3
-        dt_dx[5] = (  - p1.get_x() * p3.get_y() + p1.get_y() * p3.get_x() ) / det_dF_dt;
+        dt_dx[5] = (  - p1[0] * p3[1] + p1[1] * p3[0] ) / det_dF_dt;
 
         //dt_3/dx_1
-        dt_dx[6] = (  + p1.get_y() * p2.get_z() - p1.get_z() * p2.get_y() ) / det_dF_dt;
+        dt_dx[6] = (  + p1[1] * p2[2] - p1[2] * p2[1] ) / det_dF_dt;
         //dt_3/dx_2
-        dt_dx[7] = (  - p1.get_x() * p2.get_z() + p1.get_z() * p2.get_x() ) / det_dF_dt;
+        dt_dx[7] = (  - p1[0] * p2[2] + p1[2] * p2[0] ) / det_dF_dt;
         //dt_3/dx_3
-        dt_dx[8] = (  + p1.get_x() * p2.get_y() - p1.get_y() * p2.get_x() ) / det_dF_dt;
+        dt_dx[8] = (  + p1[0] * p2[1] - p1[1] * p2[0] ) / det_dF_dt;
 
       }
 
@@ -182,33 +182,33 @@ namespace viennafem
         if (i==0)
         {
           if (j==0)
-            ret = (  + p2.get_y() * p3.get_z() - p2.get_z() * p3.get_y() ) / det_dF_dt;
+            ret = (  + p2[1] * p3[2] - p2[2] * p3[1] ) / det_dF_dt;
           else if (j==1)
-            ret = (  - p2.get_x() * p3.get_z() + p2.get_z() * p3.get_x() ) / det_dF_dt;
+            ret = (  - p2[0] * p3[2] + p2[2] * p3[0] ) / det_dF_dt;
           else if (j==2)
-            ret = (  + p2.get_x() * p3.get_y() - p2.get_y() * p3.get_x() ) / det_dF_dt;
+            ret = (  + p2[0] * p3[1] - p2[1] * p3[0] ) / det_dF_dt;
           else
             std::cerr << "ERROR: Accessing invalid elements of functional determinant!!";
         }
         else if (i==1)
         {
           if (j==0)
-            ret = (  - p1.get_y() * p3.get_z() + p1.get_z() * p3.get_y() ) / det_dF_dt;
+            ret = (  - p1[1] * p3[2] + p1[2] * p3[1] ) / det_dF_dt;
           else if (j==1)
-            ret = (  + p1.get_x() * p3.get_z() - p1.get_z() * p3.get_x() ) / det_dF_dt;
+            ret = (  + p1[0] * p3[2] - p1[2] * p3[0] ) / det_dF_dt;
           else if (j==2)
-            ret = (  - p1.get_x() * p3.get_y() + p1.get_y() * p3.get_x() ) / det_dF_dt;
+            ret = (  - p1[0] * p3[1] + p1[1] * p3[0] ) / det_dF_dt;
           else
             std::cerr << "ERROR: Accessing invalid elements of functional determinant!!";
         }
         else if (i==2)
         {
           if (j==0)
-            ret = (  + p1.get_y() * p2.get_z() - p1.get_z() * p2.get_y() ) / det_dF_dt;
+            ret = (  + p1[1] * p2[2] - p1[2] * p2[1] ) / det_dF_dt;
           else if (j==1)
-            ret = (  - p1.get_x() * p2.get_z() + p1.get_z() * p2.get_x() ) / det_dF_dt;
+            ret = (  - p1[0] * p2[2] + p1[2] * p2[0] ) / det_dF_dt;
           else if (j==2)
-            ret = (  + p1.get_x() * p2.get_y() - p1.get_y() * p2.get_x() ) / det_dF_dt;
+            ret = (  + p1[0] * p2[1] - p1[1] * p2[0] ) / det_dF_dt;
           else
             std::cerr << "ERROR: Accessing invalid elements of functional determinant!!";
         }
@@ -292,33 +292,33 @@ namespace viennafem
         if (i==0)
         {
           if (j==0)
-            ret = (  + p2.get_y() * p3.get_z() - p2.get_z() * p3.get_y() ) / det_dF_dt;
+            ret = (  + p2[1] * p3[2] - p2[2] * p3[1] ) / det_dF_dt;
           else if (j==1)
-            ret = (  - p2.get_x() * p3.get_z() + p2.get_z() * p3.get_x() ) / det_dF_dt;
+            ret = (  - p2[0] * p3[2] + p2[2] * p3[0] ) / det_dF_dt;
           else if (j==2)
-            ret = (  + p2.get_x() * p3.get_y() - p2.get_y() * p3.get_x() ) / det_dF_dt;
+            ret = (  + p2[0] * p3[1] - p2[1] * p3[0] ) / det_dF_dt;
           else
             std::cerr << "ERROR: Accessing invalid elements of functional determinant!!";
         }
         else if (i==1)
         {
           if (j==0)
-            ret = (  - p1.get_y() * p3.get_z() + p1.get_z() * p3.get_y() ) / det_dF_dt;
+            ret = (  - p1[1] * p3[2] + p1[2] * p3[1] ) / det_dF_dt;
           else if (j==1)
-            ret = (  + p1.get_x() * p3.get_z() - p1.get_z() * p3.get_x() ) / det_dF_dt;
+            ret = (  + p1[0] * p3[2] - p1[2] * p3[0] ) / det_dF_dt;
           else if (j==2)
-            ret = (  - p1.get_x() * p3.get_y() + p1.get_y() * p3.get_x() ) / det_dF_dt;
+            ret = (  - p1[0] * p3[1] + p1[1] * p3[0] ) / det_dF_dt;
           else
             std::cerr << "ERROR: Accessing invalid elements of functional determinant!!";
         }
         else if (i==2)
         {
           if (j==0)
-            ret = (  + p1.get_y() * p2.get_z() - p1.get_z() * p2.get_y() ) / det_dF_dt;
+            ret = (  + p1[1] * p2[2] - p1[2] * p2[1] ) / det_dF_dt;
           else if (j==1)
-            ret = (  - p1.get_x() * p2.get_z() + p1.get_z() * p2.get_x() ) / det_dF_dt;
+            ret = (  - p1[0] * p2[2] + p1[2] * p2[0] ) / det_dF_dt;
           else if (j==2)
-            ret = (  + p1.get_x() * p2.get_y() - p1.get_y() * p2.get_x() ) / det_dF_dt;
+            ret = (  + p1[0] * p2[1] - p1[1] * p2[0] ) / det_dF_dt;
           else
             std::cerr << "ERROR: Accessing invalid elements of functional determinant!!";
         }
@@ -423,25 +423,25 @@ namespace viennafem
         det_dF_dt = spannedVolume(p1, p2, p3);
 
         //dt_1/dx_1
-        dt_dx[0] = (  + p2.get_y() * p3.get_z() - p2.get_z() * p3.get_y() ) / det_dF_dt;
+        dt_dx[0] = (  + p2[1] * p3[2] - p2[2] * p3[1] ) / det_dF_dt;
         //dt_1/dx_2
-        dt_dx[1] = (  - p2.get_x() * p3.get_z() + p2.get_z() * p3.get_x() ) / det_dF_dt;
+        dt_dx[1] = (  - p2[0] * p3[2] + p2[2] * p3[0] ) / det_dF_dt;
         //dt_1/dx_3
-        dt_dx[2] = (  + p2.get_x() * p3.get_y() - p2.get_y() * p3.get_x() ) / det_dF_dt;
+        dt_dx[2] = (  + p2[0] * p3[1] - p2[1] * p3[0] ) / det_dF_dt;
 
         //dt_2/dx_1
-        dt_dx[3] = (  - p1.get_y() * p3.get_z() + p1.get_z() * p3.get_y() ) / det_dF_dt;
+        dt_dx[3] = (  - p1[1] * p3[2] + p1[2] * p3[1] ) / det_dF_dt;
         //dt_2/dx_2
-        dt_dx[4] = (  + p1.get_x() * p3.get_z() - p1.get_z() * p3.get_x() ) / det_dF_dt;
+        dt_dx[4] = (  + p1[0] * p3[2] - p1[2] * p3[0] ) / det_dF_dt;
         //dt_2/dx_3
-        dt_dx[5] = (  - p1.get_x() * p3.get_y() + p1.get_y() * p3.get_x() ) / det_dF_dt;
+        dt_dx[5] = (  - p1[0] * p3[1] + p1[1] * p3[0] ) / det_dF_dt;
 
         //dt_3/dx_1
-        dt_dx[6] = (  + p1.get_y() * p2.get_z() - p1.get_z() * p2.get_y() ) / det_dF_dt;
+        dt_dx[6] = (  + p1[1] * p2[2] - p1[2] * p2[1] ) / det_dF_dt;
         //dt_3/dx_2
-        dt_dx[7] = (  - p1.get_x() * p2.get_z() + p1.get_z() * p2.get_x() ) / det_dF_dt;
+        dt_dx[7] = (  - p1[0] * p2[2] + p1[2] * p2[0] ) / det_dF_dt;
         //dt_3/dx_3
-        dt_dx[8] = (  + p1.get_x() * p2.get_y() - p1.get_y() * p2.get_x() ) / det_dF_dt;
+        dt_dx[8] = (  + p1[0] * p2[1] - p1[1] * p2[0] ) / det_dF_dt;
 
       } //computeCellJacobian()
 

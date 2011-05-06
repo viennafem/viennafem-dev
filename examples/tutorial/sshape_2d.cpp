@@ -210,7 +210,7 @@ int main()
       ++vit)
   {
     //boundary for first equation: Homogeneous Dirichlet everywhere
-    if (vit->getPoint().get_y() == 3.0 || vit->getPoint().get_x() == 5.0 )
+    if (vit->getPoint()[1] == 3.0 || vit->getPoint()[0] == 5.0 )
       viennadata::access<MyPDEConfigType_1::boundary_key_type,
                          bool>(poisson_config_1.boundary_key())(*vit) = true;
     else

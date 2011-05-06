@@ -15,6 +15,7 @@
 
 #include <iostream>
 #include "viennagrid/topology/triangle.hpp"
+#include "viennagrid/algorithm/spanned_volume.hpp"
 #include "viennagrid/domain.hpp"
 #include "viennafem/forwards.h"
 
@@ -39,7 +40,7 @@ namespace viennafem
         PointType const & p2 = cell.getPoint(2);
         
         //Step 1: store determinant:
-        double det_dF_dt = viennagrid::spannedVolume(p1 - p0, p2 - p0);
+        double det_dF_dt = 2.0 * viennagrid::spanned_volume(p0, p1, p2);
         
         assert(det_dF_dt > 0);
         
@@ -47,10 +48,10 @@ namespace viennafem
         viennadata::access<det_dF_dt_key, numeric_type>()(cell) = det_dF_dt;
         
         //Step 2: store partial derivatives:
-        viennadata::access<dt_dx_key<0, 0>, numeric_type>()(cell) = ( p2.get_y() - p0.get_y()) / det_dF_dt;
-        viennadata::access<dt_dx_key<0, 1>, numeric_type>()(cell) = - (p2.get_x() - p0.get_x()) / det_dF_dt;
-        viennadata::access<dt_dx_key<1, 0>, numeric_type>()(cell) = - (p1.get_y() - p0.get_y()) / det_dF_dt;
-        viennadata::access<dt_dx_key<1, 1>, numeric_type>()(cell) = ( p1.get_x() - p0.get_x()) / det_dF_dt;
+        viennadata::access<dt_dx_key<0, 0>, numeric_type>()(cell) = ( p2[1] - p0[1]) / det_dF_dt;
+        viennadata::access<dt_dx_key<0, 1>, numeric_type>()(cell) = - (p2[0] - p0[0]) / det_dF_dt;
+        viennadata::access<dt_dx_key<1, 0>, numeric_type>()(cell) = - (p1[1] - p0[1]) / det_dF_dt;
+        viennadata::access<dt_dx_key<1, 1>, numeric_type>()(cell) = ( p1[0] - p0[0]) / det_dF_dt;
         
       }
 
