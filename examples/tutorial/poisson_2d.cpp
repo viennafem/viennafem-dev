@@ -138,7 +138,7 @@ void write_solution_to_VTK_file(VectorType const & result,
             << filename
             << "' (can be viewed with e.g. Paraview)" << std::endl;
 
-  viennagrid::io::Vtk_writer<DomainType> my_vtk_writer;
+  viennagrid::io::vtk_writer<DomainType> my_vtk_writer;
   my_vtk_writer.writeDomain(domain, filename);  
 }
 

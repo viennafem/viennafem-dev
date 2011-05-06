@@ -65,23 +65,6 @@
 #include "viennacl/linalg/prod.hpp"
 
 
-
-
-//
-// Configuration class for a triangular domain
-//
-struct TetrahedronConfig
-{
-  typedef double                                    numeric_type;
-  typedef viennagrid::three_dimensions_tag          dimension_tag;
-  typedef viennagrid::tetrahedron_tag               cell_tag;
-
-  //multigrid:
-  //typedef viennagrid::full_multigrid_tag                       multigrid_tag;
-  typedef viennagrid::no_multigrid_tag             multigrid_tag;
-};
-
-
 //      
 // Solve system of linear equations:
 //
@@ -154,7 +137,7 @@ void write_solution_to_VTK_file(VectorType const & result,
             << filename
             << "' (can be viewed with e.g. Paraview)" << std::endl;
 
-  viennagrid::io::Vtk_writer<DomainType> my_vtk_writer;
+  viennagrid::io::vtk_writer<DomainType> my_vtk_writer;
   my_vtk_writer.writeDomain(domain, filename);  
 }
 

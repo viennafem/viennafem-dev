@@ -30,6 +30,7 @@
 
 // ViennaGrid includes:
 #include "viennagrid/domain.hpp"
+#include "viennagrid/config/simplex.hpp"
 #include "viennagrid/io/sgf_reader.hpp"
 #include "viennagrid/io/vtk_writer.hpp"
 
@@ -63,22 +64,6 @@
 #include "viennacl/linalg/norm_2.hpp"
 #include "viennacl/linalg/prod.hpp"
 
-
-
-
-//
-// Configuration class for a triangular domain
-//
-struct TetrahedronConfig
-{
-  typedef double                                    numeric_type;
-  typedef viennagrid::three_dimensions_tag          dimension_tag;
-  typedef viennagrid::tetrahedron_tag               cell_tag;
-
-  //multigrid:
-  //typedef viennagrid::full_multigrid_tag                       multigrid_tag;
-  typedef viennagrid::no_multigrid_tag             multigrid_tag;
-};
 
 
 //      
@@ -153,7 +138,7 @@ void write_solution_to_VTK_file(VectorType const & result,
             << filename
             << "' (can be viewed with e.g. Paraview)" << std::endl;
 
-  viennagrid::io::Vtk_writer<DomainType> my_vtk_writer;
+  viennagrid::io::vtk_writer<DomainType> my_vtk_writer;
   my_vtk_writer.writeDomain(domain, filename);  
 }
 
@@ -161,11 +146,12 @@ void write_solution_to_VTK_file(VectorType const & result,
 
 int main()
 {
-  typedef viennagrid::domain<TetrahedronConfig>         DomainType;
+  typedef viennagrid::config::tetrahedral_3d                             ConfigType;
+  typedef viennagrid::domain<ConfigType>         DomainType;
 
   typedef viennagrid::result_of::ncell_container<DomainType, 0>::type    VertexContainer;
   typedef viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
-  typedef viennagrid::result_of::ncell_type<TetrahedronConfig, 3>::type              CellType;
+  typedef viennagrid::result_of::ncell_type<ConfigType, 3>::type              CellType;
   
   typedef boost::numeric::ublas::compressed_matrix<viennafem::numeric_type>  MatrixType;
   typedef boost::numeric::ublas::vector<viennafem::numeric_type>             VectorType;
