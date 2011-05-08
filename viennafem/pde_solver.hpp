@@ -15,12 +15,17 @@
 
 //ViennaFEM includes:
 #include "viennafem/forwards.h"
+#include "viennafem/cell_quan.hpp"
 #include "viennafem/transform.hpp"
-#include "viennafem/BFStock.hpp"
+#include "viennafem/bases/tetrahedron.hpp"
+#include "viennafem/bases/triangle.hpp"
 #include "viennafem/eval.hpp"
-#include "viennafem/dtdx_triangle.h"
-#include "viennafem/dtdx_tetrahedron.h"
+#include "viennafem/transform/dtdx_triangle.hpp"
+#include "viennafem/transform/dtdx_tetrahedron.hpp"
 #include "viennafem/weak_form.hpp"
+#include "viennafem/linear_pde_system.hpp"
+#include "viennafem/linear_pde_options.hpp"
+
 
 //ViennaMath includes:
 #include "viennamath/manipulation/apply_coordinate_system.hpp"
@@ -33,25 +38,162 @@
 
 namespace viennafem
 {
+  
+  
+  template <typename CellType, typename InterfaceType>
+  struct cell_updater : public viennamath::traversal_interface<>
+  {
+    public:
+      cell_updater(CellType const & cell) : cell_(cell) {}
+      
+      void operator()(InterfaceType const * e) const 
+      {
+        if (viennamath::callback_if_castable< viennafem::cell_quan<CellType, InterfaceType> >::apply(e, *this))
+          return;
+      }
+      
+      void operator()(viennafem::cell_quan<CellType, InterfaceType> const & cq) const
+      {
+        cq.update(cell_);
+        //std::cout << "cell_quan updated!" << std::endl;
+      }
+      
+    private:
+      CellType const & cell_;
+  };
+
+
+  
+  struct pde_assembler
+  {
+    
+    template <typename EquationType, typename OptionType, typename DomainType, typename MatrixType, typename VectorType>
+    void operator()(EquationType const & transformed_weak_form,
+                    OptionType const & options,
+                    DomainType & domain,
+                    MatrixType & system_matrix,
+                    VectorType & load_vector
+                   ) const
+    {
+      typedef typename DomainType::config_type              Config;
+      typedef typename Config::cell_tag                     CellTag;
+      
+      typedef typename viennagrid::result_of::point_type<Config>::type                            PointType;
+      typedef typename viennagrid::result_of::ncell_type<Config, CellTag::topology_level>::type   CellType;
+
+      typedef typename viennagrid::result_of::ncell_container<DomainType, 0>::type                VertexContainer;
+      typedef typename viennagrid::result_of::iterator<VertexContainer>::type                     VertexIterator;
+
+      typedef typename viennagrid::result_of::ncell_container<DomainType, CellTag::topology_level>::type    CellContainer;
+      typedef typename viennagrid::result_of::iterator<CellContainer>::type                                 CellIterator;
+
+      typedef typename viennagrid::result_of::ncell_container<CellType, 0>::type                  VertexOnCellContainer;
+      typedef typename viennagrid::result_of::iterator<VertexOnCellContainer>::type               VertexOnCellIterator;
+
+      typedef viennafem::mapping_key                              MappingKeyType;
+      
+      typedef typename EquationType::value_type      Expression;
+      
+      MappingKeyType map_key(options.unknown_id());
+
+      //get basis:
+      //std::cout << "Getting basis..." << std::endl;
+      std::vector<Expression> trial_functions = viennafem::get_basisfunctions<Expression>(CellTag());
+      std::vector<Expression> test_functions = viennafem::get_basisfunctions<Expression>(CellTag());
+      
+      
+      std::vector<std::vector< EquationType > >  local_weak_form(viennagrid::traits::subcell_desc<CellTag, 0>::num_elements);
+      for (size_t i=0; i<viennagrid::traits::subcell_desc<CellTag, 0>::num_elements; ++i)
+        local_weak_form[i].resize(viennagrid::traits::subcell_desc<CellTag, 0>::num_elements);
+      
+      for (size_t i = 0; i<test_functions.size(); ++i)
+        for (size_t j=0; j<trial_functions.size(); ++j)
+          local_weak_form[i][j] = viennafem::insert_test_and_trial_functions(test_functions[i],
+                                                                            trial_functions[j],
+                                                                            transformed_weak_form);
+      
+      viennafem::cell_quan<CellType, typename EquationType::interface_type> det_dF_dt;
+      det_dF_dt.wrap( viennafem::det_dF_dt_key() );
+      
+      
+      CellContainer cells = viennagrid::ncells<CellTag::topology_level>(domain);
+      for (CellIterator cell_iter = cells.begin();
+          cell_iter != cells.end();
+          ++cell_iter)
+      {
+        //update cell_quantities:
+        //std::cout << "Updating cell quantities..." << std::endl;
+        //EquationType cell_expr = viennafem::update_cell_quantities(*cell_iter, transformed_weak_form);
+        viennamath::traversal_wrapper<> updater( new cell_updater<CellType, typename EquationType::interface_type>(*cell_iter) );
+        det_dF_dt.update(*cell_iter);
+        
+        
+        //write back to global matrix:
+        VertexOnCellContainer vertices_on_cell = viennagrid::ncells<0>(*cell_iter);
+        long global_index_i = 0;
+        long global_index_j = 0;
+        long local_index_i = 0;
+        long local_index_j = 0;
+        for (VertexOnCellIterator vocit_i = vertices_on_cell.begin();
+            vocit_i != vertices_on_cell.end();
+            ++vocit_i, ++local_index_i)
+        {                  
+          global_index_i = viennadata::access<MappingKeyType, long>(map_key)(*vocit_i);
+          //std::cout << "glob_i: " << global_index_i << std::endl;
+          if (global_index_i == -1)
+            continue;
+          
+          local_index_j = 0;
+          for (VertexOnCellIterator vocit_j = vertices_on_cell.begin();
+              vocit_j != vertices_on_cell.end();
+              ++vocit_j, ++local_index_j)
+          {
+            global_index_j = viennadata::access<MappingKeyType, long>(map_key)(*vocit_j);
+            //std::cout << "glob_j: " << global_index_j << std::endl;
+            if (global_index_j == -1)
+              continue; //modify right-hand side here
+          
+            local_weak_form[local_index_i][local_index_j].lhs().get()->recursive_traversal(updater);
+          
+            //std::cout << "incrementing sys matrix at " << global_index_i << " " << global_index_j << " by " << element_matrix[local_index_i][local_index_j] << std::endl;
+            system_matrix(global_index_i, global_index_j) += viennafem::eval_element_matrix_entry(local_weak_form[local_index_i][local_index_j].lhs(), CellTag()) * det_dF_dt.eval(1.0); 
+          }
+          
+          local_weak_form[local_index_i][0].rhs().get()->recursive_traversal(updater);
+          load_vector(global_index_i) += viennafem::eval_element_vector_entry(local_weak_form[local_index_i][0].rhs(), CellTag()) * det_dF_dt.eval(1.0); 
+        }
+      }
+      
+    } //operator()
+  };
+  
+  
+  
+  
+  
 
   class pde_solver
   {
     public:
       
-      template <typename EquationType, typename ConfigType, typename PDEDomain>
-      void operator()(EquationType & strong_form,
-                      ConfigType & conf,
-                      PDEDomain & domain) const;
+      template <typename SystemType, typename DomainType, typename MatrixType, typename VectorType>  //template for operator()
+      void operator()(SystemType pde_system,
+                      DomainType & domain,
+                      MatrixType & system_matrix,
+                      VectorType & load_vector
+                     ) const;
       
   };
 
 
 
 
-  template <typename EquationType, typename ConfigType, typename DomainType>  //template for operator()
-  void pde_solver::operator()(EquationType & strong_form,
-                              ConfigType & config,
-                              DomainType & domain) const
+  template <typename SystemType, typename DomainType, typename MatrixType, typename VectorType>  //template for operator()
+  void pde_solver::operator()(SystemType pde_system,
+                              DomainType & domain,
+                              MatrixType & system_matrix,
+                              VectorType & load_vector
+                             ) const
   {
     typedef typename DomainType::config_type              Config;
     typedef typename Config::cell_tag                     CellTag;
@@ -68,20 +210,14 @@ namespace viennafem
     typedef typename viennagrid::result_of::ncell_container<CellType, 0>::type                  VertexOnCellContainer;
     typedef typename viennagrid::result_of::iterator<VertexOnCellContainer>::type               VertexOnCellIterator;
     
-    typedef typename ConfigType::matrix_type               MatrixType;
-    typedef typename ConfigType::vector_type               VectorType;
-    typedef typename ConfigType::mapping_key_type          MappingKeyType;
-    typedef typename ConfigType::boundary_key_type         BoundaryKeyType;
+    typedef typename SystemType::equation_type                  EquationType;
+    typedef typename SystemType::equation_type::value_type      Expression;
+    
+    typedef viennafem::boundary_key                             BoundaryKeyType;
+    typedef viennafem::mapping_key                              MappingKeyType;
     
     
-    typedef typename EquationType::value_type      Expression;
-    
-    
-    MatrixType & system_matrix = config.system_matrix();
-    VectorType & load_vector = config.load_vector();
-    
-    
-    EquationType weak_form_general = viennafem::make_weak_form(strong_form);  
+    EquationType weak_form_general = viennafem::make_weak_form(pde_system.pde(0));  
     EquationType weak_form = viennamath::apply_coordinate_system(viennamath::cartesian<Config::dimension_tag::value>(), weak_form_general);
     
     std::cout << "* pde_solver::operator(): Using weak form " << weak_form << std::endl;
@@ -103,20 +239,23 @@ namespace viennafem
     std::cout << "* pde_solver::operator(): Create Mapping:" << std::endl;
    
     size_t map_index = 0;
+    BoundaryKeyType bnd_key(pde_system.option(0).unknown_id());
+    MappingKeyType map_key(pde_system.option(0).unknown_id());
+    
     VertexContainer vertices = viennagrid::ncells<0>(domain);
     for (VertexIterator vit = vertices.begin();
         vit != vertices.end();
         ++vit)
     {  
-      if (viennadata::access<BoundaryKeyType, bool>(config.boundary_key())(*vit))
+      if (viennadata::access<BoundaryKeyType, bool>(bnd_key)(*vit))
       {
         //std::cout << "boundary vertex" << std::endl;
-        viennadata::access<MappingKeyType, long>(config.mapping_key())(*vit) = -1;
+        viennadata::access<MappingKeyType, long>(map_key)(*vit) = -1;
       }
       else
       {
         //std::cout << "interior vertex" << std::endl;
-        viennadata::access<MappingKeyType, long>(config.mapping_key())(*vit) = map_index++;
+        viennadata::access<MappingKeyType, long>(map_key)(*vit) = map_index++;
       }
     }
     std::cout << "---------------------------" << std::endl;
@@ -126,6 +265,7 @@ namespace viennafem
     //resize global system matrix and load vector if needed:
     if (map_index > system_matrix.size1())
     {
+      std::cout << "Resizing system matrix..." << std::endl;
       system_matrix.resize(map_index, map_index, false);
       system_matrix.clear();
       system_matrix.resize(map_index, map_index, false);
@@ -133,6 +273,7 @@ namespace viennafem
     
     if (map_index > load_vector.size())
     {
+      std::cout << "Resizing load vector..." << std::endl;
       load_vector.resize(map_index, false);
       load_vector.clear();
       load_vector.resize(map_index, false);
@@ -146,142 +287,9 @@ namespace viennafem
     std::cout << transformed_weak_form << std::endl;
     std::cout << std::endl;
 
-    std::cout << "* pde_solver::operator(): Assemble local element matrix" << std::endl;
+    std::cout << "* pde_solver::operator(): Assemble system" << std::endl;
+    pde_assembler()(transformed_weak_form, pde_system.option(0), domain, system_matrix, load_vector);
 
-    //get basis:
-    //std::cout << "Getting basis..." << std::endl;
-    std::vector<Expression> trial_functions = viennafem::get_basisfunctions<Expression>(CellTag());
-    std::vector<Expression> test_functions = viennafem::get_basisfunctions<Expression>(CellTag());
-    
-    
-    std::vector<std::vector< EquationType > >  local_weak_form(viennagrid::traits::subcell_desc<CellTag, 0>::num_elements);
-    for (size_t i=0; i<viennagrid::traits::subcell_desc<CellTag, 0>::num_elements; ++i)
-      local_weak_form[i].resize(viennagrid::traits::subcell_desc<CellTag, 0>::num_elements);
-    
-    for (size_t i = 0; i<test_functions.size(); ++i)
-      for (size_t j=0; j<trial_functions.size(); ++j)
-        local_weak_form[i][j] = viennafem::insert_test_and_trial_functions(test_functions[i],
-                                                                           trial_functions[j],
-                                                                           transformed_weak_form);
-    
-    
-    //transfer cell quantities to vtk:
-    for (CellIterator cell_iter = cells.begin();
-        cell_iter != cells.end();
-        ++cell_iter)
-    {
-      
-      //set up element matrix:
-      //std::cout << "Creating element matrix..." << std::endl;
-      std::vector<std::vector< viennafem::numeric_type > >  element_matrix(viennagrid::traits::subcell_desc<CellTag, 0>::num_elements);
-      for (size_t i=0; i<viennagrid::traits::subcell_desc<CellTag, 0>::num_elements; ++i)
-        element_matrix[i].resize(viennagrid::traits::subcell_desc<CellTag, 0>::num_elements);
-      
-      std::vector<viennafem::numeric_type> element_vector(viennagrid::traits::subcell_desc<CellTag, 0>::num_elements);
-      
-      //update cell_quantities:
-      //std::cout << "Updating cell quantities..." << std::endl;
-      //EquationType cell_expr = viennafem::update_cell_quantities(*cell_iter, transformed_weak_form);
-      transformed_weak_form.lhs().get()->update_cell(*cell_iter);
-      transformed_weak_form.rhs().get()->update_cell(*cell_iter);
-      //EquationType & cell_expr = transformed_weak_form;
-      
-      //std::cout << "New cell_expr: " << cell_expr << std::endl;
-
-      viennafem::cell_quan<CellType, viennafem::det_dF_dt_key, typename EquationType::interface_type> det_dF_dt(*cell_iter);
-
-      /*
-      viennafem::cell_quan<CellType, viennafem::dt_dx_key<0,0> >  dr_dx(*cell_iter);
-      viennafem::cell_quan<CellType, viennafem::dt_dx_key<1,0> >  ds_dx(*cell_iter);
-      viennafem::cell_quan<CellType, viennafem::dt_dx_key<2,0> >  dt_dx(*cell_iter);
-      
-      viennafem::cell_quan<CellType, viennafem::dt_dx_key<0,1> >  dr_dy(*cell_iter);
-      viennafem::cell_quan<CellType, viennafem::dt_dx_key<1,1> >  ds_dy(*cell_iter);
-      viennafem::cell_quan<CellType, viennafem::dt_dx_key<2,1> >  dt_dy(*cell_iter);
-
-      viennafem::cell_quan<CellType, viennafem::dt_dx_key<0,2> >  dr_dz(*cell_iter);
-      viennafem::cell_quan<CellType, viennafem::dt_dx_key<1,2> >  ds_dz(*cell_iter);
-      viennafem::cell_quan<CellType, viennafem::dt_dx_key<2,2> >  dt_dz(*cell_iter);
-      
-      std::cout << det_dF_dt.eval(1.0) << std::endl;
-      std::cout << dr_dx.eval(0.0) << std::endl;
-      std::cout << dr_dy.eval(0.0) << std::endl;
-      std::cout << dr_dz.eval(0.0) << std::endl;
-      
-      std::cout << ds_dx.eval(0.0) << std::endl;
-      std::cout << ds_dy.eval(0.0) << std::endl;
-      std::cout << ds_dz.eval(0.0) << std::endl;
-      
-      std::cout << dt_dx.eval(0.0) << std::endl;
-      std::cout << dt_dy.eval(0.0) << std::endl;
-      std::cout << dt_dz.eval(0.0) << std::endl; */
-      
-      //fill element_matrix:
-      //std::cout << "Filling element matrix..." << std::endl;
-      //cell_iter->print_short();
-      for (size_t i = 0; i<test_functions.size(); ++i)
-      {
-        for (size_t j=0; j<trial_functions.size(); ++j)
-        {
-          local_weak_form[i][j].lhs().get()->update_cell(*cell_iter);
-          
-          //EquationType temp = viennafem::insert_test_and_trial_functions(test_functions[i],
-          //                                                                         trial_functions[j],
-          //                                                                         cell_expr);
-          element_matrix[i][j] = viennafem::eval_element_matrix_entry(local_weak_form[i][j].lhs(), CellTag()) * det_dF_dt.eval(1.0); 
-        }
-        
-        //EquationType temp = viennafem::insert_test_and_trial_functions(test_functions[i],
-        //                                                                         trial_functions[0],
-        //                                                                         cell_expr);
-        local_weak_form[i][0].rhs().get()->update_cell(*cell_iter);
-        element_vector[i] = viennafem::eval_element_vector_entry(local_weak_form[i][0].rhs(), CellTag()) * det_dF_dt.eval(1.0); 
-        
-        //std::cout << std::endl;
-      }
-      
-      //print element matrix:
-      //for (size_t i = 0; i<test_functions.size(); ++i)
-      //{
-      //  for (size_t j=0; j<trial_functions.size(); ++j)
-      //    std::cout << element_matrix[i][j] << " ";
-      //  std::cout << " | " << element_vector[i] << std::endl;
-      //}
-      
-      
-      //write back to global matrix:
-      VertexOnCellContainer vertices_on_cell = viennagrid::ncells<0>(*cell_iter);
-      long global_index_i = 0;
-      long global_index_j = 0;
-      long local_index_i = 0;
-      long local_index_j = 0;
-      for (VertexOnCellIterator vocit_i = vertices_on_cell.begin();
-          vocit_i != vertices_on_cell.end();
-          ++vocit_i, ++local_index_i)
-      {                  
-        global_index_i = viennadata::access<MappingKeyType, long>(config.mapping_key())(*vocit_i);
-        //std::cout << "glob_i: " << global_index_i << std::endl;
-        if (global_index_i == -1)
-          continue;
-        
-        local_index_j = 0;
-        for (VertexOnCellIterator vocit_j = vertices_on_cell.begin();
-            vocit_j != vertices_on_cell.end();
-            ++vocit_j, ++local_index_j)
-        {
-          global_index_j = viennadata::access<MappingKeyType, long>(config.mapping_key())(*vocit_j);
-          //std::cout << "glob_j: " << global_index_j << std::endl;
-          if (global_index_j == -1)
-            continue; //modify right-hand side here
-          
-          //std::cout << "incrementing sys matrix at " << global_index_i << " " << global_index_j << " by " << element_matrix[local_index_i][local_index_j] << std::endl;
-          system_matrix(global_index_i, global_index_j) += element_matrix[local_index_i][local_index_j];
-        }
-        
-        load_vector(global_index_i) += element_vector[local_index_i];
-      }
-      
-    }
   }
 }
 #endif

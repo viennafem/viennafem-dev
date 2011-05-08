@@ -16,10 +16,8 @@
 // ViennaFEM includes:
 //#include "viennafem/afftrans.hpp"
 //#include "viennafem/dtdx_tetrahedron.h"
-#include "viennafem/dtdx_triangle.h"
 #include "viennafem/typelist.h"
 #include "viennafem/forwards.h"
-#include "viennafem/BFStock.hpp"
 //#include "viennafem/assembling.hpp"
 //#include "viennafem/mapping.hpp"
 #include "viennafem/cell_quan.hpp"
@@ -27,6 +25,7 @@
 #include "viennafem/eval.hpp"
 #include "viennafem/unknown_config.hpp"
 #include "viennafem/pde_solver.hpp"
+#include "viennafem/io/vtk_writer.hpp"
 
 // ViennaGrid includes:
 #include "viennagrid/domain.hpp"
@@ -106,44 +105,6 @@ VectorType solve(MatrixType const & system_matrix,
   return result;
 }
 
-template <typename VectorType,
-          typename DomainType,
-          typename PDEConfig>
-void write_solution_to_VTK_file(VectorType const & result,
-                                std::string filename,
-                                DomainType const & domain,
-                                PDEConfig const & config)
-{
-  typedef typename viennagrid::result_of::const_ncell_container<DomainType, 0>::type    VertexContainer;
-  typedef typename viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
-  
-  typedef typename PDEConfig::mapping_key_type          MappingType;
-  typedef typename PDEConfig::boundary_key_type         BoundaryType;
-  
-  std::cout << "* write_solution_to_VTK_file(): Writing result on mesh for later export" << std::endl;
-  VertexContainer vertices = viennagrid::ncells<0>(domain);
-  for (VertexIterator vit = vertices.begin();
-       vit != vertices.end();
-       ++vit)
-  {
-     long cur_index = viennadata::access<MappingType, long>(config.mapping_key())(*vit);
-     if (cur_index > -1)
-       viennadata::access<std::string, double>("vtk_data")(*vit) = result[cur_index];
-     else //use Dirichlet boundary data:
-       viennadata::access<std::string, double>("vtk_data")(*vit) = 
-        viennadata::access<BoundaryType, double>(config.boundary_key())(*vit);
-  }
-
-  std::cout << "* write_solution_to_VTK_file(): Writing data to '"
-            << filename
-            << "' (can be viewed with e.g. Paraview)" << std::endl;
-
-  viennagrid::io::vtk_writer<DomainType> my_vtk_writer;
-  my_vtk_writer.writeDomain(domain, filename);  
-}
-
-
-
 int main()
 {
   typedef viennagrid::config::triangular_2d                             ConfigType;
@@ -156,8 +117,10 @@ int main()
   typedef boost::numeric::ublas::compressed_matrix<viennafem::numeric_type>  MatrixType;
   typedef boost::numeric::ublas::vector<viennafem::numeric_type>             VectorType;
 
-  typedef viennamath::function_symbol<viennafem::fem_expression_interface<viennafem::numeric_type, CellType> >   FunctionSymbol;
-  typedef viennamath::equation<viennafem::fem_expression_interface<viennafem::numeric_type, CellType> >          Equation;
+  typedef viennamath::function_symbol<>   FunctionSymbol;
+  typedef viennamath::equation<>          Equation;
+  
+  typedef viennafem::boundary_key      BoundaryKey;
   
   //
   // Create a domain from file
@@ -177,28 +140,13 @@ int main()
   
   
   //
-  // Specify two PDEs:
+  // Specify PDE:
   //
   FunctionSymbol u(0, viennamath::unknown_tag<>());   //an unknown function used for PDE specification
   Equation poisson_equ_1 = viennamath::make_equation( viennamath::laplace(u), -1);
-  Equation poisson_equ_2 = viennamath::make_equation( viennamath::laplace(u), -1);
   
-  //
-  // Create PDE config (where to find boundary information, where to store mapping indices, etc.)
-  //
-  typedef viennafem::unknown_config<MatrixType,
-                                    VectorType,
-                                    viennafem::boundary_key,
-                                    viennafem::mapping_key>          MyPDEConfigType_1;
-
-  typedef viennafem::unknown_config<MatrixType,
-                                    VectorType,
-                                    long, char>   MyPDEConfigType_2;  //using keys of type 'long' for boundary, keys of type 'char' for mapping
-
-  MatrixType matrix1, matrix2;
-  VectorType rhs1, rhs2;
-
-  MyPDEConfigType_1  poisson_config_1(matrix1,rhs1);
+  MatrixType system_matrix;
+  VectorType load_vector;
   
   //
   // Setting boundary information on domain (this should come from device specification)
@@ -211,11 +159,9 @@ int main()
   {
     //boundary for first equation: Homogeneous Dirichlet everywhere
     if (vit->getPoint()[1] == 3.0 || vit->getPoint()[0] == 5.0 )
-      viennadata::access<MyPDEConfigType_1::boundary_key_type,
-                         bool>(poisson_config_1.boundary_key())(*vit) = true;
+      viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = true;
     else
-      viennadata::access<MyPDEConfigType_1::boundary_key_type,
-                         bool>(poisson_config_1.boundary_key())(*vit) = false;
+      viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = false;
     
   }
   
@@ -223,25 +169,34 @@ int main()
   //
   // Create PDE solver functors: (discussion about proper interface required)
   //
-  viennafem::pde_solver fem_solver;
+  viennafem::pde_solver fem_assembler;
 
   
   //
   // Solve system and write solution vector to pde_result:
   // (discussion about proper interface required. Introduce a pde_result class?)
   //
-  fem_solver(poisson_equ_1, poisson_config_1, my_domain);
+  fem_assembler(viennafem::make_linear_pde_system(poisson_equ_1, 
+                                                  u,
+                                                  viennafem::make_linear_pde_options(0, 
+                                                                                     viennafem::LinearBasisfunctionTag(),
+                                                                                     viennafem::LinearBasisfunctionTag())
+                                                 ),
+                my_domain,
+                system_matrix,
+                load_vector
+               );
   
   //std::cout << poisson_config_1.load_vector() << std::endl;
   
-  VectorType pde_result_1 = solve(poisson_config_1.system_matrix(), poisson_config_1.load_vector());
+  VectorType pde_result_1 = solve(system_matrix, load_vector);
 
   //std::cout << "RESULT" << std::endl;
   //std::cout << pde_result_1 << std::endl;
   //
   // Writing solution back to domain (discussion about proper way of returning a solution required...)
   //
-  write_solution_to_VTK_file(pde_result_1, "sshape_2d", my_domain, poisson_config_1);
+  viennafem::io::write_solution_to_VTK_file(pde_result_1, "sshape_2d", my_domain, 0);
   
   std::cout << "*****************************************" << std::endl;
   std::cout << "* Poisson solver finished successfully! *" << std::endl;

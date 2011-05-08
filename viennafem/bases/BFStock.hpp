@@ -18,70 +18,10 @@
 #include "viennagrid/topology/tetrahedron.hpp"
 #include "viennagrid/forwards.h"
 #include "viennamath/expression.hpp"
-#include "viennafem/fem_expression_interface.hpp"
 
 namespace viennafem
 {
-  
-  //TODO: Has to be generalized for:
-  //       - different cell types
-  //       - different degrees of basis functions
-  //
-  // For now, returns the linear basis:
-  template <typename ExpressionType>
-  std::vector<ExpressionType> get_basisfunctions(viennagrid::triangle_tag)
-  {
-    typedef typename ExpressionType::interface_type    InterfaceType;
-    
-    //std::cout << "get_basisfunctions: entry" << std::endl;
-    std::vector<ExpressionType> ret(3);
-    
-    //std::cout << "get_basisfunctions: Creating variables" << std::endl;
-    viennamath::variable<InterfaceType> x(0);
-    viennamath::variable<InterfaceType> y(1);
-    
-    //std::cout << "get_basisfunctions: filling 0" << std::endl;
-    ret[0] = ExpressionType(1.0 - x - y);
-    //std::cout << "get_basisfunctions: filling 1" << std::endl;
-    ret[1] = ExpressionType(x);
-    //std::cout << "get_basisfunctions: filling 2" << std::endl;
-    ret[2] = ExpressionType(y);
-    
-    //std::cout << "get_basisfunctions: return" << std::endl;
-    return ret;    
-  }
-  
-  
-  template <typename ExpressionType>
-  std::vector<ExpressionType> get_basisfunctions(viennagrid::tetrahedron_tag)
-  {
-    typedef typename ExpressionType::interface_type    InterfaceType;
-    
-    //std::cout << "get_basisfunctions: entry" << std::endl;
-    std::vector<ExpressionType> ret(4);
-    
-    //std::cout << "get_basisfunctions: Creating variables" << std::endl;
-    viennamath::variable<InterfaceType> x(0);
-    viennamath::variable<InterfaceType> y(1);
-    viennamath::variable<InterfaceType> z(2);
-    
-    //std::cout << "get_basisfunctions: filling 0" << std::endl;
-    ret[0] = ExpressionType(1.0 - x - y - z);
-    //std::cout << "get_basisfunctions: filling 1" << std::endl;
-    ret[1] = ExpressionType(x);
-    //std::cout << "get_basisfunctions: filling 2" << std::endl;
-    ret[2] = ExpressionType(y);
-    //std::cout << "get_basisfunctions: filling 3" << std::endl;
-    ret[3] = ExpressionType(z);
-    
-    //std::cout << "get_basisfunctions: return" << std::endl;
-    return ret;    
-  }
-  
-  
-  
-  
-  
+
   
   
   

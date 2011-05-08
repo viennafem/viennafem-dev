@@ -4,11 +4,8 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "viennafem/dtdx_triangle.h"
 #include "viennafem/typelist.h"
 #include "viennafem/forwards.h"
-#include "viennafem/BFStock.hpp"
-//#include "viennafem/assembling.hpp"
 //#include "viennafem/mapping.hpp"
 #include "viennafem/cell_quan.hpp"
 #include "viennafem/transform.hpp"
@@ -16,6 +13,7 @@
 #include "viennafem/unknown_config.hpp"
 #include "viennafem/pde_solver.hpp"
 #include "viennafem/weak_form.hpp"
+#include "viennafem/io/vtk_writer.hpp"
 
 // ViennaGrid includes:
 #include "viennagrid/domain.hpp"
@@ -132,9 +130,9 @@ std::vector< expr<InterfaceType> > stress_tensor(std::vector< function_symbol<In
 template <typename InterfaceType>
 expr<InterfaceType> tensor_reduce(std::vector< expr<InterfaceType> > lhs, std::vector< expr<InterfaceType> > rhs)
 {
-  expr<InterfaceType> ret = constant<double, InterfaceType>(0);
+  expr<InterfaceType> ret = lhs[0] * rhs[0];
   
-  for (size_t i=0; i<rhs.size(); ++i)
+  for (size_t i=1; i<rhs.size(); ++i)
     ret = ret + lhs[i] * rhs[i];
   
   return ret;
@@ -181,42 +179,6 @@ VectorType solve(MatrixType const & system_matrix,
   return result;
 }
 
-template <typename VectorType,
-          typename DomainType,
-          typename PDEConfig>
-void write_solution_to_VTK_file(VectorType const & result,
-                                std::string filename,
-                                DomainType const & domain,
-                                PDEConfig const & config)
-{
-  typedef typename viennagrid::result_of::const_ncell_container<DomainType, 0>::type    VertexContainer;
-  typedef typename viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
-  
-  typedef typename PDEConfig::mapping_key_type          MappingType;
-  typedef typename PDEConfig::boundary_key_type         BoundaryType;
-  
-  std::cout << "* write_solution_to_VTK_file(): Writing result on mesh for later export" << std::endl;
-  VertexContainer vertices = viennagrid::ncells<0>(domain);
-  for (VertexIterator vit = vertices.begin();
-       vit != vertices.end();
-       ++vit)
-  {
-     long cur_index = viennadata::access<MappingType, long>(config.mapping_key())(*vit);
-     if (cur_index > -1)
-       viennadata::access<std::string, double>("vtk_data")(*vit) = result[cur_index];
-     else //use Dirichlet boundary data:
-       viennadata::access<std::string, double>("vtk_data")(*vit) = 
-        viennadata::access<BoundaryType, double>(config.boundary_key())(*vit);
-  }
-
-  std::cout << "* write_solution_to_VTK_file(): Writing data to '"
-            << filename
-            << "' (can be viewed with e.g. Paraview)" << std::endl;
-
-  viennagrid::io::vtk_writer<DomainType> my_vtk_writer;
-  my_vtk_writer.writeDomain(domain, filename);  
-}
-
 
 int main()
 {
@@ -230,9 +192,9 @@ int main()
   typedef boost::numeric::ublas::compressed_matrix<viennafem::numeric_type>  MatrixType;
   typedef boost::numeric::ublas::vector<viennafem::numeric_type>             VectorType;
   
-  typedef viennamath::function_symbol<viennafem::fem_expression_interface<viennafem::numeric_type, CellType> >   FunctionSymbol;
-  typedef viennamath::equation<viennafem::fem_expression_interface<viennafem::numeric_type, CellType> >          Equation;
-  typedef viennamath::expr<viennafem::fem_expression_interface<viennafem::numeric_type, CellType> >              Expression;
+  typedef viennamath::function_symbol<>   FunctionSymbol;
+  typedef viennamath::equation<>          Equation;
+  typedef viennamath::expr<>              Expression;
 
   
   std::cout << "*********************************************************" << std::endl;
@@ -252,16 +214,9 @@ int main()
     exit(EXIT_FAILURE);
   }
 
-  typedef viennafem::unknown_config<MatrixType,
-                                    VectorType,
-                                    viennafem::boundary_key,
-                                    viennafem::mapping_key>          LameConfig;
-
-  MatrixType matrix;
+  MatrixType system_matrix;
   VectorType load_vector;
 
-  LameConfig  lame_config(matrix, load_vector);
-                                    
                                     
   // the unknown function (vector valued, so one for each of the three components..
   std::vector< FunctionSymbol > u(3);
@@ -303,17 +258,26 @@ int main()
   //
   // Create PDE solver functors: (discussion about proper interface required)
   //
-  viennafem::pde_solver fem_solver;
+  viennafem::pde_solver fem_assembler;
 
   //
   // Solve system and write solution vector to pde_result:
   // (discussion about proper interface required. Introduce a pde_result class?)
   //
-  fem_solver(weak_form_lame, lame_config, my_domain);
+  fem_assembler(viennafem::make_linear_pde_system(weak_form_lame, 
+                                                  u[0],          //TODO: should be 'u' only. Fix this!
+                                                  viennafem::make_linear_pde_options(0, 
+                                                                                     viennafem::LinearBasisfunctionTag(),
+                                                                                     viennafem::LinearBasisfunctionTag(), 3)
+                                                 ),
+                my_domain,
+                system_matrix,
+                load_vector
+               );
   
-  VectorType displacements = solve(lame_config.system_matrix(), lame_config.load_vector());
+  VectorType displacements = solve(system_matrix, load_vector);
 
-  write_solution_to_VTK_file(displacements, "lame.vtu", my_domain, lame_config);
+  viennafem::io::write_solution_to_VTK_file(displacements, "lame", my_domain, 0);
 
   std::cout << "*****************************************" << std::endl;
   std::cout << "* Lame solver finished successfully! *" << std::endl;

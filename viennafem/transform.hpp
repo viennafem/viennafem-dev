@@ -23,8 +23,6 @@
 #include "viennagrid/topology/triangle.hpp"
 #include "viennagrid/topology/tetrahedron.hpp"
 
-#include "viennafem/fem_expression_interface.hpp"
-
 namespace viennafem
 {
 
@@ -33,6 +31,7 @@ namespace viennafem
   EquationType transform_to_reference_cell(EquationType const & weak_form, viennagrid::triangle_tag)
   {
     typedef typename EquationType::interface_type             InterfaceType;
+    typedef typename InterfaceType::numeric_type              numeric_type;
     typedef viennamath::function_symbol<InterfaceType>   FunctionSymbol;
     typedef viennamath::expr<InterfaceType>              Expression;
     typedef viennamath::unary_expr<InterfaceType>        UnaryExpression;
@@ -48,10 +47,11 @@ namespace viennafem
     Variable        s_temp(10);
     
     //using local coordinates (r, s) and global coordinates (x, y)
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<0,0>, InterfaceType>  dr_dx;
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<1,0>, InterfaceType>  ds_dx;
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<0,1>, InterfaceType>  dr_dy;
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<1,1>, InterfaceType>  ds_dy;
+    viennafem::cell_quan<CellType, InterfaceType>  dr_dx; dr_dx.wrap( viennafem::dt_dx_key<0,0>() );
+    viennafem::cell_quan<CellType, InterfaceType>  ds_dx; ds_dx.wrap( viennafem::dt_dx_key<1,0>() );
+    
+    viennafem::cell_quan<CellType, InterfaceType>  dr_dy; dr_dy.wrap( viennafem::dt_dx_key<0,1>() );
+    viennafem::cell_quan<CellType, InterfaceType>  ds_dy; ds_dy.wrap( viennafem::dt_dx_key<1,1>() );
     
     Expression new_lhs = weak_form.lhs();
     Expression new_rhs = weak_form.rhs();
@@ -117,17 +117,17 @@ namespace viennafem
     Variable      t_temp(11);
     
     //using local coordinates (r, s) and global coordinates (x, y)
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<0,0>, InterfaceType>  dr_dx;
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<1,0>, InterfaceType>  ds_dx;
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<2,0>, InterfaceType>  dt_dx;
+    viennafem::cell_quan<CellType, InterfaceType>  dr_dx; dr_dx.wrap( viennafem::dt_dx_key<0,0>() );
+    viennafem::cell_quan<CellType, InterfaceType>  ds_dx; ds_dx.wrap( viennafem::dt_dx_key<1,0>() );
+    viennafem::cell_quan<CellType, InterfaceType>  dt_dx; dt_dx.wrap( viennafem::dt_dx_key<2,0>() );
     
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<0,1>, InterfaceType>  dr_dy;
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<1,1>, InterfaceType>  ds_dy;
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<2,1>, InterfaceType>  dt_dy;
+    viennafem::cell_quan<CellType, InterfaceType>  dr_dy; dr_dy.wrap( viennafem::dt_dx_key<0,1>() );
+    viennafem::cell_quan<CellType, InterfaceType>  ds_dy; ds_dy.wrap( viennafem::dt_dx_key<1,1>() );
+    viennafem::cell_quan<CellType, InterfaceType>  dt_dy; dt_dy.wrap( viennafem::dt_dx_key<2,1>() );
 
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<0,2>, InterfaceType>  dr_dz;
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<1,2>, InterfaceType>  ds_dz;
-    viennafem::cell_quan<CellType, viennafem::dt_dx_key<2,2>, InterfaceType>  dt_dz;
+    viennafem::cell_quan<CellType, InterfaceType>  dr_dz; dr_dz.wrap( viennafem::dt_dx_key<0,2>() );
+    viennafem::cell_quan<CellType, InterfaceType>  ds_dz; ds_dz.wrap( viennafem::dt_dx_key<1,2>() );
+    viennafem::cell_quan<CellType, InterfaceType>  dt_dz; dt_dz.wrap( viennafem::dt_dx_key<2,2>() );
     
     Expression new_lhs = weak_form.lhs();
     Expression new_rhs = weak_form.rhs();

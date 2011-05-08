@@ -10,11 +10,12 @@
    license:    MIT (X11), see file LICENSE in the ViennaFEM base directory
 ======================================================================================= */
 
-#ifndef VIENNAFEM_DTDX_TETRAHEDRON_HPP
-#define VIENNAFEM_DTDX_TETRAHEDRON_HPP
+#ifndef VIENNAFEM_TRANSFORM_TETRAHEDRON_HPP
+#define VIENNAFEM_TRANSFORM_TETRAHEDRON_HPP
 
 #include <iostream>
 #include "viennagrid/topology/tetrahedron.hpp"
+#include "viennagrid/algorithm/spanned_volume.hpp"
 #include "viennagrid/domain.hpp"
 #include "viennafem/forwards.h"
 

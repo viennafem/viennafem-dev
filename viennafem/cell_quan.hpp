@@ -22,32 +22,91 @@
 
 namespace viennafem
 {
+  
+  template <typename CellType, typename DataType>
+  class cell_quan_interface
+  {
+    public: 
+      virtual DataType operator()(CellType const & cell) const = 0;
+      
+      virtual cell_quan_interface<CellType, DataType> * clone() const = 0;
+  };
 
-  template <typename CellType, typename KeyType, typename InterfaceType>
+  
+  template <typename CellType, typename KeyType, typename DataType>
+  class quan_accessor : public cell_quan_interface<CellType, DataType>
+  {
+    typedef quan_accessor<CellType, KeyType, DataType>    self_type;
+    
+    public:
+      DataType operator()(CellType const & cell) const
+      {
+        return viennadata::access<KeyType, DataType>()(cell);
+      }
+      
+      cell_quan_interface<CellType, DataType> * clone() const { return new self_type(); }
+  };
+  
+  
+
+  
+  template <typename CellType, typename DataType>
+  class cell_quan_wrapper
+  {
+    public:
+      template <typename T>
+      cell_quan_wrapper(T const * t) : functor_(t) {}
+      
+      cell_quan_wrapper() {}
+      
+      cell_quan_wrapper & operator=(cell_quan_wrapper & other)
+      {
+        functor_ = other.functor_;
+        return *this;
+      }
+      
+      DataType operator()(CellType const & cell) const
+      {
+        return functor_->operator()(cell); 
+      }
+      
+      cell_quan_interface<CellType, DataType> * clone() const { return functor_->clone(); }
+
+    private:
+      std::auto_ptr< const cell_quan_interface<CellType, DataType> > functor_;
+  };
+  
+  
+
+  template <typename CellType, typename InterfaceType>
   class cell_quan : public InterfaceType
   {
-      typedef cell_quan<CellType, KeyType, InterfaceType>     self_type;
+      typedef cell_quan<CellType, InterfaceType>     self_type;
       typedef typename InterfaceType::numeric_type            numeric_type;
     public:
+
+      explicit cell_quan(CellType const * cell, cell_quan_wrapper<CellType, numeric_type> const & wrapper) : current_cell(cell), accessor(wrapper.clone()) {}
       
-      explicit cell_quan(CellType const & cell) : current_cell(&cell) {};
+      //template <typename T>
+      //explicit cell_quan(T const & t) : current_cell(NULL), accessor( new quan_accessor<CellType, T, numeric_type>() ) {}
+      
       explicit cell_quan() : current_cell(NULL) {}
 
       //interface requirements:
-      InterfaceType * clone() const { return new self_type(*current_cell); }
+      InterfaceType * clone() const { return new self_type(current_cell, accessor); }
       numeric_type eval(std::vector<numeric_type> const & v) const
       {
-        return viennadata::access<KeyType, numeric_type>()(*current_cell);
+        return accessor(*current_cell);
       }
       numeric_type eval(numeric_type v) const 
       {
-        return viennadata::access<KeyType, numeric_type>()(*current_cell);
+        return accessor(*current_cell);
       }
       
       std::string deep_str() const
       {
         std::stringstream ss;
-        ss << "cell_quan<" << KeyType() << ">(" << current_cell << ")";
+        ss << "cell_quan(" << current_cell << ")";
         return ss.str();      
       }
       numeric_type unwrap() const { throw "Cannot evaluate unknown_func!"; }
@@ -78,17 +137,26 @@ namespace viennafem
       }
       
       
-      
       //additional members:
       void update(CellType const & cell) const { current_cell = &cell; }
       
+      template <typename T>
+      void wrap(T const & t) 
+      {
+        cell_quan_wrapper<CellType, numeric_type> temp( new quan_accessor<CellType, T, numeric_type>() );
+        accessor = temp;
+      }
+      
     private:
       mutable const CellType * current_cell;
+      cell_quan_wrapper<CellType, numeric_type> accessor;
   };
 
-  template <typename CellType, typename KeyType, typename InterfaceType>
+  
+  
+  template <typename CellType, typename InterfaceType>
   viennamath::expr<InterfaceType> operator*(viennamath::variable<InterfaceType> const & lhs,
-                               cell_quan<CellType, KeyType, InterfaceType> const & rhs)
+                               cell_quan<CellType, InterfaceType> const & rhs)
   {
     return viennamath::expr<InterfaceType>(new viennamath::binary_expr<InterfaceType>(lhs.clone(),
                                                             new viennamath::op_binary<viennamath::op_mult<viennamath::default_numeric_type>, InterfaceType >(),
@@ -96,71 +164,14 @@ namespace viennafem
   }
   
   
-  template <typename CellType, typename KeyType, typename InterfaceType>
+  template <typename CellType, typename InterfaceType>
   viennamath::expr<InterfaceType> operator*(viennamath::expr<InterfaceType> const & lhs,
-                               cell_quan<CellType, KeyType, InterfaceType> const & rhs)
+                               cell_quan<CellType, InterfaceType> const & rhs)
   {
     return viennamath::expr<InterfaceType>(new viennamath::binary_expr<InterfaceType>(lhs.get()->clone(),
                                                             new viennamath::op_binary<viennamath::op_mult<viennamath::default_numeric_type>, InterfaceType >(),
                                                             rhs.clone())); 
   }
-  
-  
-  
-  /*
-  template <typename CellType, typename EquationType>
-  viennamath::equation<> update_cell_quantities(CellType const & cell,
-                                                EquationType const & weak_form)
-  {
-    //step 1: update det_dF_dt
-    viennamath::expr<> new_lhs =
-       viennamath::substitute(viennamath::expr<>(new viennafem::cell_quan<CellType,
-                                                                        viennafem::det_dF_dt_key>()),
-                              viennamath::expr<>(new viennafem::cell_quan<CellType,
-                                                                        viennafem::det_dF_dt_key>(cell)),
-                              weak_form.lhs());
-                              
-    //step 2: update dt_dx<j, i>       
-    new_lhs = viennamath::substitute(viennamath::expr<>(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<0, 0> >()),
-                                     viennamath::expr<>(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<0, 0> >(cell)),
-                                     new_lhs);
-
-    new_lhs = viennamath::substitute(viennamath::expr<>(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<0, 1> >()),
-                                     viennamath::expr<>(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<0, 1> >(cell)),
-                                     new_lhs);
-
-    new_lhs = viennamath::substitute(viennamath::expr<>(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<0, 2> >()),
-                                     viennamath::expr<>(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<0, 2> >(cell)),
-                                     new_lhs);
-    
-    new_lhs = viennamath::substitute(viennamath::expr<>(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<1, 0> >()),
-                                     viennamath::expr<>(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<1, 0> >(cell)),
-                                     new_lhs);
-
-    new_lhs = viennamath::substitute(viennamath::expr<>(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<1, 1> >()),
-                                     viennamath::expr<>(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<1, 1> >(cell)),
-                                     new_lhs);
-
-    new_lhs = viennamath::substitute(viennamath::expr<>(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<1, 2> >()),
-                                     viennamath::expr<>(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<1, 2> >(cell)),
-                                     new_lhs);
-
-    new_lhs = viennamath::substitute(viennamath::expr<>(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<2, 0> >()),
-                                     viennamath::expr<>(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<2, 0> >(cell)),
-                                     new_lhs);
-
-    new_lhs = viennamath::substitute(viennamath::expr<>(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<2, 1> >()),
-                                     viennamath::expr<>(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<2, 1> >(cell)),
-                                     new_lhs);
-
-    new_lhs = viennamath::substitute(viennamath::expr<>(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<2, 2> >()),
-                                     viennamath::expr<>(new viennafem::cell_quan<CellType, viennafem::dt_dx_key<2, 2> >(cell)),
-                                     new_lhs);
-    
-    
-    
-    return viennamath::equation<>(new_lhs, weak_form.rhs());
-  } */
   
   
 }

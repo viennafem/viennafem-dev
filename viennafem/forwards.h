@@ -67,6 +67,15 @@ namespace viennafem
     enum{ degree = 1 };
     //typedef C0_Tag                ContinuityTag;
   };
+  
+  template <typename T>
+  struct space_to_id;
+  
+  template <>
+  struct space_to_id<LinearBasisfunctionTag>
+  {
+    enum { value = 42 };
+  };
 
   struct QuadraticBasisfunctionTag
   {
@@ -155,8 +164,27 @@ namespace viennafem
   };
   
   // define a key and configure viennadata to use a type-based dispatch:
-  struct boundary_key {};
-  struct mapping_key {};
+  class boundary_key 
+  {
+    public:
+      boundary_key(long id) : id_(id) {}
+      
+      bool operator<(boundary_key const & other) const { return id_ < other.id_; }
+    
+    private:
+      long id_;
+  };
+  
+  class mapping_key
+  {
+    public:
+      mapping_key(long id) : id_(id) {}
+      
+      bool operator<(mapping_key const & other) const { return id_ < other.id_; }
+    
+    private:
+      long id_;
+  };
 
   
 
@@ -167,18 +195,6 @@ namespace viennadata
 {
   namespace config
   {
-    template <>
-    struct key_dispatch<viennafem::boundary_key>
-    {
-      typedef type_key_dispatch_tag    tag;
-    };
-    
-    template <>
-    struct key_dispatch<viennafem::mapping_key>
-    {
-      typedef type_key_dispatch_tag    tag;
-    };
-    
     template <unsigned long local_index,
               unsigned long global_index>
     struct key_dispatch<viennafem::dt_dx_key<local_index,

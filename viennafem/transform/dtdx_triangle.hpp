@@ -10,8 +10,8 @@
    license:    MIT (X11), see file LICENSE in the ViennaFEM base directory
 ======================================================================================= */
 
-#ifndef VIENNAFEM_DTDX_TRIANGLE_HPP
-#define VIENNAFEM_DTDX_TRIANGLE_HPP
+#ifndef VIENNAFEM_TRANSFORM_TRIANGLE_HPP
+#define VIENNAFEM_TRANSFORM_TRIANGLE_HPP
 
 #include <iostream>
 #include "viennagrid/topology/triangle.hpp"
