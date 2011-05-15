@@ -48,7 +48,7 @@ namespace viennafem
       
       
       void add_pde(viennamath::equation<InterfaceType> const & pde,
-                   viennamath::function_symbol<InterfaceType> const & unknown,
+                   std::vector< viennamath::function_symbol<InterfaceType> > const & unknown,
                    viennafem::linear_pde_options const & option)
       {
         pdes_.push_back(pde); 
@@ -57,15 +57,15 @@ namespace viennafem
       }
       
       viennamath::equation<InterfaceType> pde(size_t index) const { return pdes_[index]; }
-      viennamath::variable<InterfaceType> unknown(size_t index) const { return unknowns_[index]; }
+      std::vector<viennamath::function_symbol<InterfaceType> > const & unknown(size_t index) const { return unknowns_[index]; }
       viennafem::linear_pde_options option(size_t index) const { return options_[index]; }
       
       size_t size() const { return pdes_.size(); }
       
     private:
-      std::vector<viennamath::equation<InterfaceType> >  pdes_;
-      std::vector<viennamath::function_symbol<InterfaceType> >  unknowns_;
-      std::vector<viennafem::linear_pde_options>         options_;
+      std::vector<viennamath::equation<InterfaceType> >                       pdes_;
+      std::vector<std::vector<viennamath::function_symbol<InterfaceType> > >  unknowns_;
+      std::vector<viennafem::linear_pde_options>                              options_;
   };
   
   
@@ -75,8 +75,21 @@ namespace viennafem
                                                           viennafem::linear_pde_options options_1)
   {
     linear_pde_system<InterfaceType> ret;
-    ret.add_pde(equ_1, unknown_1, options_1);
+    std::vector<viennamath::function_symbol<InterfaceType> > unknown_vec_1(1);
+    unknown_vec_1[0] = unknown_1;
+    ret.add_pde(equ_1, unknown_vec_1, options_1);
     return ret;
   }
+  
+  template <typename InterfaceType>
+  linear_pde_system<InterfaceType> make_linear_pde_system(viennamath::equation<InterfaceType> equ_1,
+                                                          std::vector<viennamath::function_symbol<InterfaceType> > unknowns_1,
+                                                          viennafem::linear_pde_options options_1)
+  {
+    linear_pde_system<InterfaceType> ret;
+    ret.add_pde(equ_1, unknowns_1, options_1);
+    return ret;
+  }
+  
 }
 #endif

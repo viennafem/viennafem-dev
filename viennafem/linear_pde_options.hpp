@@ -41,8 +41,8 @@ namespace viennafem
   class linear_pde_options
   {
     public:      
-      long unknown_id() const { return unknown_id_; }
-      void unknown_id(long new_id) { unknown_id_ = new_id; }
+      long data_id() const { return data_id_; }
+      void data_id(long new_id) { data_id_ = new_id; }
       
       long trial_space_id() const { return trial_space_id_; }
       void trial_space_id(long new_id) { trial_space_id_ = new_id; }
@@ -50,24 +50,19 @@ namespace viennafem
       long test_space_id() const { return test_space_id_; }
       void test_space_id(long new_id) { test_space_id_ = new_id; }
       
-      size_t solution_components() const { return solution_components_; }
-      void solution_components(size_t new_number) { solution_components_ = new_number; }
-      
     private:
-      long unknown_id_;
+      long data_id_;
       long trial_space_id_;
       long test_space_id_;
-      size_t solution_components_;
   };
   
   template <typename TrialSpaceTag, typename TestSpaceTag>
-  linear_pde_options make_linear_pde_options(long unknown_id, TrialSpaceTag, TestSpaceTag, size_t solution_components = 1)
+  linear_pde_options make_linear_pde_options(long data_id, TrialSpaceTag, TestSpaceTag)
   {
     linear_pde_options options;
-    options.unknown_id(unknown_id);
+    options.data_id(data_id);
     options.trial_space_id(viennafem::space_to_id<TrialSpaceTag>::value);
     options.test_space_id(viennafem::space_to_id<TestSpaceTag>::value);
-    options.solution_components(solution_components);
     return options;
   }
   

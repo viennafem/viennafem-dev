@@ -24,7 +24,7 @@
 #include "viennafem/transform.hpp"
 #include "viennafem/eval.hpp"
 #include "viennafem/unknown_config.hpp"
-#include "viennafem/pde_solver.hpp"
+#include "viennafem/pde_assembler.hpp"
 #include "viennafem/linear_pde_system.hpp"
 #include "viennafem/linear_pde_options.hpp"
 #include "viennafem/io/vtk_writer.hpp"

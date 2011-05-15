@@ -16,15 +16,53 @@
 
 #include <vector>
 #include "viennafem/forwards.h"
-#include "viennafem/BFStock.hpp"
+#include "viennafem/bases/BFStock.hpp"
 #include "viennagrid/forwards.h"
-#include "viennagrid/celltags.hpp"
 #include "viennagrid/domain.hpp"
 #include "viennagrid/iterators.hpp"
 
 namespace viennafem
 {
 
+  /** @brief Returns an array of mapping indices 
+   *  @param cell      The cell for which the mapping indices should be returned
+   *  @param space_id  Accessor ID for retrieving the mapping key
+   */
+  template <typename CellType>
+  std::vector<long> mapping_indices(CellType const & cell, long space_id, long unknown_components)
+  {
+    typedef typename CellType::config_type              Config;
+    typedef typename Config::cell_tag                     CellTag;
+    
+    typedef typename viennagrid::result_of::const_ncell_container<CellType, 0>::type                  VertexOnCellContainer;
+    typedef typename viennagrid::result_of::iterator<VertexOnCellContainer>::type               VertexOnCellIterator;
+
+    typedef viennafem::mapping_key                              MappingKeyType;
+    typedef std::vector<long>                                   MappingContainer;
+    
+    MappingKeyType map_key(space_id);
+
+    VertexOnCellContainer vertices_on_cell = viennagrid::ncells<0>(cell);
+    
+    MappingContainer ret(viennagrid::traits::subcell_desc<CellTag, 0>::num_elements * unknown_components);
+    
+    long local_index = 0;
+    for (VertexOnCellIterator vocit = vertices_on_cell.begin();
+                              vocit != vertices_on_cell.end();
+                              ++vocit)
+    {
+      long map_base = viennadata::access<MappingKeyType, long>(map_key)(*vocit);
+      
+      for (long i=0; i<unknown_components; ++i)
+        ret[local_index++] = map_base + i;
+    }
+   
+    return ret; //TODO: Avoid temporary
+  }
+  
+  
+/*  
+  
   //computeIndexFromBFKey: 
   template <typename BFKey, typename Permutator>
   long computeIndexFromBFKey_impl(BFKey const & bf, Permutator const & perm, long startindex, long degree, long tuple_len)
@@ -105,13 +143,13 @@ namespace viennafem
                                                         0>::ElementNum
                                          >::ReturnValue,
               bool cellMapping = true                          
-              /*                           
+              //                           
               bool cellMapping = (EQUALS<typename ASSEMBLY_CELL_TYPE
                                                      <typename ElementType::Configuration,
                                                       IntegrationDomain>::ResultType,
                                          ElementType>::ReturnValue > 0)
                                   && (mapnum != 1)
-                                  && (NOT_OF_INTERFACE_TYPE<IntegrationDomain>::ReturnValue > 0 )*/
+                                  && (NOT_OF_INTERFACE_TYPE<IntegrationDomain>::ReturnValue > 0 )//
              >
   class MappingIterator_impl
   {
@@ -246,7 +284,7 @@ namespace viennafem
   //performance gain: iterate over elements with direct map-index access
   //instead of iteration over elements plus iteration over MappingIterator_impl
   
-  /*
+  // *
   template <typename FEMConfig, typename ElementType, long id>
   class MappingIterator_impl<FEMConfig, ElementType, Interface<id>, true, 1, false>
   {
@@ -317,7 +355,7 @@ namespace viennafem
       LevelIterator litend;
       bool isValid;
       long retval;
-  }; */
+  }; * //
 
   //iterate on cell only (bubble-functions, no permutator needed)
   template <typename FEMConfig, typename ElementType, typename IntegrationDomain, bool map_u, long mapnum>
@@ -503,9 +541,9 @@ namespace viennafem
   class MappingIterator
   {
     typedef typename CellType::Configuration             DomainConfig;
-/*    typedef typename ASSEMBLY_CELL_TYPE<DomainConfig, IntegrationDomain>::ResultType
+// *    typedef typename ASSEMBLY_CELL_TYPE<DomainConfig, IntegrationDomain>::ResultType
 
-                                                                CellType;*/
+                                                                CellType;* //
     typedef typename CellType::ElementTag                   CellTag;
     typedef typename viennagrid::DomainTypes<DomainConfig>::VertexType  VertexType;
 
@@ -661,7 +699,7 @@ namespace viennafem
   };
 
   //degenerate 1D-boundary-integrals: map u = true
-  /*
+  // *
   template <typename FEMConfig, typename DomainConfig, long id, typename BFTag>
   class MappingIterator<FEMConfig, element<DomainConfig, PointTag>, Interface<id>, true, BFTag>
   {
@@ -713,7 +751,7 @@ namespace viennafem
     private:
       long retval;
       bool isValid;
-  }; */
+  }; * //
 
   //remove disambiguity:
   template <typename FEMConfig, typename DomainConfig, typename IntegrationDomain>
@@ -915,7 +953,7 @@ namespace viennafem
     seg.template getLevelIteratorBegin<0>()->setCurrentSegment(seg);
 
     return MappingCreator<FEMConfig>::apply(seg, startindex);
-  }
+  } */
 
 }
 

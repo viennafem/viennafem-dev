@@ -1,4 +1,6 @@
 
+#define NDEBUG
+
 #include <iostream>
 #include <vector>
 #include <stdlib.h>
@@ -11,7 +13,7 @@
 #include "viennafem/transform.hpp"
 #include "viennafem/eval.hpp"
 #include "viennafem/unknown_config.hpp"
-#include "viennafem/pde_solver.hpp"
+#include "viennafem/pde_assembler.hpp"
 #include "viennafem/weak_form.hpp"
 #include "viennafem/io/vtk_writer.hpp"
 
@@ -55,6 +57,7 @@
   #include "viennacl/vector.hpp"
 #endif
 #include "viennacl/linalg/cg.hpp"
+#include "viennacl/linalg/bicgstab.hpp"
 #include "viennacl/linalg/norm_2.hpp"
 #include "viennacl/linalg/prod.hpp"
 
@@ -163,7 +166,7 @@ VectorType solve(MatrixType const & system_matrix,
   
   viennacl::copy(vcl_result, result);
 #else
-  result = viennacl::linalg::solve(system_matrix, load_vector, viennacl::linalg::cg_tag());
+  result = viennacl::linalg::solve(system_matrix, load_vector, viennacl::linalg::bicgstab_tag());
   std::cout << "* solve(): Residual: " << norm_2(prod(system_matrix, result) - load_vector) << std::endl;
 #endif
     
@@ -196,6 +199,8 @@ int main()
   typedef viennamath::equation<>          Equation;
   typedef viennamath::expr<>              Expression;
 
+  typedef viennafem::boundary_key      BoundaryKey;
+  
   
   std::cout << "*********************************************************" << std::endl;
   std::cout << "*****     Demo for LAME equation with ViennaFEM     *****" << std::endl;
@@ -244,7 +249,7 @@ int main()
   
   Equation weak_form_lame = make_equation( integral(Omega(), tensor_reduce( strain, stress ), symbolic_tag()),
                                            //=                                         
-                                           0); //force is set to zero for now...
+                                           integral(Omega(), viennamath::constant<double>(1.0) * v[2], symbolic_tag()));
   
   
   std::cout << "Weak form of Lame equation: " << std::endl;
@@ -253,7 +258,21 @@ int main()
   std::cout << std::endl;
   std::cout << "--- Some bugs in Lame equation handling prohibit further processing. Stop for now... ---" << std::endl;
   std::cout << std::endl;
-  exit(0);
+  //exit(0);
+  
+  
+  VertexContainer vertices = viennagrid::ncells<0>(my_domain);
+  for (VertexIterator vit = vertices.begin();
+      vit != vertices.end();
+      ++vit)
+  {
+    //boundary for first equation: Homogeneous Dirichlet everywhere
+    if (vit->getPoint()[0] == 0.0 || vit->getPoint()[0] == 1.0 
+      || vit->getPoint()[1] == 0.0 || vit->getPoint()[1] == 1.0 )
+      viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = true;
+    else
+      viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = false;
+  }
   
   //
   // Create PDE solver functors: (discussion about proper interface required)
@@ -265,10 +284,10 @@ int main()
   // (discussion about proper interface required. Introduce a pde_result class?)
   //
   fem_assembler(viennafem::make_linear_pde_system(weak_form_lame, 
-                                                  u[0],          //TODO: should be 'u' only. Fix this!
+                                                  u,
                                                   viennafem::make_linear_pde_options(0, 
                                                                                      viennafem::LinearBasisfunctionTag(),
-                                                                                     viennafem::LinearBasisfunctionTag(), 3)
+                                                                                     viennafem::LinearBasisfunctionTag())
                                                  ),
                 my_domain,
                 system_matrix,

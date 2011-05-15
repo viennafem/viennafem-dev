@@ -114,14 +114,27 @@ namespace viennafem
       InterfaceType * substitute(const InterfaceType * e,
                                  const InterfaceType * repl) const
       {
-        if (dynamic_cast<const self_type *>(e) != NULL)
+        if (deep_equal(e))
           return repl->clone();
           
         return clone();
       };    
       
+      InterfaceType * substitute(std::vector<const InterfaceType *> const &  e,
+                                 std::vector<const InterfaceType *> const &  repl) const
+      {
+        //std::cout << "Comparing variable<" << id << "> with " << e->str() << ", result: ";
+        for (size_t i=0; i<e.size(); ++i)
+          if (deep_equal(e[i]))
+            return repl[i]->clone();
+        
+        //std::cout << "FALSE" << std::endl;
+        return clone();
+      };    
+      
       bool deep_equal(const InterfaceType * other) const
       {
+        //TODO: Include comparison of accessor
         return dynamic_cast< const self_type *>(other) != NULL;
       }
       

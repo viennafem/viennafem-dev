@@ -13,7 +13,7 @@
 #ifndef VIENNAFEM_INTERFACE_HPP
 #define VIENNAFEM_INTERFACE_HPP
 
-#include "viennafem/pde_solver.hpp"
+#include "viennafem/pde_assembler.hpp"
 #include "viennafem/unknown_config.hpp"
 #include "viennamath/expression.hpp"
 
