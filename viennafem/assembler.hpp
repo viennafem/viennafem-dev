@@ -68,11 +68,11 @@ namespace viennafem
     {
       for (size_t j=0; j<pde_system.unknown(0).size(); ++j)
       {  
-        //std::cout << "No. " << current_index << ": ";
+        std::cout << "No. " << current_index << ": ";
         full_test_functions[current_index++] = make_full_function(scalar_test_functions[i], pde_system.unknown(0).size(), j);
-        //for (size_t k=0; k<pde_system.unknown(0).size(); ++k)
-        //  std::cout << "[" << full_test_functions[current_index-1][k] << "]";
-        //std::cout << std::endl;
+        for (size_t k=0; k<pde_system.unknown(0).size(); ++k)
+          std::cout << "[" << full_test_functions[current_index-1][k] << "]";
+        std::cout << std::endl;
       }
       std::cout << std::endl;
     }
@@ -92,7 +92,7 @@ namespace viennafem
         std::cout << "No. " << current_index << ": ";
         full_trial_functions[current_index++] = make_full_function(scalar_trial_functions[i], pde_system.unknown(0).size(), j);
         for (size_t k=0; k<pde_system.unknown(0).size(); ++k)
-          std::cout << "[" << full_trial_functions[i][k] << "]";
+          std::cout << "[" << full_trial_functions[current_index-1][k] << "]";
         std::cout << std::endl;
       }
       std::cout << std::endl;
@@ -100,6 +100,9 @@ namespace viennafem
     
 
     //plug functions into weak form to obtain local form:
+    //local_size_i = 3;
+    //local_size_j = 3;
+    
     std::vector<std::vector< EquationType > >  local_weak_form(local_size_i);
     for (size_t i=0; i<local_size_i; ++i)
       local_weak_form[i].resize(local_size_j);
@@ -112,6 +115,11 @@ namespace viennafem
                                                                             pde_system,
                                                                             full_test_functions[i],
                                                                             full_trial_functions[j]);
+        /*local_weak_form[i][j] = viennafem::insert_test_and_trial_functions_vector( transformed_weak_form,
+                                                                            pde_system,
+                                                                            scalar_test_functions[0],
+                                                                            scalar_trial_functions[0],
+                                                                            i, j);*/
       }
     }
     
@@ -187,8 +195,8 @@ namespace viennafem
           std::cout << "(" << i <<  "," << j << "): " << local_weak_form[i][j] << std::endl;
         }
         std::cout << std::endl;
-      }*/
-      
+      }
+      exit(0);*/
       
       CellContainer cells = viennagrid::ncells<CellTag::topology_level>(domain);
       for (CellIterator cell_iter = cells.begin();
@@ -225,16 +233,21 @@ namespace viennafem
                ++map_iter_j, ++local_index_j)
           {
             global_index_j = *map_iter_j;
-            //std::cout << "glob_j: " << global_index_j << std::endl;
+            //std::cout << " glob_j: " << global_index_j << std::endl;
             if (global_index_j == -1)
               continue; //modify right-hand side here
           
             local_weak_form[local_index_i][local_index_j].lhs().get()->recursive_traversal(updater);
+            
+            //std::cout << " Evaluating LHS: " << local_weak_form[local_index_i][local_index_j].lhs() << std::endl;
           
             system_matrix(global_index_i, global_index_j) += viennafem::eval_element_matrix_entry(local_weak_form[local_index_i][local_index_j].lhs(), CellTag()) * det_dF_dt.eval(1.0); 
           }
           
           local_weak_form[local_index_i][0].rhs().get()->recursive_traversal(updater);
+          
+          //std::cout << "Evaluating RHS: " << local_weak_form[local_index_i][0].rhs() << std::endl;
+          
           load_vector(global_index_i) += viennafem::eval_element_vector_entry(local_weak_form[local_index_i][0].rhs(), CellTag()) * det_dF_dt.eval(1.0); 
         }
       }

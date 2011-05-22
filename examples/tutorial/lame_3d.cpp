@@ -112,7 +112,7 @@ std::vector< expr<InterfaceType> > stress_tensor(std::vector< function_symbol<In
   std::vector< expr<InterfaceType> > result(9);
   std::vector< expr<InterfaceType> > strain = strain_tensor(v);
 
-  double mu = 1;
+  double mu = 0.5;
   double lambda = 1;
   
   //The entries are in the following written 
@@ -120,12 +120,17 @@ std::vector< expr<InterfaceType> > stress_tensor(std::vector< function_symbol<In
   //add 2 \mu eps:
   for (size_t i=0; i<9; ++i)
     result[i] = (2*mu) * strain[i];
+    //result[i] = viennamath::constant<>(0);
 
   //add trace(eps) * Id:
   result[0] = (2*mu) * strain[0] + lambda * (strain[0] + strain[4] + strain[8]);
   result[4] = (2*mu) * strain[4] + lambda * (strain[0] + strain[4] + strain[8]);
   result[8] = (2*mu) * strain[8] + lambda * (strain[0] + strain[4] + strain[8]);
-    
+
+  /*result[0] = lambda * (strain[0] + strain[4] + strain[8]);
+  result[4] = lambda * (strain[0] + strain[4] + strain[8]);
+  result[8] = lambda * (strain[0] + strain[4] + strain[8]);*/
+
   return result;
 }
 
@@ -182,6 +187,35 @@ VectorType solve(MatrixType const & system_matrix,
   return result;
 }
 
+template <typename DomainType, typename VectorType>
+void apply_displacements(DomainType & domain, VectorType const & result)
+{
+  typedef typename DomainType::config_type                                              ConfigType;
+  typedef typename viennagrid::result_of::ncell_type<ConfigType, 0>::type               VertexType;
+  typedef typename viennagrid::result_of::ncell_container<DomainType, 0>::type          VertexContainer;
+  typedef typename viennagrid::result_of::iterator<VertexContainer>::type               VertexIterator;
+
+  typedef viennafem::mapping_key          MappingKeyType;
+  typedef viennafem::boundary_key         BoundaryKeyType;
+  
+  MappingKeyType map_key(0);
+  BoundaryKeyType bnd_key(0);
+  
+  std::cout << "* apply_displacements(): Writing computed displacements onto domain" << std::endl;
+  VertexContainer vertices = viennagrid::ncells<0>(domain);
+  for (VertexIterator vit = vertices.begin();
+      vit != vertices.end();
+      ++vit)
+  {
+    long cur_index = viennadata::access<MappingKeyType, long>(map_key)(*vit);
+    if (cur_index > -1)
+    {
+      vit->getPoint()[0] = vit->getPoint()[0] + result[cur_index+0];
+      vit->getPoint()[1] = vit->getPoint()[1] + result[cur_index+1];
+      vit->getPoint()[2] = vit->getPoint()[2] + result[cur_index+2];
+    }
+  }
+}
 
 int main()
 {
@@ -212,6 +246,7 @@ int main()
   {
     viennagrid::io::sgf_reader my_sgf_reader;
     my_sgf_reader(my_domain, "../examples/data/cube3072.sgf");
+    //my_sgf_reader(my_domain, "../examples/data/tet1.sgf");
   }
   catch (...)
   {
@@ -268,7 +303,8 @@ int main()
   {
     //boundary for first equation: Homogeneous Dirichlet everywhere
     if (vit->getPoint()[0] == 0.0 || vit->getPoint()[0] == 1.0 
-      || vit->getPoint()[1] == 0.0 || vit->getPoint()[1] == 1.0 )
+      //|| vit->getPoint()[1] == 0.0 || vit->getPoint()[1] == 1.0 
+       )
       viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = true;
     else
       viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = false;
@@ -294,8 +330,12 @@ int main()
                 load_vector
                );
   
+  //std::cout << system_matrix << std::endl;
+  //std::cout << load_vector << std::endl;
   VectorType displacements = solve(system_matrix, load_vector);
+  //std::cout << displacements << std::endl;
 
+  apply_displacements(my_domain, displacements);
   viennafem::io::write_solution_to_VTK_file(displacements, "lame", my_domain, 0);
 
   std::cout << "*****************************************" << std::endl;

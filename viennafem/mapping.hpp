@@ -40,6 +40,8 @@ namespace viennafem
     typedef viennafem::mapping_key                              MappingKeyType;
     typedef std::vector<long>                                   MappingContainer;
     
+    //std::cout << "* mapping_indices() with space_id = " << space_id << " and unknown_components = " << unknown_components << std::endl;
+    
     MappingKeyType map_key(space_id);
 
     VertexOnCellContainer vertices_on_cell = viennagrid::ncells<0>(cell);
@@ -53,8 +55,16 @@ namespace viennafem
     {
       long map_base = viennadata::access<MappingKeyType, long>(map_key)(*vocit);
       
-      for (long i=0; i<unknown_components; ++i)
-        ret[local_index++] = map_base + i;
+      if (map_base < 0) //Dirichlet boundary
+      {
+        for (long i=0; i<unknown_components; ++i)
+          ret[local_index++] = map_base;
+      }
+      else
+      {
+        for (long i=0; i<unknown_components; ++i)
+          ret[local_index++] = map_base + i;
+      }
     }
    
     return ret; //TODO: Avoid temporary

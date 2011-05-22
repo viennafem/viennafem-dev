@@ -39,8 +39,10 @@ namespace viennafem
                                     DomainType const & domain,
                                     long id)
     {
+      typedef typename DomainType::config_type                                              ConfigType;
+      typedef typename viennagrid::result_of::ncell_type<ConfigType, 0>::type               VertexType;
       typedef typename viennagrid::result_of::const_ncell_container<DomainType, 0>::type    VertexContainer;
-      typedef typename viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
+      typedef typename viennagrid::result_of::iterator<VertexContainer>::type               VertexIterator;
       
       typedef viennafem::mapping_key          MappingKeyType;
       typedef viennafem::boundary_key         BoundaryKeyType;
@@ -68,6 +70,8 @@ namespace viennafem
                 << "' (can be viewed with e.g. Paraview)" << std::endl;
 
       viennagrid::io::vtk_writer<DomainType> my_vtk_writer;
+      my_vtk_writer.add_point_data_scalar(viennagrid::io::io_data_accessor_global<VertexType, std::string, double>("vtk_data"),
+                                          "fem_result");
       my_vtk_writer.writeDomain(domain, filename);  
     }
 

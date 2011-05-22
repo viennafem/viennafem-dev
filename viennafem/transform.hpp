@@ -27,8 +27,10 @@ namespace viennafem
 {
 
   
-  template <typename CellType, typename EquationType>
-  EquationType transform_to_reference_cell(EquationType const & weak_form, viennagrid::triangle_tag)
+  template <typename CellType, typename EquationType, typename PDESystemType>
+  EquationType transform_to_reference_cell(EquationType const & weak_form,
+                                           PDESystemType const & pde_system,
+                                           viennagrid::triangle_tag)
   {
     typedef typename EquationType::interface_type             InterfaceType;
     typedef typename InterfaceType::numeric_type              numeric_type;
@@ -79,8 +81,10 @@ namespace viennafem
 
 
 
-  template <typename CellType, typename EquationType>
-  EquationType transform_to_reference_cell(EquationType const & weak_form, viennagrid::tetrahedron_tag)
+  template <typename CellType, typename EquationType, typename PDESystemType>
+  EquationType transform_to_reference_cell(EquationType const & weak_form,
+                                           PDESystemType const & pde_system,
+                                           viennagrid::tetrahedron_tag)
   {
     typedef typename EquationType::interface_type             InterfaceType;
     typedef viennamath::function_symbol<InterfaceType>   FunctionSymbol;
@@ -90,8 +94,19 @@ namespace viennafem
     typedef viennamath::op_unary<viennamath::op_partial_deriv<viennamath::default_numeric_type>, InterfaceType >   d_dx;
 
     
-    FunctionSymbol  u(0, viennamath::unknown_tag<>());
-    FunctionSymbol  v(0, viennamath::test_tag<>());
+    //FunctionSymbol  u(0, viennamath::unknown_tag<>());
+    //FunctionSymbol  v(0, viennamath::test_tag<>());
+    
+    size_t num_components = pde_system.unknown(0).size();
+    std::cout << "Number of components: " << num_components << std::endl;
+    std::vector< FunctionSymbol > u(num_components);
+    for (size_t i=0; i<num_components; ++i)
+      u[i] = FunctionSymbol(pde_system.unknown(0)[i].id(), viennamath::unknown_tag<>());
+
+    std::vector< FunctionSymbol > v(num_components);
+    for (size_t i=0; i<num_components; ++i)
+      v[i] = FunctionSymbol(pde_system.unknown(0)[i].id(), viennamath::test_tag<>());
+    
     Variable      r(0);
     Variable      s(1);
     Variable      t(2);
@@ -113,23 +128,31 @@ namespace viennafem
     Expression new_rhs = weak_form.rhs();
 
     
-    std::vector<Expression> search_types(6);
-    search_types[0] = UnaryExpression(u.clone(), new d_dx(0));
-    search_types[1] = UnaryExpression(u.clone(), new d_dx(1));
-    search_types[2] = UnaryExpression(u.clone(), new d_dx(2));
+    std::vector<Expression> search_types(2 * 3 * num_components);
+    size_t current_index = 0;
+    for (size_t i=0; i<num_components; ++i)
+    {
+      search_types[current_index++] = UnaryExpression(u[i].clone(), new d_dx(0));
+      search_types[current_index++] = UnaryExpression(u[i].clone(), new d_dx(1));
+      search_types[current_index++] = UnaryExpression(u[i].clone(), new d_dx(2));
     
-    search_types[3] = UnaryExpression(v.clone(), new d_dx(0));
-    search_types[4] = UnaryExpression(v.clone(), new d_dx(1));
-    search_types[5] = UnaryExpression(v.clone(), new d_dx(2));
+      search_types[current_index++] = UnaryExpression(v[i].clone(), new d_dx(0));
+      search_types[current_index++] = UnaryExpression(v[i].clone(), new d_dx(1));
+      search_types[current_index++] = UnaryExpression(v[i].clone(), new d_dx(2));
+    }
     
-    std::vector<Expression> replace_types(6);
-    replace_types[0] = viennamath::diff(u, r) * dr_dx + viennamath::diff(u, s) * ds_dx + viennamath::diff(u, t) * dt_dx,
-    replace_types[1] = viennamath::diff(u, r) * dr_dy + viennamath::diff(u, s) * ds_dy + viennamath::diff(u, t) * dt_dy,
-    replace_types[2] = viennamath::diff(u, r) * dr_dz + viennamath::diff(u, s) * ds_dz + viennamath::diff(u, t) * dt_dz,
-    
-    replace_types[3] = viennamath::diff(v, r) * dr_dx + viennamath::diff(v, s) * ds_dx + viennamath::diff(v, t) * dt_dx,
-    replace_types[4] = viennamath::diff(v, r) * dr_dy + viennamath::diff(v, s) * ds_dy + viennamath::diff(v, t) * dt_dy,
-    replace_types[5] = viennamath::diff(v, r) * dr_dz + viennamath::diff(v, s) * ds_dz + viennamath::diff(v, t) * dt_dz,
+    std::vector<Expression> replace_types(2 * 3 * num_components);
+    current_index = 0;
+    for (size_t i=0; i<num_components; ++i)
+    {
+      replace_types[current_index++] = viennamath::diff(u[i], r) * dr_dx + viennamath::diff(u[i], s) * ds_dx + viennamath::diff(u[i], t) * dt_dx;
+      replace_types[current_index++] = viennamath::diff(u[i], r) * dr_dy + viennamath::diff(u[i], s) * ds_dy + viennamath::diff(u[i], t) * dt_dy;
+      replace_types[current_index++] = viennamath::diff(u[i], r) * dr_dz + viennamath::diff(u[i], s) * ds_dz + viennamath::diff(u[i], t) * dt_dz;
+      
+      replace_types[current_index++] = viennamath::diff(v[i], r) * dr_dx + viennamath::diff(v[i], s) * ds_dx + viennamath::diff(v[i], t) * dt_dx;
+      replace_types[current_index++] = viennamath::diff(v[i], r) * dr_dy + viennamath::diff(v[i], s) * ds_dy + viennamath::diff(v[i], t) * dt_dy;
+      replace_types[current_index++] = viennamath::diff(v[i], r) * dr_dz + viennamath::diff(v[i], s) * ds_dz + viennamath::diff(v[i], t) * dt_dz;
+    }
     
     //substitute expressions in lhs:
     new_lhs = viennamath::substitute(search_types, replace_types, weak_form.lhs());
@@ -137,10 +160,11 @@ namespace viennafem
     return EquationType(new_lhs, new_rhs);
   }
 
-  template <typename CellType, typename EquationType>
-  EquationType transform_to_reference_cell(EquationType const & weak_form)
+  template <typename CellType, typename EquationType, typename PDESystemType>
+  EquationType transform_to_reference_cell(EquationType const & weak_form,
+                                           PDESystemType const & pde_system)
   {
-    return  transform_to_reference_cell<CellType>(weak_form, typename CellType::element_tag());
+    return  transform_to_reference_cell<CellType>(weak_form, pde_system, typename CellType::element_tag());
   }
   
 
@@ -215,6 +239,98 @@ namespace viennafem
     return EquationType(new_lhs, new_rhs);
   }
   
+
+
+
+  template <typename EquationType, typename PDESystemType, typename ExpressionType>
+  EquationType insert_test_and_trial_functions_vector(EquationType weak_form,
+                                               PDESystemType const & pde_system,
+                                               ExpressionType test_func,
+                                               ExpressionType trial_func,
+                                               size_t index_i,
+                                               size_t index_j
+                                               )
+  {
+    typedef typename EquationType::interface_type             InterfaceType;
+    typedef viennamath::expr<InterfaceType>              Expression;
+    typedef viennamath::function_symbol<InterfaceType>   FunctionSymbol;
+    typedef viennamath::unary_expr<InterfaceType>        UnaryExpression;
+    typedef viennamath::variable<InterfaceType>          Variable;
+    typedef viennamath::op_unary<viennamath::op_partial_deriv<viennamath::default_numeric_type>, InterfaceType >   d_dx;
+    
+    std::vector< FunctionSymbol > u(3);
+    for (size_t i=0; i<3; ++i)
+    {
+      u[i] = FunctionSymbol(pde_system.unknown(0)[i].id(), viennamath::unknown_tag<>());
+      //std::cout << "ID of u at location " << i << ": " << pde_system.unknown(0)[i].id() << std::endl;
+    }
+
+    std::vector< FunctionSymbol > v(3);
+    for (size_t i=0; i<3; ++i)
+    {
+      v[i] = FunctionSymbol(pde_system.unknown(0)[i].id(), viennamath::test_tag<>());
+      //std::cout << "ID of v at location " << i << ": " << pde_system.unknown(0)[i].id() << std::endl;
+    }
+
+    Variable r(0);
+    Variable s(1);
+    Variable t(2);
+    
+    std::vector<Expression> search_keys(4 * (2 + 2));
+    size_t current_index = 0;
+    for (size_t i=0; i<3; ++i)
+    {      
+      if (i != index_j)
+      {  
+        search_keys[current_index++] = UnaryExpression(u[i].clone(), new d_dx(0));
+        search_keys[current_index++] = UnaryExpression(u[i].clone(), new d_dx(1));
+        search_keys[current_index++] = UnaryExpression(u[i].clone(), new d_dx(2));
+        search_keys[current_index++] = u[i];
+      }
+    }
+    
+    for (size_t i=0; i<3; ++i)
+    {      
+      if (i != index_i)
+      {  
+        search_keys[current_index++] = UnaryExpression(v[i].clone(), new d_dx(0));
+        search_keys[current_index++] = UnaryExpression(v[i].clone(), new d_dx(1));
+        search_keys[current_index++] = UnaryExpression(v[i].clone(), new d_dx(2));
+        search_keys[current_index++] = v[i];
+      }
+    }
+    
+    
+    std::vector<Expression> replacements(4 * (2 + 2));
+    current_index = 0;
+    viennamath::constant<double, InterfaceType> c0(0);
+    for (size_t i=0; i<3; ++i)
+    {      
+      if (i != index_j)
+      {
+        replacements[current_index++] = c0;
+        replacements[current_index++] = c0;
+        replacements[current_index++] = c0;
+        replacements[current_index++] = c0;
+      }
+    }
+    
+    for (size_t i=0; i<3; ++i)
+    {      
+      if (i != index_i)
+      {
+        replacements[current_index++] = c0;
+        replacements[current_index++] = c0;
+        replacements[current_index++] = c0;
+        replacements[current_index++] = c0;
+      }
+    }
+    
+    ExpressionType new_lhs = viennamath::substitute(search_keys, replacements, weak_form.lhs());
+    ExpressionType new_rhs = viennamath::substitute(search_keys, replacements, weak_form.rhs());
+    
+    return EquationType(new_lhs, new_rhs);
+  }
 
 }
 #endif

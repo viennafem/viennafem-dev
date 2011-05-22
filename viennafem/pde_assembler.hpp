@@ -138,7 +138,7 @@ namespace viennafem
         
         std::cout << "* pde_solver::operator(): Transform to reference element" << std::endl;
         
-        EquationType transformed_weak_form = viennafem::transform_to_reference_cell<CellType>(weak_form);
+        EquationType transformed_weak_form = viennafem::transform_to_reference_cell<CellType>(weak_form, pde_system);
         
         std::cout << "* pde_solver::operator(): Transformed weak form:" << std::endl;
         std::cout << transformed_weak_form << std::endl;
