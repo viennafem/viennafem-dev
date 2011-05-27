@@ -37,8 +37,8 @@ namespace viennafem
     
       unknown_config(MatrixType & matrix, VectorType & vector) : m(matrix),v(vector) {}
       
-      BoundaryKeyType boundary_key() const { return BoundaryKeyType(); } 
-      MappingKeyType mapping_key() const { return MappingKeyType(); } 
+      BoundaryKeyType boundary_key() const { return BoundaryKeyType(0); } 
+      MappingKeyType mapping_key() const { return MappingKeyType(0); } 
     
       MatrixType & system_matrix() { return m; }
       VectorType & load_vector() { return v; }
