@@ -73,8 +73,9 @@ namespace viennafem
     replace_types[2] = viennamath::diff(v, r) * dr_dx + viennamath::diff(v, s) * ds_dx;
     replace_types[3] = viennamath::diff(v, r) * dr_dy + viennamath::diff(v, s) * ds_dy;
     
-    //substitute expressions in lhs:
+    //substitute expressions in lhs and rhs:
     new_lhs = viennamath::substitute(search_types, replace_types, weak_form.lhs());
+    new_rhs = viennamath::substitute(search_types, replace_types, weak_form.rhs());
     
     return EquationType(new_lhs, new_rhs);
   }
@@ -154,8 +155,9 @@ namespace viennafem
       replace_types[current_index++] = viennamath::diff(v[i], r) * dr_dz + viennamath::diff(v[i], s) * ds_dz + viennamath::diff(v[i], t) * dt_dz;
     }
     
-    //substitute expressions in lhs:
+    //substitute expressions in lhs and rhs:
     new_lhs = viennamath::substitute(search_types, replace_types, weak_form.lhs());
+    new_rhs = viennamath::substitute(search_types, replace_types, weak_form.rhs());
     
     return EquationType(new_lhs, new_rhs);
   }
