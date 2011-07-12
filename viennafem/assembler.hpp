@@ -61,27 +61,27 @@ namespace viennafem
     std::vector<Expression> scalar_test_functions = viennafem::get_basisfunctions<Expression>(CellTag());
     size_t local_size_i = pde_system.unknown(0).size() * scalar_test_functions.size();
 
-    std::cout << "Test functions: " << std::endl;
+    //std::cout << "Test functions: " << std::endl;
     std::vector< std::vector<Expression> > full_test_functions(local_size_i);
     size_t current_index = 0;
     for (size_t i=0; i<scalar_test_functions.size(); ++i)
     {
       for (size_t j=0; j<pde_system.unknown(0).size(); ++j)
       {  
-        std::cout << "No. " << current_index << ": ";
+        //std::cout << "No. " << current_index << ": ";
         full_test_functions[current_index++] = make_full_function(scalar_test_functions[i], pde_system.unknown(0).size(), j);
-        for (size_t k=0; k<pde_system.unknown(0).size(); ++k)
-          std::cout << "[" << full_test_functions[current_index-1][k] << "]";
-        std::cout << std::endl;
+        //for (size_t k=0; k<pde_system.unknown(0).size(); ++k)
+        //  std::cout << "[" << full_test_functions[current_index-1][k] << "]";
+        //std::cout << std::endl;
       }
-      std::cout << std::endl;
+      //std::cout << std::endl;
     }
 
     //trial functions:
     std::vector<Expression> scalar_trial_functions = viennafem::get_basisfunctions<Expression>(CellTag());
     size_t local_size_j = pde_system.unknown(0).size() * scalar_trial_functions.size();
       
-    std::cout << "Trial functions: " << std::endl;
+    //std::cout << "Trial functions: " << std::endl;
     std::vector< std::vector<Expression> > full_trial_functions(local_size_i);
     current_index = 0;
     for (size_t i=0; i<scalar_trial_functions.size(); ++i)
@@ -89,13 +89,13 @@ namespace viennafem
       //std::cout << "No. i: ";
       for (size_t j=0; j<pde_system.unknown(0).size(); ++j)
       {  
-        std::cout << "No. " << current_index << ": ";
+        //std::cout << "No. " << current_index << ": ";
         full_trial_functions[current_index++] = make_full_function(scalar_trial_functions[i], pde_system.unknown(0).size(), j);
-        for (size_t k=0; k<pde_system.unknown(0).size(); ++k)
-          std::cout << "[" << full_trial_functions[current_index-1][k] << "]";
-        std::cout << std::endl;
+        //for (size_t k=0; k<pde_system.unknown(0).size(); ++k)
+        //  std::cout << "[" << full_trial_functions[current_index-1][k] << "]";
+        //std::cout << std::endl;
       }
-      std::cout << std::endl;
+      //std::cout << std::endl;
     }
     
 

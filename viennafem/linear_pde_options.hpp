@@ -50,19 +50,24 @@ namespace viennafem
       long test_space_id() const { return test_space_id_; }
       void test_space_id(long new_id) { test_space_id_ = new_id; }
       
+      bool check_existing_mapping() const { return check_mapping_; }
+      void check_existing_mapping(bool b) { check_mapping_ = b; }
+      
     private:
       long data_id_;
       long trial_space_id_;
       long test_space_id_;
+      bool check_mapping_;
   };
   
   template <typename TrialSpaceTag, typename TestSpaceTag>
-  linear_pde_options make_linear_pde_options(long data_id, TrialSpaceTag, TestSpaceTag)
+  linear_pde_options make_linear_pde_options(long data_id, TrialSpaceTag, TestSpaceTag, bool existing_mapping = false)
   {
     linear_pde_options options;
     options.data_id(data_id);
     options.trial_space_id(viennafem::space_to_id<TrialSpaceTag>::value);
     options.test_space_id(viennafem::space_to_id<TestSpaceTag>::value);
+    options.check_existing_mapping(existing_mapping);
     return options;
   }
   

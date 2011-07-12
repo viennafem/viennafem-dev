@@ -290,12 +290,6 @@ int main()
   std::cout << "Weak form of Lame equation: " << std::endl;
   std::cout << weak_form_lame << std::endl;
   
-  std::cout << std::endl;
-  std::cout << "--- Some bugs in Lame equation handling prohibit further processing. Stop for now... ---" << std::endl;
-  std::cout << std::endl;
-  //exit(0);
-  
-  
   VertexContainer vertices = viennagrid::ncells<0>(my_domain);
   for (VertexIterator vit = vertices.begin();
       vit != vertices.end();

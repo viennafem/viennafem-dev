@@ -57,8 +57,8 @@ namespace viennafem
     Expression new_lhs = weak_form.lhs();
     Expression new_rhs = weak_form.rhs();
     
-    std::cout << "New lhs init: " << std::endl;
-    std::cout << new_lhs << std::endl;
+    //std::cout << "New lhs init: " << std::endl;
+    //std::cout << new_lhs << std::endl;
     
     std::vector<Expression> search_types(4);
     search_types[0] = UnaryExpression(u.clone(), new d_dx(0));

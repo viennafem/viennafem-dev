@@ -32,7 +32,7 @@
 // ViennaGrid includes:
 #include "viennagrid/domain.hpp"
 #include <viennagrid/config/simplex.hpp>
-#include "viennagrid/io/sgf_reader.hpp"
+#include "viennagrid/io/netgen_reader.hpp"
 #include "viennagrid/io/vtk_writer.hpp"
 
 // ViennaData includes:
@@ -128,11 +128,15 @@ int main()
   // Create a domain from file
   //
   DomainType my_domain;
+
+  my_domain.create_segments(2);
   
   try
   {
-    viennagrid::io::sgf_reader my_sgf_reader;
-    my_sgf_reader(my_domain, "../examples/data/square128.sgf");
+    //viennagrid::io::sgf_reader my_sgf_reader;
+    //my_sgf_reader(my_domain, "../examples/data/square128.sgf");
+    viennagrid::io::netgen_reader my_netgen_reader;
+    my_netgen_reader(my_domain, "../examples/data/square224.mesh");
   }
   catch (...)
   {
@@ -186,27 +190,30 @@ int main()
   // Solve system and write solution vector to pde_result:
   // (discussion about proper interface required. Introduce a pde_result class?)
   //
-  fem_assembler(viennafem::make_linear_pde_system(poisson_equ_1, 
-                                                  u,
-                                                  viennafem::make_linear_pde_options(0, 
-                                                                                     viennafem::LinearBasisfunctionTag(),
-                                                                                     viennafem::LinearBasisfunctionTag())
-                                                 ),
-                my_domain,
-                system_matrix_1,
-                load_vector_1
-               );
-  
-  fem_assembler(viennafem::make_linear_pde_system(poisson_equ_2, 
-                                                  u,
-                                                  viennafem::make_linear_pde_options(1, 
-                                                                                     viennafem::LinearBasisfunctionTag(),
-                                                                                     viennafem::LinearBasisfunctionTag())
-                                                 ),
-                my_domain,
-                system_matrix_2,
-                load_vector_2
-               );
+  for (size_t i=0; i<my_domain.segment_size(); ++i)
+  {
+    fem_assembler(viennafem::make_linear_pde_system(poisson_equ_1, 
+                                                    u,
+                                                    viennafem::make_linear_pde_options(0, 
+                                                                                      viennafem::LinearBasisfunctionTag(),
+                                                                                      viennafem::LinearBasisfunctionTag())
+                                                  ),
+                  my_domain.segment(i),
+                  system_matrix_1,
+                  load_vector_1
+                );
+    
+    fem_assembler(viennafem::make_linear_pde_system(poisson_equ_2, 
+                                                    u,
+                                                    viennafem::make_linear_pde_options(1, 
+                                                                                      viennafem::LinearBasisfunctionTag(),
+                                                                                      viennafem::LinearBasisfunctionTag())
+                                                  ),
+                  my_domain.segment(i),
+                  system_matrix_2,
+                  load_vector_2
+                );
+  }
   
   //std::cout << poisson_config_1.load_vector() << std::endl;
   
