@@ -177,10 +177,14 @@ namespace viennafem
       typedef typename viennagrid::result_of::ncell_container<CellType, 0>::type                  VertexOnCellContainer;
       typedef typename viennagrid::result_of::iterator<VertexOnCellContainer>::type               VertexOnCellIterator;
 
+      typedef viennafem::boundary_key                             BoundaryKeyType;
       typedef viennafem::mapping_key                              MappingKeyType;
       typedef std::vector<long>                                   MappingContainer;
       
       typedef typename EquationType::value_type      Expression;
+      
+      BoundaryKeyType bnd_key(pde_system.option(0).data_id());
+
       
       //Set up element representations:
       std::vector<std::vector< EquationType > > local_weak_form = make_local_weak_form<CellTag>(transformed_weak_form, pde_system);
@@ -227,21 +231,29 @@ namespace viennafem
           if (global_index_i == -1)
             continue;
           
+          VertexOnCellContainer vertices_on_cell = viennagrid::ncells<0>(*cell_iter);
+          VertexOnCellIterator vocit = vertices_on_cell.begin();
           local_index_j = 0;
           for (typename MappingContainer::const_iterator map_iter_j = map_indices_j.begin();
                map_iter_j != map_indices_j.end();
-               ++map_iter_j, ++local_index_j)
+               ++map_iter_j, ++local_index_j, ++vocit)
           {
             global_index_j = *map_iter_j;
             //std::cout << " glob_j: " << global_index_j << std::endl;
-            if (global_index_j == -1)
-              continue; //modify right-hand side here
-          
             local_weak_form[local_index_i][local_index_j].lhs().get()->recursive_traversal(updater);
-            
-            //std::cout << " Evaluating LHS: " << local_weak_form[local_index_i][local_index_j].lhs() << std::endl;
-          
-            system_matrix(global_index_i, global_index_j) += viennafem::eval_element_matrix_entry(local_weak_form[local_index_i][local_index_j].lhs(), CellTag()) * det_dF_dt.eval(1.0); 
+
+            if (global_index_j == -1)
+            {
+              load_vector(global_index_i) -= 
+                viennadata::access<BoundaryKeyType, double>(bnd_key)(*vocit) *
+                viennafem::eval_element_matrix_entry(local_weak_form[local_index_i][local_index_j].lhs(), CellTag()) * det_dF_dt.eval(1.0); 
+            }
+            else
+            {
+              //std::cout << " Evaluating LHS: " << local_weak_form[local_index_i][local_index_j].lhs() << std::endl;
+              system_matrix(global_index_i, global_index_j) += 
+                viennafem::eval_element_matrix_entry(local_weak_form[local_index_i][local_index_j].lhs(), CellTag()) * det_dF_dt.eval(1.0); 
+            }
           }
           
           local_weak_form[local_index_i][0].rhs().get()->recursive_traversal(updater);

@@ -150,7 +150,7 @@ int main()
   //
   FunctionSymbol u(0, viennamath::unknown_tag<>());   //an unknown function used for PDE specification
   Equation poisson_equ_1 = viennamath::make_equation( viennamath::laplace(u), -1);
-  Equation poisson_equ_2 = viennamath::make_equation( viennamath::laplace(u), -1);
+  Equation poisson_equ_2 = viennamath::make_equation( viennamath::laplace(u), 0);
 
   MatrixType system_matrix_1, system_matrix_2;
   VectorType load_vector_1, load_vector_2;
@@ -171,9 +171,17 @@ int main()
     else
       viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = false;
     
-    //boundary for second equation: Homogeneous Dirichlet at (x == 0) and (x == 1)
-    if (vit->getPoint()[0] == 0.0 || vit->getPoint()[0] == 1.0 )
+    //boundary for second equation: 0 at left boundary, 1 at right boundary
+    if (vit->getPoint()[0] == 0.0)
+    {
       viennadata::access<BoundaryKey, bool>(BoundaryKey(1))(*vit) = true;
+      viennadata::access<BoundaryKey, double>(BoundaryKey(1))(*vit) = 0.0;
+    }
+    else if (vit->getPoint()[0] == 1.0)
+    {
+      viennadata::access<BoundaryKey, bool>(BoundaryKey(1))(*vit) = true;
+      viennadata::access<BoundaryKey, double>(BoundaryKey(1))(*vit) = 1.0;
+    }
     else
       viennadata::access<BoundaryKey, bool>(BoundaryKey(1))(*vit) = false;
     

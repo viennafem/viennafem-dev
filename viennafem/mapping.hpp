@@ -30,13 +30,15 @@ namespace viennafem
   template <typename EntityType>
   struct extract_domain
   {
+    typedef EntityType  type;
     static EntityType & apply(EntityType & domain) { return domain; }
   };
   
   template <typename ConfigType>
   struct extract_domain<viennagrid::segment_t<ConfigType> >
   {
-    static viennagrid::domain<ConfigType> & apply(viennagrid::segment_t<ConfigType> & seg) { return seg.get_domain(); }
+    typedef viennagrid::domain<ConfigType> type;
+    static type & apply(viennagrid::segment_t<ConfigType> & seg) { return seg.get_domain(); }
   };
   
   
@@ -57,20 +59,32 @@ namespace viennafem
     typedef typename viennagrid::result_of::ncell_container<DomainType, 0>::type                VertexContainer;
     typedef typename viennagrid::result_of::iterator<VertexContainer>::type                     VertexIterator;
 
-    typedef typename viennagrid::result_of::ncell_container<DomainType, CellTag::topology_level>::type    CellContainer;
-    typedef typename viennagrid::result_of::iterator<CellContainer>::type                                 CellIterator;
-
-    typedef typename viennagrid::result_of::ncell_container<CellType, 0>::type                  VertexOnCellContainer;
-    typedef typename viennagrid::result_of::iterator<VertexOnCellContainer>::type               VertexOnCellIterator;
-    
-    
     typedef viennafem::boundary_key                             BoundaryKeyType;
     typedef viennafem::mapping_key                              MappingKeyType;
     
     BoundaryKeyType bnd_key(pde_system.option(0).data_id());
     MappingKeyType map_key(pde_system.option(0).data_id());
     
-    long map_index = viennadata::access<MappingKeyType, long>(map_key)(extract_domain<DomainType>::apply(domain));
+    long start_index = viennadata::access<MappingKeyType, long>(map_key)(extract_domain<DomainType>::apply(domain));
+    long map_index = start_index;
+    bool init_done = viennadata::access<MappingKeyType, bool>(map_key)(extract_domain<DomainType>::apply(domain));
+
+    //eventually, map indices need to be set to invalid first:
+    if (!init_done)
+    {
+      typedef typename extract_domain<DomainType>::type   TrueDomainType;
+      typedef typename viennagrid::result_of::ncell_container<TrueDomainType, 0>::type            DomainVertexContainer;
+      typedef typename viennagrid::result_of::iterator<DomainVertexContainer>::type               DomainVertexIterator;
+      
+      DomainVertexContainer vertices = viennagrid::ncells<0>(extract_domain<DomainType>::apply(domain));
+      for (DomainVertexIterator vit = vertices.begin();
+          vit != vertices.end();
+          ++vit)
+      {  
+        viennadata::access<MappingKeyType, long>(map_key)(*vit) = -1;
+      }
+      viennadata::access<MappingKeyType, bool>(map_key)(extract_domain<DomainType>::apply(domain)) = true;
+    }
     
     VertexContainer vertices = viennagrid::ncells<0>(domain);
     for (VertexIterator vit = vertices.begin();
@@ -85,7 +99,10 @@ namespace viennafem
       else
       {
         //std::cout << "interior vertex" << std::endl;
-        viennadata::access<MappingKeyType, long>(map_key)(*vit) = map_index;
+        if (viennadata::access<MappingKeyType, long>(map_key)(*vit) < 0) //only assign if no dof assigned yet
+          viennadata::access<MappingKeyType, long>(map_key)(*vit) = map_index;
+        //else
+        //  std::cout << "Found vertex with DOF!" << std::endl;
         map_index += pde_system.unknown(0).size();
       }
     }
