@@ -21,9 +21,18 @@
 
 namespace viennafem
 {
+  //
+  // Compile time transformation
+  //
   
-  //TODO: compile time derivation
-  
+  //TODO
+
+
+
+  //
+  // Run time transformation
+  //
+
   template <typename InterfaceType>
   struct weak_form_checker : public viennamath::traversal_interface<>
   {
@@ -64,6 +73,80 @@ namespace viennafem
     return result;
   }
 
+
+
+
+
+
+
+  template <typename InterfaceType>
+  struct weak_form_creator : public viennamath::manipulation_interface<InterfaceType>
+  {
+    public:
+      InterfaceType * operator()(InterfaceType const * e) const 
+      {
+        if (   !viennamath::callback_if_castable< viennamath::unary_expr<InterfaceType> >::apply(e, *this)
+            && !viennamath::callback_if_castable< viennamath::binary_expr<InterfaceType> >::apply(e, *this))
+        {
+          //this if-body is only executed for trivial expressions such as 'u' (L^2-projection)
+          
+          //multiply with test function and integrate
+          viennamath::function_symbol<InterfaceType> test_func(0, viennamath::test_tag<0>());
+          viennamath::expr<InterfaceType> temp(e->clone());
+          integrated_expr = viennamath::integral(viennamath::Omega(), temp * test_func, viennamath::symbolic_tag());
+        }
+        
+        return integrated_expr.get()->clone();
+        
+      }
+      
+      void operator()(viennamath::unary_expr<InterfaceType> const & unary_expr) const
+      {
+        typedef typename InterfaceType::numeric_type   NumericType;
+        typedef viennamath::op_unary<viennamath::op_divergence<NumericType>, InterfaceType>  DivergenceOperatorType;
+        
+        if (dynamic_cast<const DivergenceOperatorType *>(unary_expr.op()) != NULL) //this is something of the form div(expr) with some expression expr
+        {
+          //std::cout << "Detected divergence operator!" << std::endl;
+          viennamath::expr<InterfaceType> minus1 = -1;
+          viennamath::expr<InterfaceType> lhs(unary_expr.lhs()->clone());
+          viennamath::expr<InterfaceType> rhs = viennamath::grad(viennamath::function_symbol<InterfaceType>(0, viennamath::test_tag<0>()));
+          integrated_expr = viennamath::integral(viennamath::Omega(), minus1 * (lhs * rhs), viennamath::symbolic_tag());
+        }
+        else
+          throw "Cannot derive weak form!";
+      }
+
+      void operator()(viennamath::binary_expr<InterfaceType> const & bin) const
+      {
+        typedef typename InterfaceType::numeric_type   NumericType;
+        typedef viennamath::op_binary<viennamath::op_plus<NumericType>, InterfaceType>   PlusOperatorType;
+        typedef viennamath::op_binary<viennamath::op_minus<NumericType>, InterfaceType>  MinusOperatorType;
+        
+        if (    dynamic_cast<const PlusOperatorType *>(bin.op()) != NULL
+             || dynamic_cast<const MinusOperatorType *>(bin.op()) != NULL) //integration is additive :-)
+        {
+          viennamath::manipulation_wrapper<InterfaceType> manipulator(new weak_form_creator<InterfaceType>());
+          //Note: In the following, directly passing *this is not possible due to the need for a wrapper...
+          integrated_expr = new viennamath::binary_expr<InterfaceType>(bin.lhs()->recursive_manipulation(manipulator),
+                                                                       bin.op()->clone(),
+                                                                       bin.rhs()->recursive_manipulation(manipulator));
+        }
+        else
+        {
+          //multiply with test function and integrate
+          viennamath::function_symbol<InterfaceType> test_func(0, viennamath::test_tag<0>());
+          integrated_expr = viennamath::integral(viennamath::Omega(), bin * test_func, viennamath::symbolic_tag());
+        }
+      }
+
+      bool modifies(InterfaceType const * e) const { return true; }
+      
+    private:
+      mutable viennamath::expr<InterfaceType> integrated_expr;
+  };
+
+
   //tries to automatically derive the weak formulation from the strong formulation
   template <typename InterfaceType>
   viennamath::equation<InterfaceType> make_weak_form(viennamath::equation<InterfaceType> const & strong_formulation)
@@ -75,14 +158,24 @@ namespace viennafem
     }
     
     //TODO: More general derivations: Transform div(expr) to expr * grad(v)
-    viennamath::expr<InterfaceType> new_lhs(viennamath::substitute( viennamath::laplace(viennamath::function_symbol<InterfaceType>(0, viennamath::unknown_tag<0>())),
+    /*viennamath::expr<InterfaceType> new_lhs(viennamath::substitute( viennamath::laplace(viennamath::function_symbol<InterfaceType>(0, viennamath::unknown_tag<0>())),
                                             viennamath::constant<typename InterfaceType::numeric_type, InterfaceType>(-1) * (viennamath::grad(viennamath::function_symbol<InterfaceType>(0, viennamath::unknown_tag<0>())) * viennamath::grad(viennamath::function_symbol<InterfaceType>(0, viennamath::test_tag<0>()))),
                                             strong_formulation.lhs()
                                           )
                                );
     return viennamath::equation<InterfaceType>( viennamath::integral(viennamath::Omega(), new_lhs, viennamath::symbolic_tag()),
                                     viennamath::integral(viennamath::Omega(), strong_formulation.rhs() * viennamath::function_symbol<InterfaceType>(0, viennamath::test_tag<0>()), viennamath::symbolic_tag())
-                                  );
+                                  );*/
+    
+    viennamath::manipulation_wrapper<InterfaceType> wrapped_checker( new weak_form_creator<InterfaceType>() );
+    viennamath::expr<InterfaceType> weak_lhs(strong_formulation.lhs().get()->recursive_manipulation( wrapped_checker ));
+    viennamath::expr<InterfaceType> weak_rhs = 
+        viennamath::integral(viennamath::Omega(),
+                             strong_formulation.rhs() * viennamath::function_symbol<InterfaceType>(0, viennamath::test_tag<0>()),
+                             viennamath::symbolic_tag());
+    
+    return viennamath::equation<InterfaceType>( weak_lhs, weak_rhs);
+    
   }
 
 }

@@ -39,12 +39,17 @@ namespace viennafem
     typedef quan_accessor<CellType, KeyType, DataType>    self_type;
     
     public:
+      quan_accessor(KeyType const & key) : key_(key) {}
+      
       DataType operator()(CellType const & cell) const
       {
-        return viennadata::access<KeyType, DataType>()(cell);
+        return viennadata::access<KeyType, DataType>(key_)(cell);
       }
       
-      cell_quan_interface<CellType, DataType> * clone() const { return new self_type(); }
+      cell_quan_interface<CellType, DataType> * clone() const { return new self_type(key_); }
+      
+    private:
+      KeyType key_;
   };
   
   
@@ -156,7 +161,7 @@ namespace viennafem
       template <typename T>
       void wrap(T const & t) 
       {
-        cell_quan_wrapper<CellType, numeric_type> temp( new quan_accessor<CellType, T, numeric_type>() );
+        cell_quan_wrapper<CellType, numeric_type> temp( new quan_accessor<CellType, T, numeric_type>(t) );
         accessor = temp;
       }
       
@@ -186,6 +191,25 @@ namespace viennafem
                                                             rhs.clone())); 
   }
   
-  
+  template <typename CellType, typename InterfaceType>
+  viennamath::expr<InterfaceType> operator*(cell_quan<CellType, InterfaceType> const & lhs,
+                                            viennamath::unary_expr<InterfaceType> const & rhs
+                               )
+  {
+    return viennamath::expr<InterfaceType>(new viennamath::binary_expr<InterfaceType>(lhs.clone(),
+                                                            new viennamath::op_binary<viennamath::op_mult<viennamath::default_numeric_type>, InterfaceType >(),
+                                                            rhs.clone())); 
+  }
+
+  template <typename CellType, typename InterfaceType>
+  viennamath::expr<InterfaceType> operator*(cell_quan<CellType, InterfaceType> const & lhs,
+                                            viennamath::binary_expr<InterfaceType> const & rhs
+                               )
+  {
+    return viennamath::expr<InterfaceType>(new viennamath::binary_expr<InterfaceType>(lhs.clone(),
+                                                            new viennamath::op_binary<viennamath::op_mult<viennamath::default_numeric_type>, InterfaceType >(),
+                                                            rhs.clone())); 
+  }
+
 }
 #endif

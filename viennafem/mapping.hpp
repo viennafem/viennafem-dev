@@ -100,10 +100,12 @@ namespace viennafem
       {
         //std::cout << "interior vertex" << std::endl;
         if (viennadata::access<MappingKeyType, long>(map_key)(*vit) < 0) //only assign if no dof assigned yet
+        {
           viennadata::access<MappingKeyType, long>(map_key)(*vit) = map_index;
+          map_index += pde_system.unknown(0).size();
+        }
         //else
         //  std::cout << "Found vertex with DOF!" << std::endl;
-        map_index += pde_system.unknown(0).size();
       }
     }
     

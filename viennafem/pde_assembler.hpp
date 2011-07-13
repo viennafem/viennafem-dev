@@ -72,8 +72,9 @@ namespace viennafem
         typedef viennafem::boundary_key                             BoundaryKeyType;
         typedef viennafem::mapping_key                              MappingKeyType;
         
-        
+        std::cout << "Strong form: " << pde_system.pde(0) << std::endl;
         EquationType weak_form_general = viennafem::make_weak_form(pde_system.pde(0));  
+        //std::cout << "* pde_solver::operator(): Using weak form general: " << weak_form_general << std::endl;
         EquationType weak_form = viennamath::apply_coordinate_system(viennamath::cartesian<Config::dimension_tag::value>(), weak_form_general);
         
         std::cout << "* pde_solver::operator(): Using weak form " << weak_form << std::endl;
