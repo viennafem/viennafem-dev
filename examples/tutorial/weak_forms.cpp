@@ -70,8 +70,6 @@ int main()
   
   try
   {
-    //viennagrid::io::sgf_reader my_sgf_reader;
-    //my_sgf_reader(my_domain, "../examples/data/square128.sgf");
     viennagrid::io::netgen_reader my_netgen_reader;
     my_netgen_reader(my_domain, "../examples/data/square224.mesh");
   }

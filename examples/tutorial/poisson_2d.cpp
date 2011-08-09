@@ -64,6 +64,7 @@
 #include "viennacl/linalg/cg.hpp"
 #include "viennacl/linalg/norm_2.hpp"
 #include "viennacl/linalg/prod.hpp"
+#include "viennacl/io/matrix_market.hpp"
 
 
 //      
@@ -129,14 +130,12 @@ int main()
   //
   DomainType my_domain;
 
-  my_domain.create_segments(2);
+  //my_domain.create_segments(2);
   
   try
   {
-    //viennagrid::io::sgf_reader my_sgf_reader;
-    //my_sgf_reader(my_domain, "../examples/data/square128.sgf");
-    viennagrid::io::netgen_reader my_netgen_reader;
-    my_netgen_reader(my_domain, "../examples/data/square224.mesh");
+    viennagrid::io::netgen_reader my_reader;
+    my_reader(my_domain, "../examples/data/square512.mesh");
   }
   catch (...)
   {
@@ -230,6 +229,10 @@ int main()
 
   //std::cout << "RESULT" << std::endl;
   //std::cout << pde_result_1 << std::endl;
+  
+  system_matrix_1 *= -1.0;
+  viennacl::io::write_matrix_market_file(system_matrix_1, "fem2d.mtx");
+  
   //
   // Writing solution back to domain (discussion about proper way of returning a solution required...)
   //
