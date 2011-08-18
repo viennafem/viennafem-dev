@@ -117,9 +117,9 @@ int main()
   typedef viennagrid::domain<ConfigType>                                DomainType;
   typedef viennagrid::segment_t<ConfigType>                             SegmentType;
 
-  typedef viennagrid::result_of::ncell_container<DomainType, 0>::type    VertexContainer;
+  typedef viennagrid::result_of::ncell_range<DomainType, 0>::type    VertexContainer;
   typedef viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
-  typedef viennagrid::result_of::ncell_container<SegmentType, 2>::type   CellContainer;
+  typedef viennagrid::result_of::ncell_range<SegmentType, 2>::type   CellContainer;
   typedef viennagrid::result_of::iterator<CellContainer>::type           CellIterator;
   typedef viennagrid::result_of::ncell_type<ConfigType, 2>::type              CellType;
   

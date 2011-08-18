@@ -192,7 +192,7 @@ void apply_displacements(DomainType & domain, VectorType const & result)
 {
   typedef typename DomainType::config_type                                              ConfigType;
   typedef typename viennagrid::result_of::ncell_type<ConfigType, 0>::type               VertexType;
-  typedef typename viennagrid::result_of::ncell_container<DomainType, 0>::type          VertexContainer;
+  typedef typename viennagrid::result_of::ncell_range<DomainType, 0>::type          VertexContainer;
   typedef typename viennagrid::result_of::iterator<VertexContainer>::type               VertexIterator;
 
   typedef viennafem::mapping_key          MappingKeyType;
@@ -222,7 +222,7 @@ int main()
   typedef viennagrid::config::tetrahedral_3d                             ConfigType;
   typedef viennagrid::domain<viennagrid::config::tetrahedral_3d>         DomainType;
 
-  typedef viennagrid::result_of::ncell_container<DomainType, 0>::type    VertexContainer;
+  typedef viennagrid::result_of::ncell_range<DomainType, 0>::type    VertexContainer;
   typedef viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
   typedef viennagrid::result_of::ncell_type<ConfigType, 3>::type              CellType;
   

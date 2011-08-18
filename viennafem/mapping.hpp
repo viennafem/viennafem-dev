@@ -56,7 +56,7 @@ namespace viennafem
     typedef typename viennagrid::result_of::point_type<Config>::type                            PointType;
     typedef typename viennagrid::result_of::ncell_type<Config, CellTag::topology_level>::type   CellType;
 
-    typedef typename viennagrid::result_of::ncell_container<DomainType, 0>::type                VertexContainer;
+    typedef typename viennagrid::result_of::ncell_range<DomainType, 0>::type                VertexContainer;
     typedef typename viennagrid::result_of::iterator<VertexContainer>::type                     VertexIterator;
 
     typedef viennafem::boundary_key                             BoundaryKeyType;
@@ -73,7 +73,7 @@ namespace viennafem
     if (!init_done)
     {
       typedef typename extract_domain<DomainType>::type   TrueDomainType;
-      typedef typename viennagrid::result_of::ncell_container<TrueDomainType, 0>::type            DomainVertexContainer;
+      typedef typename viennagrid::result_of::ncell_range<TrueDomainType, 0>::type            DomainVertexContainer;
       typedef typename viennagrid::result_of::iterator<DomainVertexContainer>::type               DomainVertexIterator;
       
       DomainVertexContainer vertices = viennagrid::ncells<0>(extract_domain<DomainType>::apply(domain));
@@ -127,7 +127,7 @@ namespace viennafem
     typedef typename CellType::config_type              Config;
     typedef typename Config::cell_tag                     CellTag;
     
-    typedef typename viennagrid::result_of::const_ncell_container<CellType, 0>::type                  VertexOnCellContainer;
+    typedef typename viennagrid::result_of::const_ncell_range<CellType, 0>::type                  VertexOnCellContainer;
     typedef typename viennagrid::result_of::iterator<VertexOnCellContainer>::type               VertexOnCellIterator;
 
     typedef viennafem::mapping_key                              MappingKeyType;
@@ -139,7 +139,7 @@ namespace viennafem
 
     VertexOnCellContainer vertices_on_cell = viennagrid::ncells<0>(cell);
     
-    MappingContainer ret(viennagrid::traits::subcell_desc<CellTag, 0>::num_elements * unknown_components);
+    MappingContainer ret(viennagrid::topology::subcell_desc<CellTag, 0>::num_elements * unknown_components);
     
     long local_index = 0;
     for (VertexOnCellIterator vocit = vertices_on_cell.begin();

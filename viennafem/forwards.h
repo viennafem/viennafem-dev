@@ -219,7 +219,7 @@ namespace viennadata
       typedef object_provided_id    tag;
       typedef size_t                id_type;
 
-      static size_t get(viennagrid::element<ConfigType, viennagrid::point_tag> const & obj) { return obj.getID(); }
+      static size_t get(viennagrid::element<ConfigType, viennagrid::point_tag> const & obj) { return obj.id(); }
     };
 
     template <typename ConfigType>
@@ -228,7 +228,7 @@ namespace viennadata
       typedef object_provided_id    tag;
       typedef size_t                id_type;
 
-      static size_t get(viennagrid::element<ConfigType, viennagrid::tetrahedron_tag> const & obj) { return obj.getID(); }
+      static size_t get(viennagrid::element<ConfigType, viennagrid::tetrahedron_tag> const & obj) { return obj.id(); }
     };
     
     //

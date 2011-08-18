@@ -57,13 +57,13 @@ namespace viennafem
         typedef typename viennagrid::result_of::point_type<Config>::type                            PointType;
         typedef typename viennagrid::result_of::ncell_type<Config, CellTag::topology_level>::type   CellType;
 
-        typedef typename viennagrid::result_of::ncell_container<DomainType, 0>::type                VertexContainer;
+        typedef typename viennagrid::result_of::ncell_range<DomainType, 0>::type                VertexContainer;
         typedef typename viennagrid::result_of::iterator<VertexContainer>::type                     VertexIterator;
 
-        typedef typename viennagrid::result_of::ncell_container<DomainType, CellTag::topology_level>::type    CellContainer;
+        typedef typename viennagrid::result_of::ncell_range<DomainType, CellTag::topology_level>::type    CellContainer;
         typedef typename viennagrid::result_of::iterator<CellContainer>::type                                 CellIterator;
 
-        typedef typename viennagrid::result_of::ncell_container<CellType, 0>::type                  VertexOnCellContainer;
+        typedef typename viennagrid::result_of::ncell_range<CellType, 0>::type                  VertexOnCellContainer;
         typedef typename viennagrid::result_of::iterator<VertexOnCellContainer>::type               VertexOnCellIterator;
         
         typedef typename SystemType::equation_type                  EquationType;

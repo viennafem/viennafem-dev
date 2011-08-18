@@ -362,7 +362,7 @@ namespace viennafem
   template <typename AssemblyCellType,
               long topolevel, long current_element_id,
               bool increment_possible =
-                  (viennagrid::traits::subcell_desc< typename AssemblyCellType::ElementTag,
+                  (viennagrid::topology::subcell_desc< typename AssemblyCellType::ElementTag,
                                   topolevel
                                 >::num_elements - current_element_id > 1)
             >
