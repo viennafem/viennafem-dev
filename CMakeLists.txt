@@ -33,6 +33,12 @@ INCLUDE_DIRECTORIES("../ViennaMath/")
 INCLUDE_DIRECTORIES("../ViennaCL/")
 INCLUDE_DIRECTORIES(${BOOSTPATH})
 
+#look for HDF5
+find_package(HDF5 COMPONENTS CXX)
+IF(HDF5_FOUND)
+   INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIRS})
+ENDIF(HDF5_FOUND)
+
 #add definitions, compiler switches, etc.
 IF(DEFINED CMAKE_BUILD_TYPE)
  SET (CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE})
@@ -56,6 +62,11 @@ ADD_EXECUTABLE(sshape_2d examples/tutorial/sshape_2d.cpp)
 ADD_EXECUTABLE(sshape_3d examples/tutorial/sshape_3d.cpp)
 
 ADD_EXECUTABLE(weak_forms examples/tutorial/weak_forms.cpp)
+
+IF(HDF5_FOUND)
+   ADD_EXECUTABLE(lame_3d_copy examples/tutorial/lame_3d_copy.cpp)
+   TARGET_LINK_LIBRARIES(lame_3d_copy  ${HDF5_LIBRARIES})
+ENDIF(HDF5_FOUND)
 
 #TARGET_LINK_LIBRARIES(poisson OpenCL)
 
