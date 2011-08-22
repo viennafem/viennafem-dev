@@ -54,8 +54,8 @@ namespace viennafem
         typedef typename DomainType::config_type              Config;
         typedef typename Config::cell_tag                     CellTag;
         
-        typedef typename viennagrid::result_of::point_type<Config>::type                            PointType;
-        typedef typename viennagrid::result_of::ncell_type<Config, CellTag::topology_level>::type   CellType;
+        typedef typename viennagrid::result_of::point<Config>::type                            PointType;
+        typedef typename viennagrid::result_of::ncell<Config, CellTag::topology_level>::type   CellType;
 
         typedef typename viennagrid::result_of::ncell_range<DomainType, 0>::type                VertexContainer;
         typedef typename viennagrid::result_of::iterator<VertexContainer>::type                     VertexIterator;

@@ -191,7 +191,7 @@ template <typename DomainType, typename VectorType>
 void apply_displacements(DomainType & domain, VectorType const & result)
 {
   typedef typename DomainType::config_type                                              ConfigType;
-  typedef typename viennagrid::result_of::ncell_type<ConfigType, 0>::type               VertexType;
+  typedef typename viennagrid::result_of::ncell<ConfigType, 0>::type               VertexType;
   typedef typename viennagrid::result_of::ncell_range<DomainType, 0>::type          VertexContainer;
   typedef typename viennagrid::result_of::iterator<VertexContainer>::type               VertexIterator;
 
@@ -224,7 +224,7 @@ int main()
 
   typedef viennagrid::result_of::ncell_range<DomainType, 0>::type    VertexContainer;
   typedef viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
-  typedef viennagrid::result_of::ncell_type<ConfigType, 3>::type              CellType;
+  typedef viennagrid::result_of::ncell<ConfigType, 3>::type              CellType;
   
   typedef boost::numeric::ublas::compressed_matrix<viennafem::numeric_type>  MatrixType;
   typedef boost::numeric::ublas::vector<viennafem::numeric_type>             VectorType;

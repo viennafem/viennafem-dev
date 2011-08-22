@@ -33,7 +33,7 @@ namespace viennafem
       static void apply(CellType const & cell)
       {
         typedef typename CellType::config_type       Config;
-        typedef typename viennagrid::result_of::point_type<Config>::type   PointType;
+        typedef typename viennagrid::result_of::point<Config>::type   PointType;
         
         PointType p0 = cell.getPoint(0);
         PointType p1 = cell.getPoint(1) - p0;

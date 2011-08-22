@@ -37,9 +37,9 @@ namespace viennafem
 
     //cell is a triangle:
     template <typename CellType>
-    typename viennagrid::result_of::point_type<typename CellType::config_type>::type 
+    typename viennagrid::result_of::point<typename CellType::config_type>::type 
     mapToElement_impl(CellType const & cell,
-                      typename viennagrid::result_of::point_type<typename CellType::config_type>::type const & refpoint,
+                      typename viennagrid::result_of::point<typename CellType::config_type>::type const & refpoint,
                       viennagrid::line_tag)
     {
       //typename viennagrid::DomainTypes<typename CellType::Configuration>::PointType & point1 = cell.getPoint(0);

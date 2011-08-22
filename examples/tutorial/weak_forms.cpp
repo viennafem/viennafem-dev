@@ -54,7 +54,7 @@ int main()
 
   typedef viennagrid::result_of::ncell_range<DomainType, 0>::type    VertexContainer;
   typedef viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
-  typedef viennagrid::result_of::ncell_type<ConfigType, 2>::type              CellType;
+  typedef viennagrid::result_of::ncell<ConfigType, 2>::type              CellType;
   
   typedef viennamath::function_symbol<>   FunctionSymbol;
   typedef viennamath::equation<>          Equation;

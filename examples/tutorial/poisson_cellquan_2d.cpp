@@ -121,7 +121,7 @@ int main()
   typedef viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
   typedef viennagrid::result_of::ncell_range<SegmentType, 2>::type   CellContainer;
   typedef viennagrid::result_of::iterator<CellContainer>::type           CellIterator;
-  typedef viennagrid::result_of::ncell_type<ConfigType, 2>::type              CellType;
+  typedef viennagrid::result_of::ncell<ConfigType, 2>::type              CellType;
   
   typedef boost::numeric::ublas::compressed_matrix<viennafem::numeric_type>  MatrixType;
   typedef boost::numeric::ublas::vector<viennafem::numeric_type>             VectorType;
