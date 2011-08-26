@@ -66,8 +66,6 @@ int main()
   //
   DomainType my_domain;
 
-  my_domain.create_segments(2);
-  
   try
   {
     viennagrid::io::netgen_reader my_netgen_reader;

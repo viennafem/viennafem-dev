@@ -197,7 +197,7 @@ int main()
   // Solve system and write solution vector to pde_result:
   // (discussion about proper interface required. Introduce a pde_result class?)
   //
-  for (size_t i=0; i<my_domain.segment_size(); ++i)
+  for (size_t i=0; i<my_domain.segments().size(); ++i)
   {
     fem_assembler(viennafem::make_linear_pde_system(poisson_equ_1, 
                                                     u,
@@ -205,7 +205,7 @@ int main()
                                                                                       viennafem::LinearBasisfunctionTag(),
                                                                                       viennafem::LinearBasisfunctionTag())
                                                   ),
-                  my_domain.segment(i),
+                  my_domain.segments()[i],
                   system_matrix_1,
                   load_vector_1
                 );
@@ -216,7 +216,7 @@ int main()
                                                                                       viennafem::LinearBasisfunctionTag(),
                                                                                       viennafem::LinearBasisfunctionTag())
                                                   ),
-                  my_domain.segment(i),
+                  my_domain.segments()[i],
                   system_matrix_2,
                   load_vector_2
                 );
