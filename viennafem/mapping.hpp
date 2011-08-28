@@ -37,8 +37,8 @@ namespace viennafem
   template <typename ConfigType>
   struct extract_domain<viennagrid::segment_t<ConfigType> >
   {
-    typedef viennagrid::domain<ConfigType> type;
-    static type & apply(viennagrid::segment_t<ConfigType> & seg) { return seg.get_domain(); }
+    typedef typename viennagrid::result_of::domain<ConfigType>::type    type;
+    static type & apply(viennagrid::segment_t<ConfigType> & seg) { return seg.domain(); }
   };
   
   

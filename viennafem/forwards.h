@@ -214,34 +214,34 @@ namespace viennadata
     // tell ViennaData to use the get_id() member for vertices as identification mechanism
     //
     template <typename ConfigType>
-    struct object_identifier<viennagrid::element<ConfigType, viennagrid::point_tag> >
+    struct object_identifier<viennagrid::element_t<ConfigType, viennagrid::point_tag> >
     {
       typedef object_provided_id    tag;
       typedef size_t                id_type;
 
-      static size_t get(viennagrid::element<ConfigType, viennagrid::point_tag> const & obj) { return obj.id(); }
+      static size_t get(viennagrid::element_t<ConfigType, viennagrid::point_tag> const & obj) { return obj.id(); }
     };
 
     template <typename ConfigType>
-    struct object_identifier<viennagrid::element<ConfigType, viennagrid::tetrahedron_tag> >
+    struct object_identifier<viennagrid::element_t<ConfigType, viennagrid::tetrahedron_tag> >
     {
       typedef object_provided_id    tag;
       typedef size_t                id_type;
 
-      static size_t get(viennagrid::element<ConfigType, viennagrid::tetrahedron_tag> const & obj) { return obj.id(); }
+      static size_t get(viennagrid::element_t<ConfigType, viennagrid::tetrahedron_tag> const & obj) { return obj.id(); }
     };
     
     //
     // store data densely, no matter which key type is used:
     //
     template <typename KeyType, typename ValueType, typename ConfigType>
-    struct storage<KeyType, ValueType, viennagrid::element<ConfigType, viennagrid::point_tag> >
+    struct storage<KeyType, ValueType, viennagrid::element_t<ConfigType, viennagrid::point_tag> >
     {
       typedef dense_data_tag    tag;
     };
 
     template <typename KeyType, typename ValueType, typename ConfigType>
-    struct storage<KeyType, ValueType, viennagrid::element<ConfigType, viennagrid::tetrahedron_tag> >
+    struct storage<KeyType, ValueType, viennagrid::element_t<ConfigType, viennagrid::tetrahedron_tag> >
     {
       typedef dense_data_tag    tag;
     };

@@ -114,7 +114,7 @@ struct permittivity_key
 int main()
 {
   typedef viennagrid::config::triangular_2d                             ConfigType;
-  typedef viennagrid::domain<ConfigType>                                DomainType;
+  typedef viennagrid::result_of::domain<ConfigType>::type               DomainType;
   typedef viennagrid::segment_t<ConfigType>                             SegmentType;
 
   typedef viennagrid::result_of::ncell_range<DomainType, 0>::type    VertexContainer;
@@ -178,12 +178,12 @@ int main()
       ++vit)
   {
     //boundary for second equation: 0 at left boundary, 1 at right boundary
-    if (vit->getPoint()[0] == 0.0)
+    if (vit->point()[0] == 0.0)
     {
       viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = true;
       viennadata::access<BoundaryKey, double>(BoundaryKey(0))(*vit) = 0.0;
     }
-    else if (vit->getPoint()[0] == 1.0)
+    else if (vit->point()[0] == 1.0)
     {
       viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = true;
       viennadata::access<BoundaryKey, double>(BoundaryKey(0))(*vit) = 1.0;

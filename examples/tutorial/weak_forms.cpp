@@ -50,7 +50,7 @@ struct testkey
 int main()
 {
   typedef viennagrid::config::triangular_2d                             ConfigType;
-  typedef viennagrid::domain<ConfigType>         DomainType;
+  typedef viennagrid::result_of::domain<ConfigType>::type         DomainType;
 
   typedef viennagrid::result_of::ncell_range<DomainType, 0>::type    VertexContainer;
   typedef viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;

@@ -35,9 +35,9 @@ namespace viennafem
         typedef typename CellType::config_type       Config;
         typedef typename viennagrid::result_of::point<Config>::type   PointType;
         
-        PointType const & p0 = cell.getPoint(0);
-        PointType const & p1 = cell.getPoint(1);
-        PointType const & p2 = cell.getPoint(2);
+        PointType const & p0 = viennagrid::ncells<0>(cell)[0].point();
+        PointType const & p1 = viennagrid::ncells<0>(cell)[1].point();
+        PointType const & p2 = viennagrid::ncells<0>(cell)[2].point();
         
         //Step 1: store determinant:
         double det_dF_dt = 2.0 * viennagrid::spanned_volume(p0, p1, p2);

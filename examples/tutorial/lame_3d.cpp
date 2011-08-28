@@ -210,9 +210,9 @@ void apply_displacements(DomainType & domain, VectorType const & result)
     long cur_index = viennadata::access<MappingKeyType, long>(map_key)(*vit);
     if (cur_index > -1)
     {
-      vit->getPoint()[0] = vit->getPoint()[0] + result[cur_index+0];
-      vit->getPoint()[1] = vit->getPoint()[1] + result[cur_index+1];
-      vit->getPoint()[2] = vit->getPoint()[2] + result[cur_index+2];
+      vit->point()[0] = vit->point()[0] + result[cur_index+0];
+      vit->point()[1] = vit->point()[1] + result[cur_index+1];
+      vit->point()[2] = vit->point()[2] + result[cur_index+2];
     }
   }
 }
@@ -220,7 +220,7 @@ void apply_displacements(DomainType & domain, VectorType const & result)
 int main()
 {
   typedef viennagrid::config::tetrahedral_3d                             ConfigType;
-  typedef viennagrid::domain<viennagrid::config::tetrahedral_3d>         DomainType;
+  typedef viennagrid::result_of::domain<viennagrid::config::tetrahedral_3d>::type         DomainType;
 
   typedef viennagrid::result_of::ncell_range<DomainType, 0>::type    VertexContainer;
   typedef viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
@@ -296,8 +296,8 @@ int main()
       ++vit)
   {
     //boundary for first equation: Homogeneous Dirichlet everywhere
-    if (vit->getPoint()[0] == 0.0 || vit->getPoint()[0] == 1.0 
-      //|| vit->getPoint()[1] == 0.0 || vit->getPoint()[1] == 1.0 
+    if (vit->point()[0] == 0.0 || vit->point()[0] == 1.0 
+      //|| vit->point()[1] == 0.0 || vit->point()[1] == 1.0 
        )
       viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = true;
     else
