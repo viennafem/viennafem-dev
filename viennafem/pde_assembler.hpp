@@ -40,7 +40,7 @@
 namespace viennafem
 {
 
-  class pde_solver
+  class pde_assembler
   {
     public:
       
@@ -72,14 +72,20 @@ namespace viennafem
         typedef viennafem::boundary_key                             BoundaryKeyType;
         typedef viennafem::mapping_key                              MappingKeyType;
         
+     #ifdef VIENNAFEMDEBUG
         std::cout << "Strong form: " << pde_system.pde(0) << std::endl;
+     #endif
         EquationType weak_form_general = viennafem::make_weak_form(pde_system.pde(0));  
-        //std::cout << "* pde_solver::operator(): Using weak form general: " << weak_form_general << std::endl;
+     #ifdef VIENNAFEMDEBUG        
+        std::cout << "* pde_solver::operator(): Using weak form general: " << weak_form_general << std::endl;
+     #endif
         EquationType weak_form = viennamath::apply_coordinate_system(viennamath::cartesian<Config::dimension_tag::value>(), weak_form_general);
-        
+
+     #ifdef VIENNAFEMDEBUG        
         std::cout << "* pde_solver::operator(): Using weak form " << weak_form << std::endl;
-        
         std::cout << "* pde_solver::operator(): Write dt_dx coefficients" << std::endl;
+     #endif
+     
         //fill with cell quantities 
         CellContainer cells = viennagrid::ncells<CellTag::topology_level>(domain);
         for (CellIterator cell_iter = cells.begin();
@@ -91,17 +97,20 @@ namespace viennafem
           viennafem::dt_dx_handler<CellTag>::apply(*cell_iter);
         }
 
+     #ifdef VIENNAFEMDEBUG        
         std::cout << "* pde_solver::operator(): Create Mapping:" << std::endl;
+     #endif
         size_t map_index = create_mapping(pde_system, domain);
         
+     #ifdef VIENNAFEMDEBUG                
         std::cout << "* pde_solver::operator(): Assigned degrees of freedom in domain so far: " << map_index << std::endl;
-        
+     #endif        
         // resize global system matrix and load vector if needed:
         // TODO: This can be a performance bottleneck for large numbers of segments! (lots of resize operations...)
         if (map_index > system_matrix.size1())
         {
           MatrixType temp = system_matrix;
-          std::cout << "Resizing system matrix..." << std::endl;
+          ////std::cout << "Resizing system matrix..." << std::endl;
           system_matrix.resize(map_index, map_index, false);
           system_matrix.clear();
           system_matrix.resize(map_index, map_index, false);
@@ -119,24 +128,29 @@ namespace viennafem
         if (map_index > load_vector.size())
         {
           VectorType temp = load_vector;
+       #ifdef VIENNAFEMDEBUG                          
           std::cout << "Resizing load vector..." << std::endl;
+       #endif
           load_vector.resize(map_index, false);
           load_vector.clear();
           load_vector.resize(map_index, false);
           for (size_t i=0; i<temp.size(); ++i)
             load_vector(i) = temp(i);
         }
-        
+
+     #ifdef VIENNAFEMDEBUG                        
         std::cout << "* pde_solver::operator(): Transform to reference element" << std::endl;
-        
+     #endif
         EquationType transformed_weak_form = viennafem::transform_to_reference_cell<CellType>(weak_form, pde_system);
         
         //std::cout << "* pde_solver::operator(): Transformed weak form:" << std::endl;
         //std::cout << transformed_weak_form << std::endl;
         //std::cout << std::endl;
 
+     #ifdef VIENNAFEMDEBUG                        
         std::cout << "* pde_solver::operator(): Assemble system" << std::endl;
-        pde_assembler()(transformed_weak_form, pde_system, domain, system_matrix, load_vector);
+     #endif
+        pde_assembler_internal()(transformed_weak_form, pde_system, domain, system_matrix, load_vector);
 
       }
       

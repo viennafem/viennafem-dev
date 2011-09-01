@@ -151,7 +151,7 @@ namespace viennafem
 
 
   
-  struct pde_assembler
+  struct pde_assembler_internal
   {
     
     template <typename EquationType, typename PDESystemType, typename DomainType, typename MatrixType, typename VectorType>
