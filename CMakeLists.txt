@@ -60,14 +60,7 @@ ADD_EXECUTABLE(basic_lame examples/tutorial/basic_lame.cpp)
 ADD_EXECUTABLE(lame_3d examples/tutorial/lame_3d.cpp)
 ADD_EXECUTABLE(sshape_2d examples/tutorial/sshape_2d.cpp)
 ADD_EXECUTABLE(sshape_3d examples/tutorial/sshape_3d.cpp)
-
 ADD_EXECUTABLE(weak_forms examples/tutorial/weak_forms.cpp)
-
-IF(HDF5_FOUND)
-   ADD_EXECUTABLE(lame_3d_copy examples/tutorial/lame_3d_copy.cpp)
-   TARGET_LINK_LIBRARIES(lame_3d_copy  ${HDF5_LIBRARIES})
-ENDIF(HDF5_FOUND)
-
 #TARGET_LINK_LIBRARIES(poisson OpenCL)
 
 

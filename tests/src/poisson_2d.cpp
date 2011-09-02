@@ -179,7 +179,7 @@ int main()
   //
   // Create PDE solver functors: (discussion about proper interface required)
   //
-  viennafem::pde_solver fem_assembler;
+  viennafem::pde_assembler fem_assembler;
 
   
   //
