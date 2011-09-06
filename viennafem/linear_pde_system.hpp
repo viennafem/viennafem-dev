@@ -38,13 +38,18 @@
 
 namespace viennafem
 {
-  template <typename InterfaceType>
+  template <typename InterfaceType = viennamath::expression_interface<viennamath::default_numeric_type>, 
+            typename MappingKeyType  = viennafem::mapping_key, 
+            typename BoundaryKeyType = viennafem::boundary_key >
   class linear_pde_system
   {
     public:
-      typedef viennamath::equation<InterfaceType>    equation_type;
+      typedef InterfaceType                                 interface_type;
+      typedef MappingKeyType                                mapping_key_type;
+      typedef BoundaryKeyType                               boundary_key_type;    
+      typedef viennamath::equation<InterfaceType>           equation_type;
       typedef viennamath::function_symbol<InterfaceType>    unknown_type;
-      typedef viennafem::linear_pde_options          option_type;
+      typedef viennafem::linear_pde_options                 option_type;
       
       
       void add_pde(viennamath::equation<InterfaceType> const & pde,

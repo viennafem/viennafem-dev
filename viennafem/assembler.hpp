@@ -177,11 +177,10 @@ namespace viennafem
       typedef typename viennagrid::result_of::ncell_range<CellType, 0>::type                  VertexOnCellContainer;
       typedef typename viennagrid::result_of::iterator<VertexOnCellContainer>::type               VertexOnCellIterator;
 
-      typedef viennafem::boundary_key                             BoundaryKeyType;
-      typedef viennafem::mapping_key                              MappingKeyType;
-      typedef std::vector<long>                                   MappingContainer;
+      typedef typename PDESystemType::boundary_key_type  BoundaryKeyType;
+      typedef std::vector<long>                          MappingContainer;
       
-      typedef typename EquationType::value_type      Expression;
+      typedef typename EquationType::value_type          Expression;
       
       BoundaryKeyType bnd_key(pde_system.option(0).data_id());
 
@@ -219,8 +218,11 @@ namespace viennafem
         long local_index_i = 0;
         long local_index_j = 0;
 
-        MappingContainer map_indices_i = mapping_indices(*cell_iter, pde_system.option(0).data_id(), pde_system.unknown(0).size());
-        MappingContainer map_indices_j = mapping_indices(*cell_iter, pde_system.option(0).data_id(), pde_system.unknown(0).size());
+        MappingContainer map_indices_i = mapping_indices(pde_system, *cell_iter, 0);
+        MappingContainer map_indices_j = mapping_indices(pde_system, *cell_iter, 0);
+
+//        MappingContainer map_indices_i = mapping_indices(*cell_iter, pde_system.option(0).data_id(), pde_system.unknown(0).size());
+//        MappingContainer map_indices_j = mapping_indices(*cell_iter, pde_system.option(0).data_id(), pde_system.unknown(0).size());
         
         for (typename MappingContainer::const_iterator map_iter_i = map_indices_i.begin();
              map_iter_i != map_indices_i.end();

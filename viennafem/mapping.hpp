@@ -47,7 +47,7 @@ namespace viennafem
    * 
    */
   template <typename SystemType, typename DomainType>
-  long create_mapping(SystemType pde_system,
+  long create_mapping(SystemType & pde_system,
                       DomainType & domain)
   {
     typedef typename DomainType::config_type              Config;
@@ -59,11 +59,11 @@ namespace viennafem
     typedef typename viennagrid::result_of::ncell_range<DomainType, 0>::type                VertexContainer;
     typedef typename viennagrid::result_of::iterator<VertexContainer>::type                     VertexIterator;
 
-    typedef viennafem::boundary_key                             BoundaryKeyType;
-    typedef viennafem::mapping_key                              MappingKeyType;
+    typedef typename SystemType::mapping_key_type   MappingKeyType;
+    typedef typename SystemType::boundary_key_type  BoundaryKeyType;
     
     BoundaryKeyType bnd_key(pde_system.option(0).data_id());
-    MappingKeyType map_key(pde_system.option(0).data_id());
+    MappingKeyType  map_key(pde_system.option(0).data_id());
     
     long start_index = viennadata::access<MappingKeyType, long>(map_key)(extract_domain<DomainType>::apply(domain));
     long map_index = start_index;
@@ -118,11 +118,9 @@ namespace viennafem
   
 
   /** @brief Returns an array of mapping indices 
-   *  @param cell      The cell for which the mapping indices should be returned
-   *  @param space_id  Accessor ID for retrieving the mapping key
    */
-  template <typename CellType>
-  std::vector<long> mapping_indices(CellType const & cell, long space_id, long unknown_components)
+  template < typename SystemType, typename CellType>
+  std::vector<long> mapping_indices(SystemType & pde_system, CellType const & cell, std::size_t pdeid = 0)
   {
     typedef typename CellType::config_type              Config;
     typedef typename Config::cell_tag                     CellTag;
@@ -130,14 +128,16 @@ namespace viennafem
     typedef typename viennagrid::result_of::const_ncell_range<CellType, 0>::type                  VertexOnCellContainer;
     typedef typename viennagrid::result_of::iterator<VertexOnCellContainer>::type               VertexOnCellIterator;
 
-    typedef viennafem::mapping_key                              MappingKeyType;
+    typedef typename SystemType::mapping_key_type   MappingKeyType;
     typedef std::vector<long>                                   MappingContainer;
     
-    //std::cout << "* mapping_indices() with space_id = " << space_id << " and unknown_components = " << unknown_components << std::endl;
-    
-    MappingKeyType map_key(space_id);
+   
+    MappingKeyType map_key(pde_system.option(pdeid).data_id());
 
     VertexOnCellContainer vertices_on_cell = viennagrid::ncells<0>(cell);
+    
+    std::size_t unknown_components = pde_system.unknown(pdeid).size();
+    //std::cout << "* mapping_indices() with space_id = " << space_id << " and unknown_components = " << unknown_components << std::endl;
     
     MappingContainer ret(viennagrid::topology::subcell_desc<CellTag, 0>::num_elements * unknown_components);
     
@@ -150,18 +150,61 @@ namespace viennafem
       
       if (map_base < 0) //Dirichlet boundary
       {
-        for (long i=0; i<unknown_components; ++i)
+        for (std::size_t i=0; i<unknown_components; ++i)
           ret[local_index++] = map_base;
       }
       else
       {
-        for (long i=0; i<unknown_components; ++i)
+        for (std::size_t i=0; i<unknown_components; ++i)
           ret[local_index++] = map_base + i;
       }
     }
    
     return ret; //TODO: Avoid temporary
-  }
+  }   
+   
+//   
+//  template <typename CellType, typename MappingKeyType>
+//  std::vector<long> mapping_indices(CellType const & cell, long space_id, long unknown_components)
+//  {
+//    typedef typename CellType::config_type              Config;
+//    typedef typename Config::cell_tag                     CellTag;
+//    
+//    typedef typename viennagrid::result_of::const_ncell_range<CellType, 0>::type                  VertexOnCellContainer;
+//    typedef typename viennagrid::result_of::iterator<VertexOnCellContainer>::type               VertexOnCellIterator;
+
+//    typedef viennafem::mapping_key                              MappingKeyType;
+//    typedef std::vector<long>                                   MappingContainer;
+//    
+//    //std::cout << "* mapping_indices() with space_id = " << space_id << " and unknown_components = " << unknown_components << std::endl;
+//    
+//    MappingKeyType map_key(space_id);
+
+//    VertexOnCellContainer vertices_on_cell = viennagrid::ncells<0>(cell);
+//    
+//    MappingContainer ret(viennagrid::topology::subcell_desc<CellTag, 0>::num_elements * unknown_components);
+//    
+//    long local_index = 0;
+//    for (VertexOnCellIterator vocit = vertices_on_cell.begin();
+//                              vocit != vertices_on_cell.end();
+//                              ++vocit)
+//    {
+//      long map_base = viennadata::access<MappingKeyType, long>(map_key)(*vocit);
+//      
+//      if (map_base < 0) //Dirichlet boundary
+//      {
+//        for (long i=0; i<unknown_components; ++i)
+//          ret[local_index++] = map_base;
+//      }
+//      else
+//      {
+//        for (long i=0; i<unknown_components; ++i)
+//          ret[local_index++] = map_base + i;
+//      }
+//    }
+//   
+//    return ret; //TODO: Avoid temporary
+//  }
   
   
 /*  

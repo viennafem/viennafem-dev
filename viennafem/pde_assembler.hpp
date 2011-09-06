@@ -37,6 +37,8 @@
 //ViennaGrid includes:
 #include "viennagrid/domain.hpp"
 
+#define VIENNAFEMDEBUG
+
 namespace viennafem
 {
 
@@ -68,9 +70,6 @@ namespace viennafem
         
         typedef typename SystemType::equation_type                  EquationType;
         typedef typename SystemType::equation_type::value_type      Expression;
-        
-        typedef viennafem::boundary_key                             BoundaryKeyType;
-        typedef viennafem::mapping_key                              MappingKeyType;
         
      #ifdef VIENNAFEMDEBUG
         std::cout << "Strong form: " << pde_system.pde(0) << std::endl;
