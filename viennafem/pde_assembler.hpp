@@ -57,12 +57,12 @@ namespace viennafem
         typedef typename Config::cell_tag                     CellTag;
         
         typedef typename viennagrid::result_of::point<Config>::type                            PointType;
-        typedef typename viennagrid::result_of::ncell<Config, CellTag::topology_level>::type   CellType;
+        typedef typename viennagrid::result_of::ncell<Config, CellTag::dim>::type   CellType;
 
         typedef typename viennagrid::result_of::ncell_range<DomainType, 0>::type                VertexContainer;
         typedef typename viennagrid::result_of::iterator<VertexContainer>::type                     VertexIterator;
 
-        typedef typename viennagrid::result_of::ncell_range<DomainType, CellTag::topology_level>::type    CellContainer;
+        typedef typename viennagrid::result_of::ncell_range<DomainType, CellTag::dim>::type    CellContainer;
         typedef typename viennagrid::result_of::iterator<CellContainer>::type                                 CellIterator;
 
         typedef typename viennagrid::result_of::ncell_range<CellType, 0>::type                  VertexOnCellContainer;
@@ -78,7 +78,7 @@ namespace viennafem
      #ifdef VIENNAFEMDEBUG        
         std::cout << "* pde_solver::operator(): Using weak form general: " << weak_form_general << std::endl;
      #endif
-        EquationType weak_form = viennamath::apply_coordinate_system(viennamath::cartesian<Config::dimension_tag::value>(), weak_form_general);
+        EquationType weak_form = viennamath::apply_coordinate_system(viennamath::cartesian<Config::coordinate_system_tag::dim>(), weak_form_general);
 
      #ifdef VIENNAFEMDEBUG        
         std::cout << "* pde_solver::operator(): Using weak form " << weak_form << std::endl;
@@ -86,7 +86,7 @@ namespace viennafem
      #endif
      
         //fill with cell quantities 
-        CellContainer cells = viennagrid::ncells<CellTag::topology_level>(domain);
+        CellContainer cells = viennagrid::ncells<CellTag::dim>(domain);
         for (CellIterator cell_iter = cells.begin();
             cell_iter != cells.end();
             ++cell_iter)

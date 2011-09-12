@@ -166,7 +166,7 @@ namespace viennafem
   EquationType transform_to_reference_cell(EquationType const & weak_form,
                                            PDESystemType const & pde_system)
   {
-    return  transform_to_reference_cell<CellType>(weak_form, pde_system, typename CellType::element_tag());
+    return  transform_to_reference_cell<CellType>(weak_form, pde_system, typename CellType::tag());
   }
   
 

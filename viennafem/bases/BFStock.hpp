@@ -362,9 +362,9 @@ namespace viennafem
   template <typename AssemblyCellType,
               long topolevel, long current_element_id,
               bool increment_possible =
-                  (viennagrid::topology::subcell_desc< typename AssemblyCellType::ElementTag,
+                  (viennagrid::topology::bndcells< typename AssemblyCellType::ElementTag,
                                   topolevel
-                                >::num_elements - current_element_id > 1)
+                                >::num - current_element_id > 1)
             >
   struct BfIDIncrementer_element_id
   {
