@@ -28,16 +28,16 @@
 #include "viennafem/assembler.hpp"
 
 
-//ViennaMath includes:
+////ViennaMath includes:
 #include "viennamath/manipulation/apply_coordinate_system.hpp"
 
-//ViennaData includes:
+////ViennaData includes:
 #include "viennadata/api.hpp"
 
-//ViennaGrid includes:
+////ViennaGrid includes:
 #include "viennagrid/domain.hpp"
 
-#define VIENNAFEMDEBUG
+//#define VIENNAFEMDEBUG
 
 namespace viennafem
 {
@@ -46,11 +46,10 @@ namespace viennafem
   {
     public:
       
-      template <typename SystemType, typename DomainType, typename MatrixType, typename VectorType>  //template for operator()
+      template <typename SystemType, typename DomainType, typename LinSolverT>  //template for operator()
       void operator()(SystemType pde_system,
                       DomainType & domain,
-                      MatrixType & system_matrix,
-                      VectorType & load_vector
+                      LinSolverT & linsolver
                      ) const
       {
         typedef typename DomainType::config_type              Config;
@@ -106,36 +105,35 @@ namespace viennafem
      #endif        
         // resize global system matrix and load vector if needed:
         // TODO: This can be a performance bottleneck for large numbers of segments! (lots of resize operations...)
-        if (map_index > system_matrix.size1())
-        {
-          MatrixType temp = system_matrix;
-          ////std::cout << "Resizing system matrix..." << std::endl;
-          system_matrix.resize(map_index, map_index, false);
-          system_matrix.clear();
-          system_matrix.resize(map_index, map_index, false);
-          for (typename MatrixType::iterator1 row_it = temp.begin1();
-               row_it != temp.end1();
-               ++row_it)
-          {
-            for (typename MatrixType::iterator2 col_it = row_it.begin();
-                 col_it != row_it.end();
-                 ++col_it)
-                 system_matrix(col_it.index1(), col_it.index2()) = *col_it;
-          }
-        }
-        
-        if (map_index > load_vector.size())
-        {
-          VectorType temp = load_vector;
-       #ifdef VIENNAFEMDEBUG                          
-          std::cout << "Resizing load vector..." << std::endl;
-       #endif
-          load_vector.resize(map_index, false);
-          load_vector.clear();
-          load_vector.resize(map_index, false);
-          for (size_t i=0; i<temp.size(); ++i)
-            load_vector(i) = temp(i);
-        }
+////        if (map_index > system_matrix.size1())
+////        {
+////          MatrixType temp = system_matrix;
+////          ////std::cout << "Resizing system matrix..." << std::endl;
+////          system_matrix.resize(map_index, map_index, false);
+////          system_matrix.clear();
+////          system_matrix.resize(map_index, map_index, false);
+////          for (typename MatrixType::iterator1 row_it = temp.begin1();
+////               row_it != temp.end1();
+////               ++row_it)
+////          {
+////            for (typename MatrixType::iterator2 col_it = row_it.begin();
+////                 col_it != row_it.end();
+////                 ++col_it)
+////                 system_matrix(col_it.index1(), col_it.index2()) = *col_it;
+////          }
+////        }
+////        if (map_index > load_vector.size())
+////        {
+////          VectorType temp = load_vector;
+////       #ifdef VIENNAFEMDEBUG                          
+////          std::cout << "Resizing load vector..." << std::endl;
+////       #endif
+////          load_vector.resize(map_index, false);
+////          load_vector.clear();
+////          load_vector.resize(map_index, false);
+////          for (size_t i=0; i<temp.size(); ++i)
+////            load_vector(i) = temp(i);
+////        }
 
      #ifdef VIENNAFEMDEBUG                        
         std::cout << "* pde_solver::operator(): Transform to reference element" << std::endl;
@@ -149,7 +147,7 @@ namespace viennafem
      #ifdef VIENNAFEMDEBUG                        
         std::cout << "* pde_solver::operator(): Assemble system" << std::endl;
      #endif
-        pde_assembler_internal()(transformed_weak_form, pde_system, domain, system_matrix, load_vector);
+        pde_assembler_internal()(transformed_weak_form, pde_system, domain, linsolver);
 
       }
       
