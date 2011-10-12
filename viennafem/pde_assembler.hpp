@@ -56,7 +56,7 @@ namespace viennafem
     template<typename IndexT, typename NumericT>
     inline void add(IndexT col, IndexT row, NumericT value)
     {
-      matrix(col,row) = value;
+      matrix(col,row) += value;
     }
 
     MatrixT& matrix; 
@@ -283,6 +283,7 @@ namespace viennafem
         wrapper_type wrapper(system_matrix, load_vector);
      
         pde_assembler_internal()(transformed_weak_form, pde_system, domain, wrapper);
+//        pde_assembler_internal()(transformed_weak_form, pde_system, domain, system_matrix, load_vector);
 
       }
       
