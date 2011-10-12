@@ -154,11 +154,11 @@ namespace viennafem
   struct pde_assembler_internal
   {
     
-    template <typename EquationType, typename PDESystemType, typename DomainType, typename LinSolverT>
+    template <typename EquationType, typename PDESystemType, typename DomainType, typename LinerSystemT>
     void operator()(EquationType const & transformed_weak_form,
                     PDESystemType const & pde_system,
                     DomainType & domain,
-                    LinSolverT & linsolver
+                    LinerSystemT & linear_system
                    ) const
     {
       typedef typename DomainType::config_type              Config;
@@ -246,7 +246,7 @@ namespace viennafem
             if (global_index_j == -1)
             {
               //load_vector(global_index_i) -= 
-               linsolver(global_index_i) -=
+               linear_system(global_index_i) -=
                 viennadata::access<BoundaryKeyType, double>(bnd_key)(*vocit) *
                 viennafem::eval_element_matrix_entry(local_weak_form[local_index_i][local_index_j].lhs(), CellTag()) * det_dF_dt.eval(1.0); 
             }
@@ -255,7 +255,7 @@ namespace viennafem
               //std::cout << " Evaluating LHS: " << local_weak_form[local_index_i][local_index_j].lhs() << std::endl;
               //system_matrix(global_index_i, global_index_j) += 
               //  viennafem::eval_element_matrix_entry(local_weak_form[local_index_i][local_index_j].lhs(), CellTag()) * det_dF_dt.eval(1.0); 
-               linsolver.add(
+               linear_system.add(
                   global_index_i, 
                   global_index_j, 
                   viennafem::eval_element_matrix_entry(local_weak_form[local_index_i][local_index_j].lhs(), CellTag()) * det_dF_dt.eval(1.0)    
@@ -268,7 +268,7 @@ namespace viennafem
           //std::cout << "Evaluating RHS: " << local_weak_form[local_index_i][0].rhs() << std::endl;
           
           //load_vector(global_index_i) += 
-          linsolver(global_index_i) += 
+          linear_system(global_index_i) += 
             viennafem::eval_element_vector_entry(local_weak_form[local_index_i][0].rhs(), CellTag()) * det_dF_dt.eval(1.0); 
         }
       }
