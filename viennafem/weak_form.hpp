@@ -122,6 +122,8 @@ namespace viennafem
         typedef typename InterfaceType::numeric_type   NumericType;
         typedef viennamath::op_binary<viennamath::op_plus<NumericType>, InterfaceType>   PlusOperatorType;
         typedef viennamath::op_binary<viennamath::op_minus<NumericType>, InterfaceType>  MinusOperatorType;
+        typedef viennamath::op_binary<viennamath::op_mult<NumericType>, InterfaceType>   ProductOperatorType;
+        typedef viennamath::op_binary<viennamath::op_div<NumericType>, InterfaceType>  DivisionOperatorType;
         
         if (    dynamic_cast<const PlusOperatorType *>(bin.op()) != NULL
              || dynamic_cast<const MinusOperatorType *>(bin.op()) != NULL) //integration is additive :-)
@@ -132,7 +134,33 @@ namespace viennafem
                                                                        bin.op()->clone(),
                                                                        bin.rhs()->recursive_manipulation(manipulator));
         }
-        else
+        else if (dynamic_cast<const ProductOperatorType *>(bin.op()) != NULL
+                  || dynamic_cast<const DivisionOperatorType *>(bin.op()) != NULL)
+        {
+          //handle the cases const * div(...) and div(...) * const
+          
+          if (bin.lhs()->is_constant())
+          {
+            viennamath::manipulation_wrapper<InterfaceType> manipulator(new weak_form_creator<InterfaceType>());
+            //Note: In the following, directly passing *this is not possible due to the need for a wrapper...
+            integrated_expr = new viennamath::binary_expr<InterfaceType>(bin.lhs()->clone(),
+                                                                         bin.op()->clone(),
+                                                                         bin.rhs()->recursive_manipulation(manipulator));
+          }
+          else if (bin.rhs()->is_constant())
+          {
+            viennamath::manipulation_wrapper<InterfaceType> manipulator(new weak_form_creator<InterfaceType>());
+            //Note: In the following, directly passing *this is not possible due to the need for a wrapper...
+            integrated_expr = new viennamath::binary_expr<InterfaceType>(bin.lhs()->recursive_manipulation(manipulator),
+                                                                         bin.op()->clone(),
+                                                                         bin.rhs()->clone());
+          }
+          else
+          {
+            throw "cannot derive weak form!";
+          }
+        }
+        else //TODO: Add checks!
         {
           //multiply with test function and integrate
           viennamath::function_symbol<InterfaceType> test_func(0, viennamath::test_tag<0>());
