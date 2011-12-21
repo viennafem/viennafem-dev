@@ -182,6 +182,8 @@ namespace viennafem
       typedef typename EquationType::value_type          Expression;
       
       BoundaryKeyType bnd_key(pde_system.option(0).data_id());
+      
+      std::cout << "Number of components: " << pde_system.unknown(0).size() << std::endl;
 
       
       //Set up element representations:
@@ -235,10 +237,19 @@ namespace viennafem
           VertexOnCellContainer vertices_on_cell = viennagrid::ncells<0>(*cell_iter);
           VertexOnCellIterator vocit = vertices_on_cell.begin();
           local_index_j = 0;
+          bool first_run = true;
           for (typename MappingContainer::const_iterator map_iter_j = map_indices_j.begin();
                map_iter_j != map_indices_j.end();
-               ++map_iter_j, ++local_index_j, ++vocit)
+               ++map_iter_j, ++local_index_j)
           {
+            if ((local_index_j % pde_system.unknown(0).size()) == 0)
+            {
+              if (first_run)
+                first_run = false;
+              else
+                ++vocit;
+            }
+            
             global_index_j = *map_iter_j;
             //std::cout << " glob_j: " << global_index_j << std::endl;
             local_weak_form[local_index_i][local_index_j].lhs().get()->recursive_traversal(updater);
@@ -246,9 +257,23 @@ namespace viennafem
             if (global_index_j == -1)
             {
               //load_vector(global_index_i) -= 
+              if (pde_system.unknown(0).size() == 1) //scalar valued unknowns
+              {
                linear_system(global_index_i) -=
                 viennadata::access<BoundaryKeyType, double>(bnd_key)(*vocit) *
                 viennafem::eval_element_matrix_entry(local_weak_form[local_index_i][local_index_j].lhs(), CellTag()) * det_dF_dt.eval(1.0); 
+              }
+              else //vector valued unknowns
+              {
+                std::vector<double> const & bnd_values = viennadata::access<BoundaryKeyType, std::vector<double> >(bnd_key)(*vocit);
+                
+                if (bnd_values.size() > 1) //allow homogeneous case without having the data vector initialized
+                {
+                  linear_system(global_index_i) -=
+                    bnd_values[local_index_j % pde_system.unknown(0).size()] *
+                    viennafem::eval_element_matrix_entry(local_weak_form[local_index_i][local_index_j].lhs(), CellTag()) * det_dF_dt.eval(1.0); 
+                }
+              }
             }
             else
             {

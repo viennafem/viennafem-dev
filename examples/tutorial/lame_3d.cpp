@@ -214,6 +214,15 @@ void apply_displacements(DomainType & domain, VectorType const & result)
       vit->point()[1] = vit->point()[1] + result[cur_index+1];
       vit->point()[2] = vit->point()[2] + result[cur_index+2];
     }
+    else
+    {
+      if (viennadata::access<BoundaryKeyType, std::vector<double> >(bnd_key)(*vit).size() > 0)
+      {
+        vit->point()[0] += viennadata::access<BoundaryKeyType, std::vector<double> >(bnd_key)(*vit)[0];
+        vit->point()[1] += viennadata::access<BoundaryKeyType, std::vector<double> >(bnd_key)(*vit)[1];
+        vit->point()[2] += viennadata::access<BoundaryKeyType, std::vector<double> >(bnd_key)(*vit)[2];
+      }
+    }
   }
 }
 
@@ -290,6 +299,9 @@ int main()
   std::cout << "Weak form of Lame equation: " << std::endl;
   std::cout << weak_form_lame << std::endl;
   
+  std::vector<double> bnd_data_right(3);
+  bnd_data_right[0] = 0.2; //small displacement into x-direction prescribed
+  
   VertexContainer vertices = viennagrid::ncells<0>(my_domain);
   for (VertexIterator vit = vertices.begin();
       vit != vertices.end();
@@ -302,6 +314,12 @@ int main()
       viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = true;
     else
       viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = false;
+    
+    if (vit->point()[0] == 1.0)
+    {
+      viennadata::access<BoundaryKey, std::vector<double> >(BoundaryKey(0))(*vit) = bnd_data_right; //this is the boundary data
+      viennadata::access<BoundaryKey, double>(BoundaryKey(0))(*vit) = bnd_data_right[0]; //this is for the moment used for the VTK writer
+    }
   }
   
   //
