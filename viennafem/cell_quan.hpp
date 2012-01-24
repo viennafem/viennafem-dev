@@ -173,40 +173,40 @@ namespace viennafem
   
   
   template <typename CellType, typename InterfaceType>
-  viennamath::expr<InterfaceType> operator*(viennamath::variable<InterfaceType> const & lhs,
+  viennamath::rt_expr<InterfaceType> operator*(viennamath::rt_variable<InterfaceType> const & lhs,
                                cell_quan<CellType, InterfaceType> const & rhs)
   {
-    return viennamath::expr<InterfaceType>(new viennamath::binary_expr<InterfaceType>(lhs.clone(),
+    return viennamath::rt_expr<InterfaceType>(new viennamath::rt_binary_expr<InterfaceType>(lhs.clone(),
                                                             new viennamath::op_binary<viennamath::op_mult<viennamath::default_numeric_type>, InterfaceType >(),
                                                             rhs.clone())); 
   }
   
   
   template <typename CellType, typename InterfaceType>
-  viennamath::expr<InterfaceType> operator*(viennamath::expr<InterfaceType> const & lhs,
+  viennamath::rt_expr<InterfaceType> operator*(viennamath::rt_expr<InterfaceType> const & lhs,
                                cell_quan<CellType, InterfaceType> const & rhs)
   {
-    return viennamath::expr<InterfaceType>(new viennamath::binary_expr<InterfaceType>(lhs.get()->clone(),
+    return viennamath::rt_expr<InterfaceType>(new viennamath::rt_binary_expr<InterfaceType>(lhs.get()->clone(),
                                                             new viennamath::op_binary<viennamath::op_mult<viennamath::default_numeric_type>, InterfaceType >(),
                                                             rhs.clone())); 
   }
   
   template <typename CellType, typename InterfaceType>
-  viennamath::expr<InterfaceType> operator*(cell_quan<CellType, InterfaceType> const & lhs,
-                                            viennamath::unary_expr<InterfaceType> const & rhs
+  viennamath::rt_expr<InterfaceType> operator*(cell_quan<CellType, InterfaceType> const & lhs,
+                                            viennamath::rt_unary_expr<InterfaceType> const & rhs
                                )
   {
-    return viennamath::expr<InterfaceType>(new viennamath::binary_expr<InterfaceType>(lhs.clone(),
+    return viennamath::rt_expr<InterfaceType>(new viennamath::rt_binary_expr<InterfaceType>(lhs.clone(),
                                                             new viennamath::op_binary<viennamath::op_mult<viennamath::default_numeric_type>, InterfaceType >(),
                                                             rhs.clone())); 
   }
 
   template <typename CellType, typename InterfaceType>
-  viennamath::expr<InterfaceType> operator*(cell_quan<CellType, InterfaceType> const & lhs,
-                                            viennamath::binary_expr<InterfaceType> const & rhs
+  viennamath::rt_expr<InterfaceType> operator*(cell_quan<CellType, InterfaceType> const & lhs,
+                                            viennamath::rt_binary_expr<InterfaceType> const & rhs
                                )
   {
-    return viennamath::expr<InterfaceType>(new viennamath::binary_expr<InterfaceType>(lhs.clone(),
+    return viennamath::rt_expr<InterfaceType>(new viennamath::rt_binary_expr<InterfaceType>(lhs.clone(),
                                                             new viennamath::op_binary<viennamath::op_mult<viennamath::default_numeric_type>, InterfaceType >(),
                                                             rhs.clone())); 
   }

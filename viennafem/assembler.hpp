@@ -128,7 +128,7 @@ namespace viennafem
   
   
   template <typename CellType, typename InterfaceType>
-  struct cell_updater : public viennamath::traversal_interface<>
+  struct cell_updater : public viennamath::rt_traversal_interface<>
   {
     public:
       cell_updater(CellType const & cell) : cell_(cell) {}
@@ -209,7 +209,7 @@ namespace viennafem
       {
         //update cell_quantities:
         //std::cout << "Updating cell quantities..." << std::endl;
-        viennamath::traversal_wrapper<> updater( new cell_updater<CellType, typename EquationType::interface_type>(*cell_iter) );
+        viennamath::rt_traversal_wrapper<> updater( new cell_updater<CellType, typename EquationType::interface_type>(*cell_iter) );
         det_dF_dt.update(*cell_iter);
         
         

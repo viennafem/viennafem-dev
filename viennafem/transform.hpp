@@ -34,10 +34,10 @@ namespace viennafem
   {
     typedef typename EquationType::interface_type             InterfaceType;
     typedef typename InterfaceType::numeric_type              numeric_type;
-    typedef viennamath::function_symbol<InterfaceType>   FunctionSymbol;
-    typedef viennamath::expr<InterfaceType>              Expression;
-    typedef viennamath::unary_expr<InterfaceType>        UnaryExpression;
-    typedef viennamath::variable<InterfaceType>          Variable;
+    typedef viennamath::rt_function_symbol<InterfaceType>   FunctionSymbol;
+    typedef viennamath::rt_expr<InterfaceType>              Expression;
+    typedef viennamath::rt_unary_expr<InterfaceType>        UnaryExpression;
+    typedef viennamath::rt_variable<InterfaceType>          Variable;
     typedef viennamath::op_unary<viennamath::op_partial_deriv<viennamath::default_numeric_type>, InterfaceType >   d_dx;
     
     
@@ -88,10 +88,10 @@ namespace viennafem
                                            viennagrid::tetrahedron_tag)
   {
     typedef typename EquationType::interface_type             InterfaceType;
-    typedef viennamath::function_symbol<InterfaceType>   FunctionSymbol;
-    typedef viennamath::expr<InterfaceType>              Expression;
-    typedef viennamath::unary_expr<InterfaceType>        UnaryExpression;
-    typedef viennamath::variable<InterfaceType>          Variable;
+    typedef viennamath::rt_function_symbol<InterfaceType>   FunctionSymbol;
+    typedef viennamath::rt_expr<InterfaceType>              Expression;
+    typedef viennamath::rt_unary_expr<InterfaceType>        UnaryExpression;
+    typedef viennamath::rt_variable<InterfaceType>          Variable;
     typedef viennamath::op_unary<viennamath::op_partial_deriv<viennamath::default_numeric_type>, InterfaceType >   d_dx;
 
     
@@ -180,10 +180,10 @@ namespace viennafem
                                                )
   {
     typedef typename EquationType::interface_type             InterfaceType;
-    typedef viennamath::expr<InterfaceType>              Expression;
-    typedef viennamath::function_symbol<InterfaceType>   FunctionSymbol;
-    typedef viennamath::unary_expr<InterfaceType>        UnaryExpression;
-    typedef viennamath::variable<InterfaceType>          Variable;
+    typedef viennamath::rt_expr<InterfaceType>              Expression;
+    typedef viennamath::rt_function_symbol<InterfaceType>   FunctionSymbol;
+    typedef viennamath::rt_unary_expr<InterfaceType>        UnaryExpression;
+    typedef viennamath::rt_variable<InterfaceType>          Variable;
     typedef viennamath::op_unary<viennamath::op_partial_deriv<viennamath::default_numeric_type>, InterfaceType >   d_dx;
     
     std::vector< FunctionSymbol > u(trial_func.size());
@@ -254,10 +254,10 @@ namespace viennafem
                                                )
   {
     typedef typename EquationType::interface_type             InterfaceType;
-    typedef viennamath::expr<InterfaceType>              Expression;
-    typedef viennamath::function_symbol<InterfaceType>   FunctionSymbol;
-    typedef viennamath::unary_expr<InterfaceType>        UnaryExpression;
-    typedef viennamath::variable<InterfaceType>          Variable;
+    typedef viennamath::rt_expr<InterfaceType>              Expression;
+    typedef viennamath::rt_function_symbol<InterfaceType>   FunctionSymbol;
+    typedef viennamath::rt_unary_expr<InterfaceType>        UnaryExpression;
+    typedef viennamath::rt_variable<InterfaceType>          Variable;
     typedef viennamath::op_unary<viennamath::op_partial_deriv<viennamath::default_numeric_type>, InterfaceType >   d_dx;
     
     std::vector< FunctionSymbol > u(3);
@@ -305,7 +305,7 @@ namespace viennafem
     
     std::vector<Expression> replacements(4 * (2 + 2));
     current_index = 0;
-    viennamath::constant<double, InterfaceType> c0(0);
+    viennamath::rt_constant<double, InterfaceType> c0(0);
     for (size_t i=0; i<3; ++i)
     {      
       if (i != index_j)

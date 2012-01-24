@@ -126,8 +126,8 @@ int main()
   typedef boost::numeric::ublas::compressed_matrix<viennafem::numeric_type>  MatrixType;
   typedef boost::numeric::ublas::vector<viennafem::numeric_type>             VectorType;
 
-  typedef viennamath::function_symbol<>   FunctionSymbol;
-  typedef viennamath::equation<>          Equation;
+  typedef viennamath::function_symbol   FunctionSymbol;
+  typedef viennamath::equation          Equation;
   
   typedef viennafem::boundary_key      BoundaryKey;
   
@@ -153,14 +153,14 @@ int main()
   //
   FunctionSymbol u(0, viennamath::unknown_tag<>());   //an unknown function used for PDE specification
   FunctionSymbol v(0, viennamath::test_tag<>());   //an unknown function used for PDE specification
-  viennafem::cell_quan<CellType, viennamath::expr<>::interface_type>  permittivity; permittivity.wrap( permittivity_key() );  
+  viennafem::cell_quan<CellType, viennamath::expr::interface_type>  permittivity; permittivity.wrap( permittivity_key() );  
 
   //the strong form (not yet functional because of ViennaMath limitations)
   //Equation poisson_equ = viennamath::make_equation( viennamath::div(permittivity * viennamath::grad(u)), 0);
 
   //the weak form:
   Equation poisson_equ = viennamath::make_equation( 
-                          viennamath::integral(viennamath::Omega(),
+                          viennamath::integral(viennamath::symbolic_interval(),
                                                permittivity * (viennamath::grad(u) * viennamath::grad(v)),
                                                viennamath::symbolic_tag()),
                           0);

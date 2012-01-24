@@ -36,9 +36,9 @@ namespace viennafem
     std::vector<ExpressionType> ret(4);
     
     //std::cout << "get_basisfunctions: Creating variables" << std::endl;
-    viennamath::variable<InterfaceType> x(0);
-    viennamath::variable<InterfaceType> y(1);
-    viennamath::variable<InterfaceType> z(2);
+    viennamath::rt_variable<InterfaceType> x(0);
+    viennamath::rt_variable<InterfaceType> y(1);
+    viennamath::rt_variable<InterfaceType> z(2);
     
     //std::cout << "get_basisfunctions: filling 0" << std::endl;
     ret[0] = ExpressionType(1.0 - x - y - z);

@@ -67,14 +67,14 @@ using namespace viennamath;
 // The strain tensor: eps_ij = 0.5 * (du_i/dx_j + du_j/dx_i)
 // 
 template <typename InterfaceType>
-std::vector< expr<InterfaceType> > strain_tensor(std::vector< function_symbol<InterfaceType> > const & u)
+std::vector< rt_expr<InterfaceType> > strain_tensor(std::vector< rt_function_symbol<InterfaceType> > const & u)
 {
-  typedef variable<InterfaceType>     Variable;
+  typedef rt_variable<InterfaceType>     Variable;
   
   //
   // a 3x3 matrix representing the strain tensor
   //
-  std::vector< expr<InterfaceType> > result(9);
+  std::vector< rt_expr<InterfaceType> > result(9);
   
   Variable x(0);
   Variable y(1);
@@ -104,13 +104,13 @@ std::vector< expr<InterfaceType> > strain_tensor(std::vector< function_symbol<In
 // can be replaced with other expressions for plasticity and the like
 // 
 template <typename InterfaceType>
-std::vector< expr<InterfaceType> > stress_tensor(std::vector< function_symbol<InterfaceType> > const & v)
+std::vector< rt_expr<InterfaceType> > stress_tensor(std::vector< rt_function_symbol<InterfaceType> > const & v)
 {
   //
   // a 3x3 matrix representing the stress tensor
   //
-  std::vector< expr<InterfaceType> > result(9);
-  std::vector< expr<InterfaceType> > strain = strain_tensor(v);
+  std::vector< rt_expr<InterfaceType> > result(9);
+  std::vector< rt_expr<InterfaceType> > strain = strain_tensor(v);
 
   double mu = 0.5;
   double lambda = 1;
@@ -136,9 +136,9 @@ std::vector< expr<InterfaceType> > stress_tensor(std::vector< function_symbol<In
 
 
 template <typename InterfaceType>
-expr<InterfaceType> tensor_reduce(std::vector< expr<InterfaceType> > lhs, std::vector< expr<InterfaceType> > rhs)
+rt_expr<InterfaceType> tensor_reduce(std::vector< rt_expr<InterfaceType> > lhs, std::vector< rt_expr<InterfaceType> > rhs)
 {
-  expr<InterfaceType> ret = lhs[0] * rhs[0];
+  rt_expr<InterfaceType> ret = lhs[0] * rhs[0];
   
   for (size_t i=1; i<rhs.size(); ++i)
     ret = ret + lhs[i] * rhs[i];
@@ -238,9 +238,9 @@ int main()
   typedef boost::numeric::ublas::compressed_matrix<viennafem::numeric_type>  MatrixType;
   typedef boost::numeric::ublas::vector<viennafem::numeric_type>             VectorType;
   
-  typedef viennamath::function_symbol<>   FunctionSymbol;
-  typedef viennamath::equation<>          Equation;
-  typedef viennamath::expr<>              Expression;
+  typedef viennamath::function_symbol   FunctionSymbol;
+  typedef viennamath::equation          Equation;
+  typedef viennamath::expr              Expression;
 
   typedef viennafem::boundary_key      BoundaryKey;
   
@@ -291,9 +291,9 @@ int main()
   std::vector< Expression > strain = strain_tensor(u);
   std::vector< Expression > stress = stress_tensor(v);
   
-  Equation weak_form_lame = make_equation( integral(Omega(), tensor_reduce( strain, stress ), symbolic_tag()),
+  Equation weak_form_lame = make_equation( integral(symbolic_interval(), tensor_reduce( strain, stress ), symbolic_tag()),
                                            //=                                         
-                                           integral(Omega(), viennamath::constant<double>(1.0) * v[2], symbolic_tag()));
+                                           integral(symbolic_interval(), viennamath::rt_constant<double>(1.0) * v[2], symbolic_tag()));
   
   
   std::cout << "Weak form of Lame equation: " << std::endl;

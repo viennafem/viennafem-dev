@@ -38,7 +38,7 @@
 
 namespace viennafem
 {
-  template <typename InterfaceType = viennamath::expression_interface<viennamath::default_numeric_type>, 
+  template <typename InterfaceType = viennamath::rt_expression_interface<viennamath::default_numeric_type>, 
             typename MappingKeyType  = viennafem::mapping_key, 
             typename BoundaryKeyType = viennafem::boundary_key >
   class linear_pde_system
@@ -47,13 +47,13 @@ namespace viennafem
       typedef InterfaceType                                 interface_type;
       typedef MappingKeyType                                mapping_key_type;
       typedef BoundaryKeyType                               boundary_key_type;    
-      typedef viennamath::equation<InterfaceType>           equation_type;
-      typedef viennamath::function_symbol<InterfaceType>    unknown_type;
+      typedef viennamath::rt_equation<InterfaceType>           equation_type;
+      typedef viennamath::rt_function_symbol<InterfaceType>    unknown_type;
       typedef viennafem::linear_pde_options                 option_type;
       
       
-      void add_pde(viennamath::equation<InterfaceType> const & pde,
-                   std::vector< viennamath::function_symbol<InterfaceType> > const & unknown,
+      void add_pde(viennamath::rt_equation<InterfaceType> const & pde,
+                   std::vector< viennamath::rt_function_symbol<InterfaceType> > const & unknown,
                    viennafem::linear_pde_options const & option)
       {
         pdes_.push_back(pde); 
@@ -61,34 +61,34 @@ namespace viennafem
         options_.push_back(option);
       }
       
-      viennamath::equation<InterfaceType> pde(size_t index) const { return pdes_[index]; }
-      std::vector<viennamath::function_symbol<InterfaceType> > const & unknown(size_t index) const { return unknowns_[index]; }
+      viennamath::rt_equation<InterfaceType> pde(size_t index) const { return pdes_[index]; }
+      std::vector<viennamath::rt_function_symbol<InterfaceType> > const & unknown(size_t index) const { return unknowns_[index]; }
       viennafem::linear_pde_options option(size_t index) const { return options_[index]; }
       
       size_t size() const { return pdes_.size(); }
       
     private:
-      std::vector<viennamath::equation<InterfaceType> >                       pdes_;
-      std::vector<std::vector<viennamath::function_symbol<InterfaceType> > >  unknowns_;
+      std::vector<viennamath::rt_equation<InterfaceType> >                       pdes_;
+      std::vector<std::vector<viennamath::rt_function_symbol<InterfaceType> > >  unknowns_;
       std::vector<viennafem::linear_pde_options>                              options_;
   };
   
   
   template <typename InterfaceType>
-  linear_pde_system<InterfaceType> make_linear_pde_system(viennamath::equation<InterfaceType> equ_1,
-                                                          viennamath::function_symbol<InterfaceType> unknown_1,
+  linear_pde_system<InterfaceType> make_linear_pde_system(viennamath::rt_equation<InterfaceType> equ_1,
+                                                          viennamath::rt_function_symbol<InterfaceType> unknown_1,
                                                           viennafem::linear_pde_options options_1)
   {
     linear_pde_system<InterfaceType> ret;
-    std::vector<viennamath::function_symbol<InterfaceType> > unknown_vec_1(1);
+    std::vector<viennamath::rt_function_symbol<InterfaceType> > unknown_vec_1(1);
     unknown_vec_1[0] = unknown_1;
     ret.add_pde(equ_1, unknown_vec_1, options_1);
     return ret;
   }
   
   template <typename InterfaceType>
-  linear_pde_system<InterfaceType> make_linear_pde_system(viennamath::equation<InterfaceType> equ_1,
-                                                          std::vector<viennamath::function_symbol<InterfaceType> > unknowns_1,
+  linear_pde_system<InterfaceType> make_linear_pde_system(viennamath::rt_equation<InterfaceType> equ_1,
+                                                          std::vector<viennamath::rt_function_symbol<InterfaceType> > unknowns_1,
                                                           viennafem::linear_pde_options options_1)
   {
     linear_pde_system<InterfaceType> ret;

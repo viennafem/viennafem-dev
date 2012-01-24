@@ -119,8 +119,8 @@ int main()
   typedef boost::numeric::ublas::compressed_matrix<viennafem::numeric_type>  MatrixType;
   typedef boost::numeric::ublas::vector<viennafem::numeric_type>             VectorType;
 
-  typedef viennamath::function_symbol<>   FunctionSymbol;
-  typedef viennamath::equation<>          Equation;
+  typedef viennamath::function_symbol   FunctionSymbol;
+  typedef viennamath::equation          Equation;
   
   typedef viennafem::boundary_key      BoundaryKey;
   

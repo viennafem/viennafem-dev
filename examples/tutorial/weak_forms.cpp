@@ -56,8 +56,8 @@ int main()
   typedef viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
   typedef viennagrid::result_of::ncell<ConfigType, 2>::type              CellType;
   
-  typedef viennamath::function_symbol<>   FunctionSymbol;
-  typedef viennamath::equation<>          Equation;
+  typedef viennamath::function_symbol   FunctionSymbol;
+  typedef viennamath::equation          Equation;
   
   typedef viennafem::boundary_key      BoundaryKey;
   
@@ -107,7 +107,7 @@ int main()
   std::cout << "Weak form: " << viennafem::make_weak_form(equ_5) << std::endl;  
   std::cout << "-------------" << std::endl;
   
-  viennafem::cell_quan<CellType, viennamath::expr<>::interface_type>  permittivity; permittivity.wrap( testkey() );  
+  viennafem::cell_quan<CellType, viennamath::expr::interface_type>  permittivity; permittivity.wrap( testkey() );  
   Equation equ_6 = viennamath::make_equation( viennamath::div( permittivity * viennamath::grad(u)), -1);
   std::cout << "Strong form: " << equ_6 << std::endl;
   std::cout << "Weak form: " << viennafem::make_weak_form(equ_6) << std::endl;  

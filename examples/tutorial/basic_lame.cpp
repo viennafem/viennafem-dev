@@ -20,13 +20,13 @@ using namespace viennamath;
 //
 // The strain tensor: eps_ij = 0.5 * (du_i/dx_j + du_j/dx_i)
 // 
-std::vector< expr<> > strain_tensor(std::vector< function_symbol<> > const & u)
+std::vector< expr > strain_tensor(std::vector< function_symbol > const & u)
 {
-  std::vector< expr<> > result(9);
+  std::vector< expr > result(9);
   
-  variable<> x(0);
-  variable<> y(1);
-  variable<> z(2);
+  variable x(0);
+  variable y(1);
+  variable z(2);
   
   //first row:
   result[0] =        diff(u[0], x);
@@ -51,10 +51,10 @@ std::vector< expr<> > strain_tensor(std::vector< function_symbol<> > const & u)
 //
 // The stress tensor: sigma = 2 \mu eps + \lambda trace(eps) Id
 // 
-std::vector< expr<> > stress_tensor(std::vector< function_symbol<> > const & v)
+std::vector< expr > stress_tensor(std::vector< function_symbol > const & v)
 {
-  std::vector< expr<> > result(9);
-  std::vector< expr<> > strain = strain_tensor(v);
+  std::vector< expr > result(9);
+  std::vector< expr > strain = strain_tensor(v);
 
   double mu = 1;
   
@@ -72,9 +72,9 @@ std::vector< expr<> > stress_tensor(std::vector< function_symbol<> > const & v)
 }
 
 
-expr<> tensor_reduce(std::vector< expr<> > lhs, std::vector< expr<> > rhs)
+expr tensor_reduce(std::vector< expr > lhs, std::vector< expr > rhs)
 {
-  expr<> ret = constant<double>(0);
+  expr ret = constant(0);
   
   for (size_t i=0; i<rhs.size(); ++i)
     ret = ret + lhs[i] * rhs[i];
@@ -84,19 +84,19 @@ expr<> tensor_reduce(std::vector< expr<> > lhs, std::vector< expr<> > rhs)
 
 
 
-void print_entry(expr<> const & e, size_t test_index, size_t unknown_index)
+void print_entry(expr const & e, size_t test_index, size_t unknown_index)
 {
-    std::vector<viennamath::expr<> > basisfuncs(4);
+    std::vector<expr > basisfuncs(4);
     
-    function_symbol<> u1(0, unknown_tag<>());   //an unknown function
-    function_symbol<> u2(1, unknown_tag<>());   //an unknown function
-    function_symbol<> u3(2, unknown_tag<>());   //an unknown function
+    function_symbol u1(0, unknown_tag<>());   //an unknown function
+    function_symbol u2(1, unknown_tag<>());   //an unknown function
+    function_symbol u3(2, unknown_tag<>());   //an unknown function
     
-    function_symbol<>    v1(0, test_tag<>());   //a test function (typical for FEM and FVM)
-    function_symbol<>    v2(1, test_tag<>());   //a test function (typical for FEM and FVM)
-    function_symbol<>    v3(2, test_tag<>());   //a test function (typical for FEM and FVM)
+    function_symbol v1(0, test_tag<>());   //a test function (typical for FEM and FVM)
+    function_symbol v2(1, test_tag<>());   //a test function (typical for FEM and FVM)
+    function_symbol v3(2, test_tag<>());   //a test function (typical for FEM and FVM)
     
-    expr<> result = e;
+    expr result = e;
     //constant<default_numeric_type> zero(0);
   
     if (unknown_index != 0)
@@ -132,31 +132,31 @@ int main()
   std::cout << "*****     Demo for ViennaMath with FEM     *****" << std::endl;
   std::cout << "************************************************" << std::endl;
 
-  function_symbol<> u1(0, unknown_tag<>());   //an unknown function
-  function_symbol<> u2(1, unknown_tag<>());   //an unknown function
-  function_symbol<> u3(2, unknown_tag<>());   //an unknown function
+  function_symbol u1(0, unknown_tag<>());   //an unknown function
+  function_symbol u2(1, unknown_tag<>());   //an unknown function
+  function_symbol u3(2, unknown_tag<>());   //an unknown function
 
-  function_symbol<> u_phi(42, unknown_tag<>());   //an unknown function
+  function_symbol u_phi(42, unknown_tag<>());   //an unknown function
 
-  std::vector< function_symbol<> > u(3);
+  std::vector<function_symbol> u(3);
   u[0] = u1;
   u[1] = u2;
   u[2] = u3;
   
-  function_symbol<>    v1(0, test_tag<>());   //a test function (typical for FEM and FVM)
-  function_symbol<>    v2(1, test_tag<>());   //a test function (typical for FEM and FVM)
-  function_symbol<>    v3(2, test_tag<>());   //a test function (typical for FEM and FVM)
+  function_symbol v1(0, test_tag<>());   //a test function (typical for FEM and FVM)
+  function_symbol v2(1, test_tag<>());   //a test function (typical for FEM and FVM)
+  function_symbol v3(2, test_tag<>());   //a test function (typical for FEM and FVM)
   
-  function_symbol<>    v_phi(42, test_tag<>());   //a test function (typical for FEM and FVM)
+  function_symbol v_phi(42, test_tag<>());   //a test function (typical for FEM and FVM)
   
-  std::vector< function_symbol<> > v(3);
+  std::vector<function_symbol> v(3);
   v[0] = v1;
   v[1] = v2;
   v[2] = v3;
   
-  variable<> x(0);
-  variable<> y(1);
-  variable<> z(2);
+  variable x(0);
+  variable y(1);
+  variable z(2);
 
   std::cout << "-- Printing div(u): --" << std::endl;
   std::cout << diff(u1, x) << std::endl;
@@ -186,9 +186,9 @@ int main()
   //             (lambda + mu) div(u) div(v) + mu grad(u):grad(v) = F
   // with force F set to 0.
   //
-  viennamath::constant<double> lambda(1.0);
-  viennamath::constant<double> mu(1.0);
-  viennamath::constant<double> one_half(0.5);
+  viennamath::constant lambda(1.0);
+  viennamath::constant mu(1.0);
+  viennamath::constant one_half(0.5);
   
   /*
   equation<> strong_form = make_equation( (lambda + mu) * grad(div(u)) + mu * laplace(u), 0);
@@ -205,8 +205,8 @@ int main()
   */                                              
   
 
-  std::vector< expr<> > strain = strain_tensor(u);
-  std::vector< expr<> > stress = stress_tensor(v);
+  std::vector<expr> strain = strain_tensor(u);
+  std::vector<expr> stress = stress_tensor(v);
   
   std::cout << "Strain: " << std::endl;
   for (size_t i=0; i<strain.size(); ++i)
@@ -216,8 +216,8 @@ int main()
   for (size_t i=0; i<stress.size(); ++i)
     std::cout << stress[i] << std::endl;
   
-  equation<> weak_form_lame = make_equation( 
-                                 integral(Omega(), tensor_reduce( strain, stress ), symbolic_tag()),
+  equation weak_form_lame = make_equation( 
+                                 integral(viennamath::symbolic_interval(), tensor_reduce( strain, stress ), symbolic_tag()),
                                  //=                                         
                                  0);
   
