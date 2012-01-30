@@ -12,6 +12,7 @@
 #include "viennamath/runtime/equation.hpp"
 #include "viennamath/manipulation/integral.hpp"
 #include "viennamath/manipulation/apply_coordinate_system.hpp"
+#include "viennamath/runtime/rt_integral.hpp"
 
 #include "viennafem/weak_form.hpp"
 
@@ -216,8 +217,9 @@ int main()
   for (size_t i=0; i<stress.size(); ++i)
     std::cout << stress[i] << std::endl;
   
+  interval interv(true);
   equation weak_form_lame = make_equation( 
-                                 integral(viennamath::symbolic_interval(), tensor_reduce( strain, stress ), symbolic_tag()),
+                                 integral(interv, tensor_reduce( strain, stress ), viennamath::ct_variable<0>()),
                                  //=                                         
                                  0);
   

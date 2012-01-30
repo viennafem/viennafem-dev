@@ -26,10 +26,12 @@
 #include "viennafem/linear_pde_system.hpp"
 #include "viennafem/linear_pde_options.hpp"
 #include "viennafem/mapping.hpp"
-
+#include "viennafem/integrator.hpp"
 
 //ViennaMath includes:
 #include "viennamath/manipulation/apply_coordinate_system.hpp"
+#include "viennamath/runtime/numerical_quadrature.hpp"
+#include "viennamath/manipulation/eval.hpp"
 
 //ViennaData includes:
 #include "viennadata/api.hpp"
@@ -192,7 +194,7 @@ namespace viennafem
       viennafem::cell_quan<CellType, typename EquationType::interface_type> det_dF_dt;
       det_dF_dt.wrap( viennafem::det_dF_dt_key() );
       
-      /*for (size_t i=0; i<local_weak_form.size(); ++i)
+      for (size_t i=0; i<local_weak_form.size(); ++i)
       {
         for (size_t j=0; j<local_weak_form[i].size(); ++j)
         {
@@ -200,7 +202,10 @@ namespace viennafem
         }
         std::cout << std::endl;
       }
-      exit(0);*/
+      //exit(0);
+      
+      //Integrator setup:
+      viennamath::numerical_quadrature integrator(new viennafem::rt_gauss_quad_1_element<CellTag, typename EquationType::interface_type>());
       
       CellContainer cells = viennagrid::ncells<CellTag::dim>(domain);
       for (CellIterator cell_iter = cells.begin();
@@ -260,8 +265,10 @@ namespace viennafem
               if (pde_system.unknown(0).size() == 1) //scalar valued unknowns
               {
                linear_system(global_index_i) -=
-                viennadata::access<BoundaryKeyType, double>(bnd_key)(*vocit) *
-                viennafem::eval_element_matrix_entry(local_weak_form[local_index_i][local_index_j].lhs(), CellTag()) * det_dF_dt.eval(1.0); 
+                viennadata::access<BoundaryKeyType, double>(bnd_key)(*vocit) 
+                * viennamath::eval(integrator(local_weak_form[local_index_i][local_index_j].lhs()), 0.0)
+                //viennafem::eval_element_matrix_entry(local_weak_form[local_index_i][local_index_j].lhs(), CellTag()) 
+                * det_dF_dt.eval(1.0); 
               }
               else //vector valued unknowns
               {
@@ -270,8 +277,10 @@ namespace viennafem
                 if (bnd_values.size() > 1) //allow homogeneous case without having the data vector initialized
                 {
                   linear_system(global_index_i) -=
-                    bnd_values[local_index_j % pde_system.unknown(0).size()] *
-                    viennafem::eval_element_matrix_entry(local_weak_form[local_index_i][local_index_j].lhs(), CellTag()) * det_dF_dt.eval(1.0); 
+                    bnd_values[local_index_j % pde_system.unknown(0).size()] 
+                    * viennamath::eval(integrator(local_weak_form[local_index_i][local_index_j].lhs()), 0.0)
+                    //viennafem::eval_element_matrix_entry(local_weak_form[local_index_i][local_index_j].lhs(), CellTag())
+                    * det_dF_dt.eval(1.0); 
                 }
               }
             }
@@ -283,7 +292,8 @@ namespace viennafem
                linear_system.add(
                   global_index_i, 
                   global_index_j, 
-                  viennafem::eval_element_matrix_entry(local_weak_form[local_index_i][local_index_j].lhs(), CellTag()) * det_dF_dt.eval(1.0)    
+                  viennamath::eval(integrator(local_weak_form[local_index_i][local_index_j].lhs()), 0.0) * det_dF_dt.eval(1.0)
+                  //viennafem::eval_element_matrix_entry(local_weak_form[local_index_i][local_index_j].lhs(), CellTag()) * det_dF_dt.eval(1.0)    
                );
             }
           }
@@ -294,7 +304,8 @@ namespace viennafem
           
           //load_vector(global_index_i) += 
           linear_system(global_index_i) += 
-            viennafem::eval_element_vector_entry(local_weak_form[local_index_i][0].rhs(), CellTag()) * det_dF_dt.eval(1.0); 
+            //viennafem::eval_element_vector_entry(local_weak_form[local_index_i][0].rhs(), CellTag()) * det_dF_dt.eval(1.0); 
+            viennamath::eval(integrator(local_weak_form[local_index_i][0].rhs()), 0.0) * det_dF_dt.eval(1.0);
         }
       }
       

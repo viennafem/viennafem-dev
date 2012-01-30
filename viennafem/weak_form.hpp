@@ -47,7 +47,7 @@ namespace viennafem
       
       void operator()(viennamath::rt_unary_expr<InterfaceType> const & unary_expr) const
       {
-        typedef viennamath::op_unary<viennamath::op_symbolic_integration<typename InterfaceType::numeric_type>, InterfaceType>  SymbolicIntegrationType;
+        typedef viennamath::op_unary<viennamath::op_rt_integral<InterfaceType>, InterfaceType>  SymbolicIntegrationType;
         
         if (dynamic_cast<const SymbolicIntegrationType *>(unary_expr.op()) != NULL)
           is_weak_ = true;        
@@ -93,7 +93,8 @@ namespace viennafem
           //multiply with test function and integrate
           viennamath::rt_function_symbol<InterfaceType> test_func(0, viennamath::test_tag<0>());
           viennamath::rt_expr<InterfaceType> temp(e->clone());
-          integrated_expr = viennamath::integral(viennamath::symbolic_interval(), temp * test_func, viennamath::symbolic_tag());
+          viennamath::rt_interval<InterfaceType> interv(true);
+          integrated_expr = viennamath::integral(interv, temp * test_func, viennamath::ct_variable<0>());
         }
         
         return integrated_expr.get()->clone();
@@ -111,7 +112,8 @@ namespace viennafem
           viennamath::rt_expr<InterfaceType> minus1 = -1;
           viennamath::rt_expr<InterfaceType> lhs(unary_expr.lhs()->clone());
           viennamath::rt_expr<InterfaceType> rhs = viennamath::grad(viennamath::rt_function_symbol<InterfaceType>(0, viennamath::test_tag<0>()));
-          integrated_expr = viennamath::integral(viennamath::symbolic_interval(), minus1 * (lhs * rhs), viennamath::symbolic_tag());
+          viennamath::rt_interval<InterfaceType> interv(true);
+          integrated_expr = viennamath::integral(interv, minus1 * (lhs * rhs), viennamath::ct_variable<0>());
         }
         else
           throw "Cannot derive weak form!";
@@ -164,7 +166,8 @@ namespace viennafem
         {
           //multiply with test function and integrate
           viennamath::rt_function_symbol<InterfaceType> test_func(0, viennamath::test_tag<0>());
-          integrated_expr = viennamath::integral(viennamath::symbolic_interval(), bin * test_func, viennamath::symbolic_tag());
+          viennamath::rt_interval<InterfaceType> interv(true);
+          integrated_expr = viennamath::integral(interv, bin * test_func, viennamath::ct_variable<0>());
         }
       }
 
@@ -195,12 +198,13 @@ namespace viennafem
                                     viennamath::integral(viennamath::Omega(), strong_formulation.rhs() * viennamath::function_symbol<InterfaceType>(0, viennamath::test_tag<0>()), viennamath::symbolic_tag())
                                   );*/
     
+    viennamath::rt_interval<InterfaceType> interv(true);
     viennamath::rt_manipulation_wrapper<InterfaceType> wrapped_checker( new weak_form_creator<InterfaceType>() );
     viennamath::rt_expr<InterfaceType> weak_lhs(strong_formulation.lhs().get()->recursive_manipulation( wrapped_checker ));
     viennamath::rt_expr<InterfaceType> weak_rhs = 
-        viennamath::integral(viennamath::symbolic_interval(),
+        viennamath::integral(interv,
                              strong_formulation.rhs() * viennamath::rt_function_symbol<InterfaceType>(0, viennamath::test_tag<0>()),
-                             viennamath::symbolic_tag());
+                             viennamath::ct_variable<0>());
     
     return viennamath::rt_equation<InterfaceType>( weak_lhs, weak_rhs);
     
