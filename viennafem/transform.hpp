@@ -238,8 +238,8 @@ namespace viennafem
     ExpressionType new_lhs = viennamath::substitute(search_keys, replacements, weak_form.lhs());
     ExpressionType new_rhs = viennamath::substitute(search_keys, replacements, weak_form.rhs());
     
-    std::cout << "Old rhs: " << weak_form.rhs() << std::endl;
-    std::cout << "New rhs: " << new_rhs << std::endl;
+    //std::cout << "Old rhs: " << weak_form.rhs() << std::endl;
+    //std::cout << "New rhs: " << new_rhs << std::endl;
     
     return EquationType(new_lhs, new_rhs);
   }
