@@ -194,6 +194,7 @@ namespace viennafem
       viennafem::cell_quan<CellType, typename EquationType::interface_type> det_dF_dt;
       det_dF_dt.wrap( viennafem::det_dF_dt_key() );
       
+      /*
       for (size_t i=0; i<local_weak_form.size(); ++i)
       {
         for (size_t j=0; j<local_weak_form[i].size(); ++j)
@@ -201,7 +202,7 @@ namespace viennafem
           std::cout << "(" << i <<  "," << j << "): " << local_weak_form[i][j] << std::endl;
         }
         std::cout << std::endl;
-      }
+      }*/
       //exit(0);
       
       //Integrator setup:

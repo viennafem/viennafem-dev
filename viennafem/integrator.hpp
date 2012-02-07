@@ -46,9 +46,6 @@ namespace viennafem
                                               viennamath::rt_expr<InterfaceType> const & e,
                                               viennamath::rt_variable<InterfaceType> const & var) const
       {
-        if (!interv.is_symbolic())
-          throw "No symbolic interval provided!";
-        
         return viennamath::rt_expr<InterfaceType>(new viennamath::rt_constant<NumericT, InterfaceType>(0.5 * e.get()->eval(p_)));
       }
       
@@ -72,9 +69,6 @@ namespace viennafem
                                               viennamath::rt_expr<InterfaceType> const & e,
                                               viennamath::rt_variable<InterfaceType> const & var) const
       {
-        if (!interv.is_symbolic())
-          throw "No symbolic interval provided!";
-        
         return viennamath::rt_expr<InterfaceType>(new viennamath::rt_constant<NumericT, InterfaceType>(e.get()->eval(p_) / 6.0));
       }
       

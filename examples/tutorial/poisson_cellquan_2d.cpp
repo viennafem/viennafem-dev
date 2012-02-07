@@ -159,11 +159,9 @@ int main()
   //Equation poisson_equ = viennamath::make_equation( viennamath::div(permittivity * viennamath::grad(u)), 0);
 
   //the weak form:
-  viennamath::interval symbolic_interv(true);
   Equation poisson_equ = viennamath::make_equation( 
-                          viennamath::integral(symbolic_interv,
-                                               permittivity * (viennamath::grad(u) * viennamath::grad(v)),
-                                               viennamath::ct_variable<0>()),
+                          viennamath::integral(viennamath::symbolic_interval(),
+                                               permittivity * (viennamath::grad(u) * viennamath::grad(v)) ),
                           0);
 
   MatrixType system_matrix;

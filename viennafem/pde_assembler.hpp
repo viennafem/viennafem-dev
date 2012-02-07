@@ -271,8 +271,8 @@ namespace viennafem
      #endif
         EquationType transformed_weak_form = viennafem::transform_to_reference_cell<CellType>(weak_form, pde_system);
         
-        //std::cout << "* pde_solver::operator(): Transformed weak form:" << std::endl;
-        //std::cout << transformed_weak_form << std::endl;
+        std::cout << "* pde_solver::operator(): Transformed weak form:" << std::endl;
+        std::cout << transformed_weak_form << std::endl;
         //std::cout << std::endl;
 
      #ifdef VIENNAFEMDEBUG                        

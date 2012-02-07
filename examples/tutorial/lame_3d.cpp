@@ -292,10 +292,10 @@ int main()
   std::vector< Expression > strain = strain_tensor(u);
   std::vector< Expression > stress = stress_tensor(v);
   
-  interval symbolic_interv(true);
-  Equation weak_form_lame = make_equation( integral(symbolic_interv, tensor_reduce( strain, stress ), viennamath::ct_variable<0>()),
+  Equation weak_form_lame = make_equation( integral(symbolic_interval(), tensor_reduce( strain, stress )),
                                            //=                                         
-                                           integral(symbolic_interv, viennamath::rt_constant<double>(1.0) * v[2], viennamath::ct_variable<0>()));
+                                           integral(symbolic_interval(), viennamath::rt_constant<double>(1.0) * v[2])
+                                         );
   
   
   std::cout << "Weak form of Lame equation: " << std::endl;
