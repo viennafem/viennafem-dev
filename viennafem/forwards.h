@@ -31,20 +31,28 @@ namespace viennafem
   struct mapping_key_type {}; 
 
   
-  //integration tags on cells:
-  struct AnalyticIntegrationTag {};
+  //
+  // Integration
+  //
+  
+  //prototype for Gauss quadrature rules
+  template <typename ElementType, unsigned long order, typename InterfaceType = viennamath::default_interface_type>
+  struct rt_gauss_quad_element;
+  
+  //prototype for Strang quadrature rules on triangles
+  template <typename ElementType, unsigned long order, typename InterfaceType = viennamath::default_interface_type>
+  struct rt_strang_quad_element;
 
-  struct LinearIntegrationTag {};
-  struct QuadraticIntegrationTag {};
-  struct CubicIntegrationTag {};
+  
+  //prototype for Strang quadrature rules on tetrahedra
+  template <typename ElementType, unsigned long order, typename InterfaceType = viennamath::default_interface_type>
+  struct rt_keast_quad_element;
 
-  struct QuinticIntegrationTag {};
-
-  struct OrderSevenIntegrationTag {};
-
-  struct CellIntegrationTag {};
-
-
+  
+  //
+  //
+  //
+  
   
   //Basisfunction-Treatment:
   struct TypeListTag {};      //use typelists

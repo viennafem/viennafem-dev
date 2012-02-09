@@ -26,7 +26,7 @@
 #include "viennafem/linear_pde_system.hpp"
 #include "viennafem/linear_pde_options.hpp"
 #include "viennafem/mapping.hpp"
-#include "viennafem/integrator.hpp"
+#include "viennafem/quadrature/quad.hpp"
 
 //ViennaMath includes:
 #include "viennamath/manipulation/apply_coordinate_system.hpp"
@@ -206,7 +206,7 @@ namespace viennafem
       //exit(0);
       
       //Integrator setup:
-      viennamath::numerical_quadrature integrator(new viennafem::rt_gauss_quad_1_element<CellTag, typename EquationType::interface_type>());
+      viennamath::numerical_quadrature integrator(new viennafem::rt_gauss_quad_element<CellTag, 1, typename EquationType::interface_type>());
       
       CellContainer cells = viennagrid::ncells<CellTag::dim>(domain);
       for (CellIterator cell_iter = cells.begin();

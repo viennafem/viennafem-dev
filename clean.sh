@@ -1,9 +1,10 @@
 #!/bin/bash
 
 rm viennafem/*.*~
-rm viennafem/transform/*.*~
 rm viennafem/bases/*.*~
 rm viennafem/io/*.*~
+rm viennafem/quadrature/*.*~
+rm viennafem/transform/*.*~
 rm examples/*.*~
 rm examples/tutorial/*.*~
 rm tests/*.*~
