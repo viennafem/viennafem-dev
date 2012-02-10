@@ -79,7 +79,9 @@ namespace viennafem
   {
       typedef typename InterfaceType::numeric_type         NumericT;
     public:
-      explicit rt_gauss_quad_element() : abscissas_(8, std::vector<numeric_type>(2))
+      enum { num_points = 8 };
+      
+      explicit rt_gauss_quad_element() : abscissas_(num_points, std::vector<numeric_type>(3))
       {
         abscissas_[0][0] = 0.7886751345948125; abscissas_[0][1] = 0.7886751345948125; abscissas_[0][2] = 0.7886751345948125;
         abscissas_[1][0] = 0.7886751345948125; abscissas_[1][1] = 0.7886751345948125; abscissas_[1][2] = 0.2113248654051875;
@@ -96,7 +98,7 @@ namespace viennafem
                     viennamath::rt_variable<InterfaceType> const & var) const
       {
         NumericT result = 0;
-        for (std::size_t i=0; i<8; ++i)
+        for (std::size_t i=0; i<num_points; ++i)
           result += viennamath::eval(e, abscissas_[i]);
         return 0.25 * result;
       }
@@ -106,6 +108,97 @@ namespace viennafem
   };
   
   
+  //
+  //
+  // Exact for polynomials up to order 5
+  //
+  //
+  template <typename InterfaceType>
+  class rt_gauss_quad_element <viennagrid::hexahedron_tag, 5, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
+  {
+      typedef typename InterfaceType::numeric_type         NumericT;
+    public:
+      enum { num_points = 27 };
+      
+      explicit rt_gauss_quad_element() : abscissas_(num_points, std::vector<numeric_type>(3)), weights_(num_points)
+      {
+        abscissas_[0][0] = 0.11270166537925829786; abscissas_[0][1] = 0.11270166537925829786; abscissas_[0][2] = 0.11270166537925829786;
+        abscissas_[1][0] = 0.11270166537925829786; abscissas_[1][1] = 0.11270166537925829786; abscissas_[1][2] = 0.5;
+        abscissas_[2][0] = 0.11270166537925829786; abscissas_[2][1] = 0.11270166537925829786; abscissas_[2][2] = 0.88729833462074170214;
+        abscissas_[3][0] = 0.11270166537925829786; abscissas_[3][1] = 0.5;                    abscissas_[3][2] = 0.11270166537925829786;
+        abscissas_[4][0] = 0.11270166537925829786; abscissas_[4][1] = 0.5;                    abscissas_[4][2] = 0.5;
+        abscissas_[5][0] = 0.11270166537925829786; abscissas_[5][1] = 0.5;                    abscissas_[5][2] = 0.88729833462074170214;
+        abscissas_[6][0] = 0.11270166537925829786; abscissas_[6][1] = 0.88729833462074170214; abscissas_[6][2] = 0.11270166537925829786;
+        abscissas_[7][0] = 0.11270166537925829786; abscissas_[7][1] = 0.88729833462074170214; abscissas_[7][2] = 0.5;
+        abscissas_[8][0] = 0.11270166537925829786; abscissas_[8][1] = 0.88729833462074170214; abscissas_[8][2] = 0.88729833462074170214;
+
+        abscissas_[ 9][0] = 0.5;                   abscissas_[ 9][1] = 0.11270166537925829786; abscissas_[ 9][2] = 0.11270166537925829786;
+        abscissas_[10][0] = 0.5;                   abscissas_[10][1] = 0.11270166537925829786; abscissas_[10][2] = 0.5;
+        abscissas_[11][0] = 0.5;                   abscissas_[11][1] = 0.11270166537925829786; abscissas_[11][2] = 0.88729833462074170214;
+        abscissas_[12][0] = 0.5;                   abscissas_[12][1] = 0.5;                    abscissas_[12][2] = 0.11270166537925829786;
+        abscissas_[13][0] = 0.5;                   abscissas_[13][1] = 0.5;                    abscissas_[13][2] = 0.5;
+        abscissas_[14][0] = 0.5;                   abscissas_[14][1] = 0.5;                    abscissas_[14][2] = 0.88729833462074170214;
+        abscissas_[15][0] = 0.5;                   abscissas_[15][1] = 0.88729833462074170214; abscissas_[15][2] = 0.11270166537925829786;
+        abscissas_[16][0] = 0.5;                   abscissas_[16][1] = 0.88729833462074170214; abscissas_[16][2] = 0.5;
+        abscissas_[17][0] = 0.5;                   abscissas_[17][1] = 0.88729833462074170214; abscissas_[17][2] = 0.88729833462074170214;
+
+        abscissas_[19][0] = 0.88729833462074170214; abscissas_[19][1] = 0.11270166537925829786; abscissas_[19][2] = 0.11270166537925829786;
+        abscissas_[20][0] = 0.88729833462074170214; abscissas_[20][1] = 0.11270166537925829786; abscissas_[20][2] = 0.5;
+        abscissas_[21][0] = 0.88729833462074170214; abscissas_[21][1] = 0.11270166537925829786; abscissas_[21][2] = 0.88729833462074170214;
+        abscissas_[22][0] = 0.88729833462074170214; abscissas_[22][1] = 0.5;                    abscissas_[22][2] = 0.11270166537925829786;
+        abscissas_[23][0] = 0.88729833462074170214; abscissas_[23][1] = 0.5;                    abscissas_[23][2] = 0.5;
+        abscissas_[24][0] = 0.88729833462074170214; abscissas_[24][1] = 0.5;                    abscissas_[24][2] = 0.88729833462074170214;
+        abscissas_[25][0] = 0.88729833462074170214; abscissas_[25][1] = 0.88729833462074170214; abscissas_[25][2] = 0.11270166537925829786;
+        abscissas_[26][0] = 0.88729833462074170214; abscissas_[26][1] = 0.88729833462074170214; abscissas_[26][2] = 0.5;
+        abscissas_[27][0] = 0.88729833462074170214; abscissas_[27][1] = 0.88729833462074170214; abscissas_[27][2] = 0.88729833462074170214;
+        
+        // weights:
+        double denominator = 18.0 * 18.0 * 18.0;
+        weights_[0] = (5.0 * 5.0 * 5.0) / denominator;
+        weights_[1] = (5.0 * 5.0 * 8.0) / denominator;
+        weights_[2] = (5.0 * 5.0 * 5.0) / denominator;
+        weights_[3] = (5.0 * 8.0 * 5.0) / denominator;
+        weights_[4] = (5.0 * 8.0 * 8.0) / denominator;
+        weights_[5] = (5.0 * 8.0 * 5.0) / denominator;
+        weights_[6] = (5.0 * 5.0 * 5.0) / denominator;
+        weights_[7] = (5.0 * 5.0 * 8.0) / denominator;
+        weights_[8] = (5.0 * 5.0 * 5.0) / denominator;
+        
+        weights_[ 9] = (8.0 * 5.0 * 5.0) / denominator;
+        weights_[10] = (8.0 * 5.0 * 8.0) / denominator;
+        weights_[11] = (8.0 * 5.0 * 5.0) / denominator;
+        weights_[12] = (8.0 * 8.0 * 5.0) / denominator;
+        weights_[13] = (8.0 * 8.0 * 8.0) / denominator;
+        weights_[14] = (8.0 * 8.0 * 5.0) / denominator;
+        weights_[15] = (8.0 * 5.0 * 5.0) / denominator;
+        weights_[16] = (8.0 * 5.0 * 8.0) / denominator;
+        weights_[17] = (8.0 * 5.0 * 5.0) / denominator;
+
+        weights_[18] = (5.0 * 5.0 * 5.0) / denominator;
+        weights_[19] = (5.0 * 5.0 * 8.0) / denominator;
+        weights_[20] = (5.0 * 5.0 * 5.0) / denominator;
+        weights_[21] = (5.0 * 8.0 * 5.0) / denominator;
+        weights_[22] = (5.0 * 8.0 * 8.0) / denominator;
+        weights_[23] = (5.0 * 8.0 * 5.0) / denominator;
+        weights_[24] = (5.0 * 5.0 * 5.0) / denominator;
+        weights_[25] = (5.0 * 5.0 * 8.0) / denominator;
+        weights_[26] = (5.0 * 5.0 * 5.0) / denominator;        
+      }
+      
+      NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
+                    viennamath::rt_expr<InterfaceType> const & e,
+                    viennamath::rt_variable<InterfaceType> const & var) const
+      {
+        NumericT result = 0;
+        for (std::size_t i=0; i<num_points; ++i)
+          result += weights_[i] * viennamath::eval(e, abscissas_[i]);
+        return result;
+      }
+      
+    private:
+      std::vector<std::vector<NumericT> > abscissas_;
+      std::vector<NumericT> weights_;
+  };
   
 
 }

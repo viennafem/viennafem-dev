@@ -90,6 +90,57 @@ namespace viennafem
   };
   
 
+  //
+  //
+  // Exact for polynomials up to order 5
+  //
+  //
+  template <typename InterfaceType>
+  class rt_gauss_quad_element <viennagrid::quadrilateral_tag, 5, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
+  {
+      typedef typename InterfaceType::numeric_type         NumericT;
+    public:
+      enum { num_points = 9 };
+      
+      explicit rt_gauss_quad_element() : abscissas_(num_points, std::vector<numeric_type>(2)), weights_(num_points)
+      {
+        abscissas_[0][0] = 0.11270166537925829786; abscissas_[0][1] = 0.11270166537925829786;
+        abscissas_[1][0] = 0.11270166537925829786; abscissas_[1][1] = 0.5;
+        abscissas_[2][0] = 0.11270166537925829786; abscissas_[2][1] = 0.88729833462074170214;
+        abscissas_[3][0] = 0.5;                    abscissas_[3][1] = 0.11270166537925829786;
+        abscissas_[4][0] = 0.5;                    abscissas_[4][1] = 0.5;
+        abscissas_[5][0] = 0.5;                    abscissas_[5][1] = 0.88729833462074170214;
+        abscissas_[6][0] = 0.88729833462074170214; abscissas_[6][1] = 0.11270166537925829786;
+        abscissas_[7][0] = 0.88729833462074170214; abscissas_[7][1] = 0.5;
+        abscissas_[8][0] = 0.88729833462074170214; abscissas_[8][1] = 0.88729833462074170214;
+        
+        weights_[0] = (5.0 * 5.0) / (18.0 * 18.0);
+        weights_[1] = (5.0 * 8.0) / (18.0 * 18.0);
+        weights_[2] = (5.0 * 5.0) / (18.0 * 18.0);
+        
+        weights_[3] = (8.0 * 5.0) / (18.0 * 18.0);
+        weights_[4] = (8.0 * 8.0) / (18.0 * 18.0);
+        weights_[5] = (8.0 * 5.0) / (18.0 * 18.0);
+        
+        weights_[6] = (5.0 * 5.0) / (18.0 * 18.0);
+        weights_[7] = (5.0 * 8.0) / (18.0 * 18.0);
+        weights_[8] = (5.0 * 5.0) / (18.0 * 18.0);
+      }
+      
+      NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
+                    viennamath::rt_expr<InterfaceType> const & e,
+                    viennamath::rt_variable<InterfaceType> const & var) const
+      {
+        NumericT result = 0;
+        for (std::size_t i=0; i<num_points; ++i)
+          result += weights_[i] * viennamath::eval(e, abscissas_[i]);
+        return result;
+      }
+      
+    private:
+      std::vector<std::vector<NumericT> > abscissas_;
+      std::vector<NumericT> weights_;
+  };
   
   
 
