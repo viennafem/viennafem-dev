@@ -35,10 +35,16 @@ namespace viennafem
   //
   //
   template <typename InterfaceType>
-  class rt_gauss_quad_element <viennagrid::line_tag, 1, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
+  class rt_gauss_quad_element <viennafem::unit_interval, 1, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
+      typedef rt_gauss_quad_element <viennafem::unit_interval, 1, InterfaceType>  self_type;
+      typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
+      
     public:
+      
+      BaseType * clone() const { return new self_type(); }
+      
       NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
                     viennamath::rt_expr<InterfaceType> const & e,
                     viennamath::rt_variable<InterfaceType> const & var) const
@@ -62,10 +68,15 @@ namespace viennafem
   //
   //
   template <typename InterfaceType>
-  class rt_gauss_quad_element <viennagrid::line_tag, 3, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
+  class rt_gauss_quad_element <viennafem::unit_interval, 3, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
+      typedef rt_gauss_quad_element <viennafem::unit_interval, 3, InterfaceType>  self_type;
+      typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
+      
+      BaseType * clone() const { return new self_type(); }
+      
       NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
                     viennamath::rt_expr<InterfaceType> const & e,
                     viennamath::rt_variable<InterfaceType> const & var) const
@@ -83,10 +94,15 @@ namespace viennafem
   //
   //
   template <typename InterfaceType>
-  class rt_gauss_quad_element <viennagrid::line_tag, 5, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
+  class rt_gauss_quad_element <viennafem::unit_interval, 5, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
+      typedef rt_gauss_quad_element <viennafem::unit_interval, 5, InterfaceType>  self_type;
+      typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
+      
+      BaseType * clone() const { return new self_type(); }
+      
       NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
                     viennamath::rt_expr<InterfaceType> const & e,
                     viennamath::rt_variable<InterfaceType> const & var) const

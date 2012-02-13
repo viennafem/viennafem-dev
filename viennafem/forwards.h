@@ -50,73 +50,106 @@ namespace viennafem
 
   
   //
+  // Reference elements
   //
+  
+  /** @brief A tag representing the interval [-1,1]. Particularly useful for higher-order FEM. */
+  struct symmetric_interval {};
+
+  /** @brief A tag for the unit interval [0,1].
+   *
+   * Some families of basis functions can be defined in a more compact manner here than on [-1,1]. */
+  struct unit_interval {};
+
+  
+  /** @brief A tag for the triangle with vertices (0,0), (1,0), (0,1).
+   *
+   * Home of form functions.
+   */
+  struct unit_triangle {};
+  
+  /** @brief A tag for the triangle with vertices at (-1,-1), (1,-1), (-1,1).
+   *
+   * Commonly used for the construction of high-order FEM bases.
+   */
+  struct symmetric_triangle {};
+
+  
+  /** @brief A tag for the quadrilateral with vertices at (0,0), (1,0), (0,1), (1,1)
+   * 
+   * Often used in the engineering community for first and second order FEM.
+   */
+  struct unit_quadrilateral {};
+  
+  /** @brief A tag for the quadrilateral with vertices at (-1,-1), (1, -1), (-1, 1), (1, 1)
+   * 
+   * Allows for a construction of high-order FEM in a very natural way out of [-1,1].
+   */
+  struct symmetric_quadrilateral {};
+  
+  
+  /** @brief A tag for the tetrahedron with vertices at (0,0,0), (1,0,0), (0,1,0), (0,0,1)
+   * 
+   * Commonly used for simple form functions of first or second order. 
+   */
+  struct unit_tetrahedron {};
+  
+  /** @brief A tag for the tetrahedron with vertices at (-1,-1,-1), (1,-1,-1), (-1,1,-1), (-1,-1,1)
+   * 
+   * Handy for high-order FEM, since hierarchical bases can be constructed out of the interval [-1,1]
+   */
+  struct symmetric_tetrahedron {};
+  
+  
+  /** @brief A tag for the hexahedron with vertices at (0,0,0), (1,0,0), (0,1,0), (1,1,0), (0,0,1), (1,0,1), (0,1,1), (1,1,1)
+   * 
+   * Commonly used for low-order form functions
+   */
+  struct unit_hexahedron {};
+  
+  /** @brief A tag for the hexahedron with vertices at (-1,-1,-1), (1,-1,-1), (-1,1,-1), (1,1,-1), (-1,-1,1), (1,-1,1), (-1,1,1), (1,1,1)
+   * 
+   * Used for high-order FEM, since basis functions can be constructed more easily out of [-1,1].
+   */
+  struct symmetric_hexahedron {};
+  
+  
+  //
+  // Basis functions
   //
   
-  
-  //Basisfunction-Treatment:
-  struct TypeListTag {};      //use typelists
-  struct TypeErasureTag {};   //use type erasure
-
-  //Tag for handling of functional determinant
-  struct DtDxStoreAll{ };   //all elements of functional determinant are stored. Usually fastest, but high memory consumption.
-  struct DtDxStoreDetOnly {}; //only determinant is stored, other elements computed on-the-fly. Needs less memory, but usually increases runtime a little bit
-  struct DtDxOnAccess {};   //All values are (repeatedly) computed on-the-fly. Use only in situations where every bit of memory is important.
-  struct DtDxStoreStatically {}; //computes the functional determinant at the point of first access to a cell in static variables. Must not be used together with multi-threading!
-  
-  
-  //Continuity-Tag:
-  struct C0_Tag {};   //ordinary H1-basisfunctions
-  struct C1_Tag {};   //Hermite
-
-  //Basis function tags
-  struct LinearBasisfunctionTag
-  {
-    enum{ degree = 1 };
-    //typedef C0_Tag                ContinuityTag;
-  };
+  struct LinearBasisfunctionTag {};
   
   template <typename T>
-  struct space_to_id;
+  struct space_to_id {};
   
   template <>
   struct space_to_id<LinearBasisfunctionTag>
   {
-    enum { value = 42 };
+    enum { value = 1 };
   };
-
-  struct QuadraticBasisfunctionTag
+  
+  template <typename Cell, typename T>
+  struct reference_cell_for_basis {};
+  
+  template <>
+  struct reference_cell_for_basis < viennagrid::line_tag, LinearBasisfunctionTag>
   {
-    enum{ degree = 2 };
-    //typedef C0_Tag                ContinuityTag;
+    typedef unit_interval   type;
   };
 
-  struct CubicBasisfunctionTag
+  template <>
+  struct reference_cell_for_basis < viennagrid::triangle_tag, LinearBasisfunctionTag>
   {
-    enum{ degree = 3 };
+    typedef unit_triangle   type;
   };
 
-  struct QuarticBasisfunctionTag
+  template <>
+  struct reference_cell_for_basis < viennagrid::tetrahedron_tag, LinearBasisfunctionTag>
   {
-    enum{ degree = 4 };
+    typedef unit_tetrahedron   type;
   };
-
-  struct QuinticBasisfunctionTag
-  {
-    enum{ degree = 5 };
-  };
-
-  // A tag for scalar-valued PDEs
-  struct ScalarTag {
-    enum { dim = 1 };
-  };
-
-  // A tag for vector-valued PDEs
-  template <typename DimensionTag>
-  struct VectorTag {
-    enum { dim = DimensionTag::dim };
-  };
-
+  
   
   //Integration domain:
   struct Omega {};
@@ -152,25 +185,7 @@ namespace viennafem
   template <typename CellTag>
   struct dt_dx_handler;
   
-  //Mapping Tags:
-  
-  /** @brief A tag indicating that degrees of freedoms are assigned regardless of whether a (Dirichlet) boundary condition is specified there. */
-  struct FullMappingTag             //Create the 'full' mapping, including boundary vertices. This means that 
-  {
-    template <typename Iterator, typename BoundaryKey>
-    static bool apply(Iterator & it, BoundaryKey const & bk) { return false; }
-  };
 
-  /** @brief A tag that specifies that no degrees of freedom are assigned at (Dirichlet) boundaries */
-  struct NoBoundaryMappingTag       //exclude boundary vertices from mapping.
-  {
-    template <typename Iterator, typename BoundaryKey>
-    static bool apply(Iterator & it, BoundaryKey const & bk)
-    {
-      return viennadata::access<BoundaryKey, bool>(bk)(*it);
-    }
-  };
-  
   // define a key and configure viennadata to use a type-based dispatch:
   class boundary_key 
   {

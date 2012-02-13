@@ -28,6 +28,17 @@
 
 namespace viennafem
 {
+  //
+  //
+  //                 S E C T I O N    1
+  //  
+  //  Reference tetrahedron with vertices (0,0,0), (1,0,0), (0,1,0), (0,0,1)
+  //
+  //
+  //
+  
+  
+  
   
   //
   //
@@ -35,21 +46,28 @@ namespace viennafem
   //
   //
   template <typename InterfaceType>
-  class rt_gauss_quad_element <viennagrid::quadrilateral_tag, 1, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
+  class rt_gauss_quad_element <viennafem::unit_quadrilateral, 1, InterfaceType> 
+   : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
+      typedef rt_gauss_quad_element <viennafem::unit_quadrilateral, 1, InterfaceType>  self_type;
+      typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
+      enum { num_points = 1 };
+      
       explicit rt_gauss_quad_element() : p_(2)
       {
-        p_[0] = 1.0/3.0;
-        p_[1] = 1.0/3.0;
+        p_[0] = 0.5;
+        p_[1] = 0.5;
       }
+      
+      BaseType * clone() const { return new self_type(); }
       
       NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
                     viennamath::rt_expr<InterfaceType> const & e,
                     viennamath::rt_variable<InterfaceType> const & var) const
       {
-        return 0.5 * viennamath::eval(e, p_);
+        return viennamath::eval(e, p_);
       }
       
     private:
@@ -63,11 +81,16 @@ namespace viennafem
   //
   //
   template <typename InterfaceType>
-  class rt_gauss_quad_element <viennagrid::quadrilateral_tag, 3, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
+  class rt_gauss_quad_element <viennafem::unit_quadrilateral, 3, InterfaceType> 
+   : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
+      typedef rt_gauss_quad_element <viennafem::unit_quadrilateral, 3, InterfaceType>  self_type;
+      typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
-      explicit rt_gauss_quad_element() : abscissas_(4, std::vector<numeric_type>(2))
+      enum { num_points = 4 };
+      
+      explicit rt_gauss_quad_element() : abscissas_(num_points, std::vector<numeric_type>(2))
       {
         abscissas_[0][0] = 0.7886751345948125; abscissas_[0][1] = 0.7886751345948125;
         abscissas_[1][0] = 0.7886751345948125; abscissas_[1][1] = 0.2113248654051875;
@@ -75,12 +98,14 @@ namespace viennafem
         abscissas_[3][0] = 0.2113248654051875; abscissas_[3][1] = 0.2113248654051875;
       }
       
+      BaseType * clone() const { return new self_type(); }
+      
       NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
                     viennamath::rt_expr<InterfaceType> const & e,
                     viennamath::rt_variable<InterfaceType> const & var) const
       {
         NumericT result = 0;
-        for (std::size_t i=0; i<4; ++i)
+        for (std::size_t i=0; i<num_points; ++i)
           result += viennamath::eval(e, abscissas_[i]);
         return 0.25 * result;
       }
@@ -96,9 +121,12 @@ namespace viennafem
   //
   //
   template <typename InterfaceType>
-  class rt_gauss_quad_element <viennagrid::quadrilateral_tag, 5, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
+  class rt_gauss_quad_element <viennafem::unit_quadrilateral, 5, InterfaceType> 
+   : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
+      typedef rt_gauss_quad_element <viennafem::unit_quadrilateral, 5, InterfaceType>  self_type;
+      typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
       enum { num_points = 9 };
       
@@ -127,6 +155,8 @@ namespace viennafem
         weights_[8] = (5.0 * 5.0) / (18.0 * 18.0);
       }
       
+      BaseType * clone() const { return new self_type(); }
+      
       NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
                     viennamath::rt_expr<InterfaceType> const & e,
                     viennamath::rt_variable<InterfaceType> const & var) const
@@ -143,6 +173,28 @@ namespace viennafem
   };
   
   
-
+  
+  
+  
+  //
+  // Quadrature rule generator
+  //
+  template <typename InterfaceType>
+  viennamath::numerical_quadrature quadrature_for_reference_cell(viennafem::unit_quadrilateral const &,
+                                                                 std::size_t order)
+  {
+    switch (order)
+    {
+      case 1: return viennamath::numerical_quadrature(new rt_gauss_quad_element <viennafem::unit_quadrilateral, 1, InterfaceType>());
+      case 2:
+      case 3: return viennamath::numerical_quadrature(new rt_gauss_quad_element <viennafem::unit_quadrilateral, 3, InterfaceType>());
+      case 4:
+      case 5: return viennamath::numerical_quadrature(new rt_gauss_quad_element <viennafem::unit_quadrilateral, 5, InterfaceType>());
+    }
+    
+    std::cout << "Cannot find quadrature rule for order " << order << " - fallback to order 5." << std::endl;
+    return viennamath::numerical_quadrature(new rt_gauss_quad_element <viennafem::unit_quadrilateral, 5, InterfaceType>());
+  }
+  
 }
 #endif

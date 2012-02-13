@@ -206,7 +206,8 @@ namespace viennafem
       //exit(0);
       
       //Integrator setup:
-      viennamath::numerical_quadrature integrator(new viennafem::rt_gauss_quad_element<CellTag, 1, typename EquationType::interface_type>());
+      typedef typename reference_cell_for_basis<CellTag, LinearBasisfunctionTag>::type    ReferenceCell;
+      viennamath::numerical_quadrature integrator(new viennafem::rt_gauss_quad_element<ReferenceCell, 1, typename EquationType::interface_type>());
       
       CellContainer cells = viennagrid::ncells<CellTag::dim>(domain);
       for (CellIterator cell_iter = cells.begin();

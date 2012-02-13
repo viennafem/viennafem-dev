@@ -35,15 +35,19 @@ namespace viennafem
   //
   //
   template <typename InterfaceType>
-  class rt_gauss_quad_element <viennagrid::triangle_tag, 1, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
+  class rt_gauss_quad_element <viennafem::unit_triangle, 1, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
+      typedef rt_gauss_quad_element <viennafem::unit_triangle, 1, InterfaceType>  self_type;
+      typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
       explicit rt_gauss_quad_element() : p_(2)
       {
         p_[0] = 1.0/3.0;
         p_[1] = 1.0/3.0;
       }
+      
+      BaseType * clone() const { return new self_type(); }
       
       NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
                     viennamath::rt_expr<InterfaceType> const & e,
@@ -65,16 +69,20 @@ namespace viennafem
   //
   //
   template <typename InterfaceType>
-  class rt_strang_quad_element <viennagrid::triangle_tag, 2, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
+  class rt_strang_quad_element <viennafem::unit_triangle, 2, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
+      typedef rt_strang_quad_element <viennafem::unit_triangle, 2, InterfaceType>  self_type;
+      typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
       explicit rt_strang_quad_element() : p1_(2), p2_(2), p3_(2)
       {
-        p1_[0] = 2.0/3.0; p1_[1] = 1.0/3.0;
-        p2_[0] = 1.0/3.0; p2_[1] = 2.0/3.0;
+        p1_[0] = 2.0/3.0; p1_[1] = 1.0/6.0;
+        p2_[0] = 1.0/6.0; p2_[1] = 2.0/3.0;
         p3_[0] = 1.0/6.0; p3_[1] = 1.0/6.0;
       }
+      
+      BaseType * clone() const { return new self_type(); }
       
       NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
                     viennamath::rt_expr<InterfaceType> const & e,
@@ -97,9 +105,11 @@ namespace viennafem
   //
   //
   template <typename InterfaceType>
-  class rt_strang_quad_element <viennagrid::triangle_tag, 3, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
+  class rt_strang_quad_element <viennafem::unit_triangle, 3, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
+      typedef rt_strang_quad_element <viennafem::unit_triangle, 3, InterfaceType>  self_type;
+      typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
       enum { num_points = 6 };
       
@@ -119,6 +129,8 @@ namespace viennafem
         weights_[4] = 0.16666666666666666667;
         weights_[5] = 0.16666666666666666667;
       }
+      
+      BaseType * clone() const { return new self_type(); }
       
       NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
                     viennamath::rt_expr<InterfaceType> const & e,
@@ -143,9 +155,11 @@ namespace viennafem
   //
   //
   template <typename InterfaceType>
-  class rt_strang_quad_element <viennagrid::triangle_tag, 4, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
+  class rt_strang_quad_element <viennafem::unit_triangle, 4, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
+      typedef rt_strang_quad_element <viennafem::unit_triangle, 4, InterfaceType>  self_type;
+      typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
       enum { num_points = 6 };
       
@@ -165,6 +179,8 @@ namespace viennafem
         weights_[4] = 0.223381589678011;
         weights_[5] = 0.223381589678011;
       }
+      
+      BaseType * clone() const { return new self_type(); }
       
       NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
                     viennamath::rt_expr<InterfaceType> const & e,
@@ -188,9 +204,11 @@ namespace viennafem
   //
   //
   template <typename InterfaceType>
-  class rt_strang_quad_element <viennagrid::triangle_tag, 5, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
+  class rt_strang_quad_element <viennafem::unit_triangle, 5, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
+      typedef rt_strang_quad_element <viennafem::unit_triangle, 5, InterfaceType>  self_type;
+      typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
       enum { num_points = 7 };
       
@@ -212,7 +230,9 @@ namespace viennafem
         weights_[5] = 0.13239415278850616;
         weights_[6] = 0.13239415278850616;
       }
-      
+
+      BaseType * clone() const { return new self_type(); }
+
       NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
                     viennamath::rt_expr<InterfaceType> const & e,
                     viennamath::rt_variable<InterfaceType> const & var) const
@@ -235,9 +255,11 @@ namespace viennafem
   //
   //
   template <typename InterfaceType>
-  class rt_strang_quad_element <viennagrid::triangle_tag, 6, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
+  class rt_strang_quad_element <viennafem::unit_triangle, 6, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
+      typedef rt_strang_quad_element <viennafem::unit_triangle, 6, InterfaceType>  self_type;
+      typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
       enum { num_points = 9 };
       
@@ -263,7 +285,9 @@ namespace viennafem
         weights_[7] = 0.063691414286223;
         weights_[8] = 0.063691414286223;
       }
-      
+
+      BaseType * clone() const { return new self_type(); }
+
       NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
                     viennamath::rt_expr<InterfaceType> const & e,
                     viennamath::rt_variable<InterfaceType> const & var) const
@@ -286,9 +310,11 @@ namespace viennafem
   //
   //
   template <typename InterfaceType>
-  class rt_gauss_quad_element <viennagrid::triangle_tag, 7, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
+  class rt_gauss_quad_element <viennafem::unit_triangle, 7, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
+      typedef rt_gauss_quad_element <viennafem::unit_triangle, 7, InterfaceType>  self_type;
+      typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
       enum { num_points = 16 };
       
@@ -329,7 +355,9 @@ namespace viennafem
         weights_[15] = 0.01084645180365496;
         
       }
-      
+
+      BaseType * clone() const { return new self_type(); }
+
       NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
                     viennamath::rt_expr<InterfaceType> const & e,
                     viennamath::rt_variable<InterfaceType> const & var) const
@@ -347,9 +375,11 @@ namespace viennafem
   
   
   template <typename InterfaceType>
-  class rt_strang_quad_element <viennagrid::triangle_tag, 7, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
+  class rt_strang_quad_element <viennafem::unit_triangle, 7, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
+      typedef rt_strang_quad_element <viennafem::unit_triangle, 7, InterfaceType>  self_type;
+      typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
       enum { num_points = 13 };
       
@@ -387,7 +417,9 @@ namespace viennafem
         weights_[11] = 0.077113760890257;
         weights_[12] = 0.077113760890257;
       }
-      
+
+      BaseType * clone() const { return new self_type(); }
+
       NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
                     viennamath::rt_expr<InterfaceType> const & e,
                     viennamath::rt_variable<InterfaceType> const & var) const
@@ -413,9 +445,11 @@ namespace viennafem
 
   // TOMS algorithm #706
   template <typename InterfaceType>
-  class rt_strang_quad_element <viennagrid::triangle_tag, 13, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
+  class rt_strang_quad_element <viennafem::unit_triangle, 13, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
+      typedef rt_strang_quad_element <viennafem::unit_triangle, 13, InterfaceType>  self_type;
+      typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
       enum { num_points = 37 };
       
@@ -517,6 +551,8 @@ namespace viennafem
         weights_[36] = 0.037038683681384627918546472190;
       }
       
+      BaseType * clone() const { return new self_type(); }
+
       NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
                     viennamath::rt_expr<InterfaceType> const & e,
                     viennamath::rt_variable<InterfaceType> const & var) const

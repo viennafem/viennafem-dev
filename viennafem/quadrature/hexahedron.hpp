@@ -35,9 +35,11 @@ namespace viennafem
   //
   //
   template <typename InterfaceType>
-  class rt_gauss_quad_element <viennagrid::hexahedron_tag, 1, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
+  class rt_gauss_quad_element <viennafem::unit_hexahedron, 1, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
+      typedef rt_gauss_quad_element <viennafem::unit_hexahedron, 1, InterfaceType>  self_type;
+      typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
       explicit rt_gauss_quad_element() : p_(3)
       {
@@ -45,6 +47,8 @@ namespace viennafem
         p_[1] = 1.0/2.0;
         p_[2] = 1.0/2.0;
       }
+      
+      BaseType * clone() const { return new self_type(); }
       
       NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
                     viennamath::rt_expr<InterfaceType> const & e,
@@ -75,9 +79,11 @@ namespace viennafem
   //
   
   template <typename InterfaceType>
-  class rt_gauss_quad_element <viennagrid::hexahedron_tag, 3, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
+  class rt_gauss_quad_element <viennafem::unit_hexahedron, 3, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
+      typedef rt_gauss_quad_element <viennafem::unit_hexahedron, 3, InterfaceType>  self_type;
+      typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
       enum { num_points = 8 };
       
@@ -93,6 +99,8 @@ namespace viennafem
         abscissas_[7][0] = 0.2113248654051875; abscissas_[7][1] = 0.2113248654051875; abscissas_[7][2] = 0.2113248654051875;
       }
       
+      BaseType * clone() const { return new self_type(); }
+      
       NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
                     viennamath::rt_expr<InterfaceType> const & e,
                     viennamath::rt_variable<InterfaceType> const & var) const
@@ -100,7 +108,7 @@ namespace viennafem
         NumericT result = 0;
         for (std::size_t i=0; i<num_points; ++i)
           result += viennamath::eval(e, abscissas_[i]);
-        return 0.25 * result;
+        return result / 8.0;
       }
       
     private:
@@ -114,9 +122,11 @@ namespace viennafem
   //
   //
   template <typename InterfaceType>
-  class rt_gauss_quad_element <viennagrid::hexahedron_tag, 5, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
+  class rt_gauss_quad_element <viennafem::unit_hexahedron, 5, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
+      typedef rt_gauss_quad_element <viennafem::unit_hexahedron, 5, InterfaceType>  self_type;
+      typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
       enum { num_points = 27 };
       
@@ -142,15 +152,15 @@ namespace viennafem
         abscissas_[16][0] = 0.5;                   abscissas_[16][1] = 0.88729833462074170214; abscissas_[16][2] = 0.5;
         abscissas_[17][0] = 0.5;                   abscissas_[17][1] = 0.88729833462074170214; abscissas_[17][2] = 0.88729833462074170214;
 
-        abscissas_[19][0] = 0.88729833462074170214; abscissas_[19][1] = 0.11270166537925829786; abscissas_[19][2] = 0.11270166537925829786;
-        abscissas_[20][0] = 0.88729833462074170214; abscissas_[20][1] = 0.11270166537925829786; abscissas_[20][2] = 0.5;
-        abscissas_[21][0] = 0.88729833462074170214; abscissas_[21][1] = 0.11270166537925829786; abscissas_[21][2] = 0.88729833462074170214;
-        abscissas_[22][0] = 0.88729833462074170214; abscissas_[22][1] = 0.5;                    abscissas_[22][2] = 0.11270166537925829786;
-        abscissas_[23][0] = 0.88729833462074170214; abscissas_[23][1] = 0.5;                    abscissas_[23][2] = 0.5;
-        abscissas_[24][0] = 0.88729833462074170214; abscissas_[24][1] = 0.5;                    abscissas_[24][2] = 0.88729833462074170214;
-        abscissas_[25][0] = 0.88729833462074170214; abscissas_[25][1] = 0.88729833462074170214; abscissas_[25][2] = 0.11270166537925829786;
-        abscissas_[26][0] = 0.88729833462074170214; abscissas_[26][1] = 0.88729833462074170214; abscissas_[26][2] = 0.5;
-        abscissas_[27][0] = 0.88729833462074170214; abscissas_[27][1] = 0.88729833462074170214; abscissas_[27][2] = 0.88729833462074170214;
+        abscissas_[18][0] = 0.88729833462074170214; abscissas_[18][1] = 0.11270166537925829786; abscissas_[18][2] = 0.11270166537925829786;
+        abscissas_[19][0] = 0.88729833462074170214; abscissas_[19][1] = 0.11270166537925829786; abscissas_[19][2] = 0.5;
+        abscissas_[20][0] = 0.88729833462074170214; abscissas_[20][1] = 0.11270166537925829786; abscissas_[20][2] = 0.88729833462074170214;
+        abscissas_[21][0] = 0.88729833462074170214; abscissas_[21][1] = 0.5;                    abscissas_[21][2] = 0.11270166537925829786;
+        abscissas_[22][0] = 0.88729833462074170214; abscissas_[22][1] = 0.5;                    abscissas_[22][2] = 0.5;
+        abscissas_[23][0] = 0.88729833462074170214; abscissas_[23][1] = 0.5;                    abscissas_[23][2] = 0.88729833462074170214;
+        abscissas_[24][0] = 0.88729833462074170214; abscissas_[24][1] = 0.88729833462074170214; abscissas_[24][2] = 0.11270166537925829786;
+        abscissas_[25][0] = 0.88729833462074170214; abscissas_[25][1] = 0.88729833462074170214; abscissas_[25][2] = 0.5;
+        abscissas_[26][0] = 0.88729833462074170214; abscissas_[26][1] = 0.88729833462074170214; abscissas_[26][2] = 0.88729833462074170214;
         
         // weights:
         double denominator = 18.0 * 18.0 * 18.0;
@@ -184,6 +194,8 @@ namespace viennafem
         weights_[25] = (5.0 * 5.0 * 8.0) / denominator;
         weights_[26] = (5.0 * 5.0 * 5.0) / denominator;        
       }
+      
+      BaseType * clone() const { return new self_type(); }
       
       NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
                     viennamath::rt_expr<InterfaceType> const & e,
