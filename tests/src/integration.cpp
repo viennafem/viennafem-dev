@@ -204,10 +204,10 @@ void fill_integration_rules(std::vector<viennamath::numerical_quadrature> & inte
                             std::vector<std::string> & names);
 
 template <>
-void fill_integration_rules<viennagrid::line_tag>(std::vector<viennamath::numerical_quadrature> & integrators,
+void fill_integration_rules<viennafem::unit_interval>(std::vector<viennamath::numerical_quadrature> & integrators,
                                                   std::vector<std::string> & names)
 {
-  typedef viennagrid::line_tag  CellTag;
+  typedef viennafem::unit_interval  CellTag;
   
   integrators.push_back(viennamath::numerical_quadrature(new viennafem::rt_gauss_quad_element<CellTag, 1>()));
   names.push_back("Gauss, exact up to degree 1");
@@ -222,10 +222,10 @@ void fill_integration_rules<viennagrid::line_tag>(std::vector<viennamath::numeri
 
 
 template <>
-void fill_integration_rules<viennagrid::quadrilateral_tag>(std::vector<viennamath::numerical_quadrature> & integrators,
+void fill_integration_rules<viennafem::unit_quadrilateral>(std::vector<viennamath::numerical_quadrature> & integrators,
                                                            std::vector<std::string> & names)
 {
-  typedef viennagrid::quadrilateral_tag  CellTag;
+  typedef viennafem::unit_quadrilateral  CellTag;
   
   integrators.push_back(viennamath::numerical_quadrature(new viennafem::rt_gauss_quad_element<CellTag, 1>()));
   names.push_back("Gauss, exact up to degree 1");
@@ -239,10 +239,10 @@ void fill_integration_rules<viennagrid::quadrilateral_tag>(std::vector<viennamat
 }
 
 template <>
-void fill_integration_rules<viennagrid::hexahedron_tag>(std::vector<viennamath::numerical_quadrature> & integrators,
+void fill_integration_rules<viennafem::unit_hexahedron>(std::vector<viennamath::numerical_quadrature> & integrators,
                                                         std::vector<std::string> & names)
 {
-  typedef viennagrid::hexahedron_tag  CellTag;
+  typedef viennafem::unit_hexahedron  CellTag;
   
   integrators.push_back(viennamath::numerical_quadrature(new viennafem::rt_gauss_quad_element<CellTag, 1>()));
   names.push_back("Gauss, exact up to degree 1");
@@ -258,10 +258,10 @@ void fill_integration_rules<viennagrid::hexahedron_tag>(std::vector<viennamath::
 
 
 template <>
-void fill_integration_rules<viennagrid::triangle_tag>(std::vector<viennamath::numerical_quadrature> & integrators,
+void fill_integration_rules<viennafem::unit_triangle>(std::vector<viennamath::numerical_quadrature> & integrators,
                                                       std::vector<std::string> & names)
 {
-  typedef viennagrid::triangle_tag  CellTag;
+  typedef viennafem::unit_triangle  CellTag;
   
   integrators.push_back(viennamath::numerical_quadrature(new viennafem::rt_gauss_quad_element<CellTag, 1>()));
   names.push_back("Gauss, exact up to degree 1");
@@ -296,10 +296,10 @@ void fill_integration_rules<viennagrid::triangle_tag>(std::vector<viennamath::nu
 
 
 template <>
-void fill_integration_rules<viennagrid::tetrahedron_tag>(std::vector<viennamath::numerical_quadrature> & integrators,
+void fill_integration_rules<viennafem::unit_tetrahedron>(std::vector<viennamath::numerical_quadrature> & integrators,
                                                          std::vector<std::string> & names)
 {
-  typedef viennagrid::tetrahedron_tag  CellTag;
+  typedef viennafem::unit_tetrahedron  CellTag;
   
   integrators.push_back(viennamath::numerical_quadrature(new viennafem::rt_gauss_quad_element<CellTag, 1>()));
   names.push_back("Gauss, exact up to degree 1");
@@ -325,14 +325,9 @@ void fill_integration_rules<viennagrid::tetrahedron_tag>(std::vector<viennamath:
   
 }
 
-template <typename ConfigType>
+template <typename RefernceCell>
 int test(viennamath::expr const & e)
 {
-  typedef typename viennagrid::result_of::domain<ConfigType>::type            DomainType;
-
-  typedef typename ConfigType::cell_tag                                 CellTag;
-  typedef typename viennagrid::result_of::ncell<ConfigType, CellTag::dim>::type  CellType;
-  typedef typename viennagrid::result_of::point<ConfigType>::type                PointType;
   
   //
   // Run integration:
@@ -340,7 +335,7 @@ int test(viennamath::expr const & e)
   std::vector<viennamath::numerical_quadrature> integrators;
   std::vector<std::string> integrator_names;
   
-  fill_integration_rules<CellTag>(integrators, integrator_names);
+  fill_integration_rules<RefernceCell>(integrators, integrator_names);
 
   for (std::size_t i=0; i<integrators.size(); ++i)
     std::cout << integrator_names[i] << ": " << std::setprecision(12) << integrators[i](e) << std::endl;

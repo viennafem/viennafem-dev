@@ -263,8 +263,10 @@ namespace viennafem
                 ++vocit;
             
             local_weak_form[local_index_i][local_index_j].lhs().get()->recursive_traversal(updater);
+            global_index_j = *map_iter_j;
+            
 
-            if (*map_iter_j == -1) // Dirichlet boundary
+            if (global_index_j == -1) // Dirichlet boundary
             {
               if (pde_system.unknown(0).size() == 1) //scalar valued unknowns
               {
@@ -288,6 +290,7 @@ namespace viennafem
             else
             {
               //std::cout << " Evaluating LHS: " << local_weak_form[local_index_i][local_index_j].lhs() << std::endl;
+              //std::cout << "Adding to (" << global_index_i << ", " << global_index_j << "): " << integrator(local_weak_form[local_index_i][local_index_j].lhs()) << std::endl;
                linear_system.add(
                   global_index_i, 
                   global_index_j, 

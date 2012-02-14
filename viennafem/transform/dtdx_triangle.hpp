@@ -43,7 +43,7 @@ namespace viennafem
         double det_dF_dt = 2.0 * viennagrid::spanned_volume(p0, p1, p2);
         
         assert(det_dF_dt > 0);
-        std::cout << "dt_dx triangle!" << std::endl;
+        //std::cout << "dt_dx triangle!" << std::endl;
         
         viennadata::access<det_dF_dt_key, numeric_type>()(cell) = det_dF_dt;
         

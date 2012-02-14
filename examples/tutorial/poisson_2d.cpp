@@ -222,9 +222,6 @@ int main()
                 );
   }
   
-  std::cout << system_matrix_2 << std::endl;
-  std::cout << load_vector_2 << std::endl;
-  
   VectorType pde_result_1 = solve(system_matrix_1, load_vector_1);
   VectorType pde_result_2 = solve(system_matrix_2, load_vector_2);
 
