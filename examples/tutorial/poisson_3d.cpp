@@ -190,8 +190,8 @@ int main()
   fem_assembler(viennafem::make_linear_pde_system(poisson_equ_1, 
                                                   u,
                                                   viennafem::make_linear_pde_options(0, 
-                                                                                     viennafem::LinearBasisfunctionTag(),
-                                                                                     viennafem::LinearBasisfunctionTag())
+                                                                                     viennafem::lagrange_tag<1>(),
+                                                                                     viennafem::lagrange_tag<1>())
                                                  ),
                 my_domain,
                 system_matrix_1,
@@ -201,8 +201,8 @@ int main()
   fem_assembler(viennafem::make_linear_pde_system(poisson_equ_2, 
                                                   u,
                                                   viennafem::make_linear_pde_options(1, 
-                                                                                     viennafem::LinearBasisfunctionTag(),
-                                                                                     viennafem::LinearBasisfunctionTag())
+                                                                                     viennafem::lagrange_tag<1>(),
+                                                                                     viennafem::lagrange_tag<1>())
                                                  ),
                 my_domain,
                 system_matrix_2,

@@ -25,7 +25,7 @@ namespace viennafem
   
   //memory-intensive: Compute them once and store the computed values until next update
   template <>
-  struct dt_dx_handler<viennagrid::tetrahedron_tag>
+  struct dt_dx_handler<viennafem::unit_tetrahedron>
   {
     public:
       

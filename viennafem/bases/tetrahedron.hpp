@@ -18,44 +18,103 @@
 #include "viennagrid/topology/tetrahedron.hpp"
 #include "viennagrid/forwards.h"
 #include "viennamath/expression.hpp"
+#include "viennafem/forwards.h"
 
 namespace viennafem
 {
   
-  //TODO: Has to be generalized for:
-  //       - different cell types
-  //       - different degrees of basis functions
+ 
   //
-  // For now, returns the linear basis:
-  template <typename ExpressionType>
-  std::vector<ExpressionType> get_basisfunctions(viennagrid::tetrahedron_tag)
+  // Lagrange family on tetrahedra
+  //
+  
+  
+  // Vertex basis:
+  template <typename InterfaceType, std::size_t order>
+  struct local_basis <InterfaceType,
+                      viennafem::lagrange_tag<order>,
+                      unit_tetrahedron,
+                      0,   // vertex level
+                      0>   // vertex (0,0,0)
   {
-    typedef typename ExpressionType::interface_type    InterfaceType;
+    typedef viennamath::rt_expr<InterfaceType>   expression_type;
     
-    //std::cout << "get_basisfunctions: entry" << std::endl;
-    std::vector<ExpressionType> ret(4);
-    
-    //std::cout << "get_basisfunctions: Creating variables" << std::endl;
-    viennamath::rt_variable<InterfaceType> x(0);
-    viennamath::rt_variable<InterfaceType> y(1);
-    viennamath::rt_variable<InterfaceType> z(2);
-    
-    //std::cout << "get_basisfunctions: filling 0" << std::endl;
-    ret[0] = ExpressionType(1.0 - x - y - z);
-    //std::cout << "get_basisfunctions: filling 1" << std::endl;
-    ret[1] = ExpressionType(x);
-    //std::cout << "get_basisfunctions: filling 2" << std::endl;
-    ret[2] = ExpressionType(y);
-    //std::cout << "get_basisfunctions: filling 3" << std::endl;
-    ret[3] = ExpressionType(z);
-    
-    //std::cout << "get_basisfunctions: return" << std::endl;
-    return ret;    
-  }
-  
-  
-  
+    typedef viennamath::ct_expr< viennamath::ct_expr< viennamath::ct_constant<1>,
+                                                      viennamath::op_minus<viennafem::numeric_type>,
+                                                      viennamath::ct_variable<0> >,
+                                 viennamath::op_minus<viennafem::numeric_type>,
+                                 viennamath::ct_expr< viennamath::ct_variable<1>,
+                                                      viennamath::op_plus<viennafem::numeric_type>,
+                                                      viennamath::ct_variable<2> >
+                               >                 type;
+                                 
+    static std::vector<expression_type> get()
+    {
+      std::vector<expression_type> ret(1);
+      ret[0] = expression_type(type());
+      return ret;    
+    }
+  };
 
+  template <typename InterfaceType, std::size_t order>
+  struct local_basis <InterfaceType,
+                      viennafem::lagrange_tag<order>,
+                      unit_tetrahedron,
+                      0,   //vertex level
+                      1>   //vertex (1,0,0)
+  {
+    typedef viennamath::rt_expr<InterfaceType>   expression_type;
+    
+    typedef viennamath::ct_variable<0>           type;
+    
+    static std::vector<expression_type> get()
+    {
+      std::vector<expression_type> ret(1);
+      ret[0] = expression_type(type());
+      return ret;    
+    }
+  };
+
+  
+  template <typename InterfaceType, std::size_t order>
+  struct local_basis <InterfaceType,
+                      viennafem::lagrange_tag<order>,
+                      unit_tetrahedron,
+                      0,   //vertex level
+                      2>   //vertex (0,1,0)
+  {
+    typedef viennamath::rt_expr<InterfaceType>   expression_type;
+    
+    typedef viennamath::ct_variable<1>           type;
+    
+    static std::vector<expression_type> get()
+    {
+      std::vector<expression_type> ret(1);
+      ret[0] = expression_type(type());
+      return ret;    
+    }
+  };
+  
+  template <typename InterfaceType, std::size_t order>
+  struct local_basis <InterfaceType,
+                      viennafem::lagrange_tag<order>,
+                      unit_tetrahedron,
+                      0,   //vertex level
+                      3>   //vertex (0,0,1)
+  {
+    typedef viennamath::rt_expr<InterfaceType>   expression_type;
+    
+    typedef viennamath::ct_variable<2>           type;
+    
+    static std::vector<expression_type> get()
+    {
+      std::vector<expression_type> ret(1);
+      ret[0] = expression_type(type());
+      return ret;    
+    }
+  };
+  
+  
 }
 
 #endif

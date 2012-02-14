@@ -26,6 +26,54 @@
 namespace viennafem
 {
 
+  template <typename CellType, typename InterfaceType>
+  struct jacobian_adder : public viennamath::rt_manipulation_interface<InterfaceType>
+  {
+    public:
+      typedef typename InterfaceType::numeric_type        numeric_type;
+      
+      InterfaceType * operator()(InterfaceType const * e) const 
+      {
+        const viennamath::rt_unary_expr<InterfaceType> * integral_expression = dynamic_cast<const viennamath::rt_unary_expr<InterfaceType> *>(e);
+        
+        if (integral_expression != NULL)
+        {
+          typedef viennamath::op_unary<viennamath::op_rt_symbolic_integral<InterfaceType>, InterfaceType>    SymbolicIntegrationOperation;
+
+          const SymbolicIntegrationOperation * op_symb_tmp = dynamic_cast<const SymbolicIntegrationOperation *>(integral_expression->op());
+
+          viennafem::cell_quan<CellType, InterfaceType> det_dF_dt;
+          det_dF_dt.wrap( viennafem::det_dF_dt_key() );
+          
+          if (op_symb_tmp != NULL)
+          {
+            return new viennamath::rt_unary_expr<InterfaceType>( new viennamath::rt_binary_expr<InterfaceType>(integral_expression->lhs()->clone(),
+                                                                                                               new viennamath::op_binary<viennamath::op_mult<numeric_type>, InterfaceType>(),
+                                                                                                               det_dF_dt.clone()),
+                                                                 op_symb_tmp->clone());
+          }
+        }
+        
+        return e->clone();
+      }
+      
+      bool modifies(InterfaceType const * e) const
+      {
+        const viennamath::rt_unary_expr<InterfaceType> * integral_expression = dynamic_cast<const viennamath::rt_unary_expr<InterfaceType> *>(e);
+        
+        if (integral_expression != NULL)
+        {
+          typedef viennamath::op_unary<viennamath::op_rt_symbolic_integral<InterfaceType>, InterfaceType>    SymbolicIntegrationOperation;
+
+          const SymbolicIntegrationOperation * op_symb_tmp = dynamic_cast<const SymbolicIntegrationOperation *>(integral_expression->op());
+          
+          if (op_symb_tmp != NULL)
+            return true;
+        }
+        return false;
+      }
+  };
+  
   
   template <typename CellType, typename EquationType, typename PDESystemType>
   EquationType transform_to_reference_cell(EquationType const & weak_form,
@@ -77,7 +125,11 @@ namespace viennafem
     new_lhs = viennamath::substitute(search_types, replace_types, weak_form.lhs());
     new_rhs = viennamath::substitute(search_types, replace_types, weak_form.rhs());
     
-    return EquationType(new_lhs, new_rhs);
+    viennamath::rt_manipulation_wrapper<InterfaceType> jacobian_manipulator( new jacobian_adder<CellType, InterfaceType>() );
+    Expression new_lhs_with_jacobian(new_lhs.get()->recursive_manipulation(jacobian_manipulator));
+    Expression new_rhs_with_jacobian(new_rhs.get()->recursive_manipulation(jacobian_manipulator));
+    
+    return EquationType(new_lhs_with_jacobian, new_rhs_with_jacobian);
   }
 
 
@@ -159,7 +211,11 @@ namespace viennafem
     new_lhs = viennamath::substitute(search_types, replace_types, weak_form.lhs());
     new_rhs = viennamath::substitute(search_types, replace_types, weak_form.rhs());
     
-    return EquationType(new_lhs, new_rhs);
+    viennamath::rt_manipulation_wrapper<InterfaceType> jacobian_manipulator( new jacobian_adder<CellType, InterfaceType>() );
+    Expression new_lhs_with_jacobian(new_lhs.get()->recursive_manipulation(jacobian_manipulator));
+    Expression new_rhs_with_jacobian(new_rhs.get()->recursive_manipulation(jacobian_manipulator));
+    
+    return EquationType(new_lhs_with_jacobian, new_rhs_with_jacobian);
   }
 
   template <typename CellType, typename EquationType, typename PDESystemType>
@@ -168,6 +224,15 @@ namespace viennafem
   {
     return  transform_to_reference_cell<CellType>(weak_form, pde_system, typename CellType::tag());
   }
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
 
 

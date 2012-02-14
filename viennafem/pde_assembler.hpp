@@ -106,6 +106,8 @@ namespace viennafem
         std::cout << "* pde_solver::operator(): Using weak form " << weak_form << std::endl;
         std::cout << "* pde_solver::operator(): Write dt_dx coefficients" << std::endl;
      #endif
+        
+        typedef typename reference_cell_for_basis<CellTag, viennafem::lagrange_tag<1> >::type    ReferenceCell;
      
         //fill with cell quantities 
         CellContainer cells = viennagrid::ncells<CellTag::dim>(domain);
@@ -115,7 +117,7 @@ namespace viennafem
         {
           //cell_iter->print_short();
           //viennadata::access<example_key, double>()(*cell_iter) = i; 
-          viennafem::dt_dx_handler<CellTag>::apply(*cell_iter);
+          viennafem::dt_dx_handler<ReferenceCell>::apply(*cell_iter);
         }
 
      #ifdef VIENNAFEMDEBUG        
@@ -215,6 +217,8 @@ namespace viennafem
         std::cout << "* pde_solver::operator(): Write dt_dx coefficients" << std::endl;
      #endif
      
+        typedef typename reference_cell_for_basis<CellTag, viennafem::lagrange_tag<1> >::type    ReferenceCell;
+        
         //fill with cell quantities 
         CellContainer cells = viennagrid::ncells<CellTag::dim>(domain);
         for (CellIterator cell_iter = cells.begin();
@@ -223,7 +227,7 @@ namespace viennafem
         {
           //cell_iter->print_short();
           //viennadata::access<example_key, double>()(*cell_iter) = i; 
-          viennafem::dt_dx_handler<CellTag>::apply(*cell_iter);
+          viennafem::dt_dx_handler<ReferenceCell>::apply(*cell_iter);
         }
 
      #ifdef VIENNAFEMDEBUG        

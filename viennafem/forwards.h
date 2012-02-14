@@ -31,6 +31,9 @@ namespace viennafem
   struct mapping_key_type {}; 
 
   
+  struct none;
+  
+  
   //
   // Integration
   //
@@ -118,13 +121,16 @@ namespace viennafem
   // Basis functions
   //
   
-  struct LinearBasisfunctionTag {};
+  // Family of Lagrange basis functions
+  template <std::size_t order>
+  struct lagrange_tag {};
   
+
   template <typename T>
   struct space_to_id {};
   
-  template <>
-  struct space_to_id<LinearBasisfunctionTag>
+  template <std::size_t order>
+  struct space_to_id< lagrange_tag<order> >
   {
     enum { value = 1 };
   };
@@ -132,23 +138,39 @@ namespace viennafem
   template <typename Cell, typename T>
   struct reference_cell_for_basis {};
   
-  template <>
-  struct reference_cell_for_basis < viennagrid::line_tag, LinearBasisfunctionTag>
+  template <std::size_t order>
+  struct reference_cell_for_basis < viennagrid::line_tag, lagrange_tag<order> >
   {
     typedef unit_interval   type;
   };
 
-  template <>
-  struct reference_cell_for_basis < viennagrid::triangle_tag, LinearBasisfunctionTag>
+  template <std::size_t order>
+  struct reference_cell_for_basis < viennagrid::triangle_tag, lagrange_tag<order> >
   {
     typedef unit_triangle   type;
   };
 
-  template <>
-  struct reference_cell_for_basis < viennagrid::tetrahedron_tag, LinearBasisfunctionTag>
+  template <std::size_t order>
+  struct reference_cell_for_basis < viennagrid::tetrahedron_tag, lagrange_tag<order> >
   {
     typedef unit_tetrahedron   type;
   };
+  
+
+  
+  // Basis function retrieval:
+  template <typename InterfaceType,
+            typename BasisTag,
+            typename ReferenceCell,
+            std::size_t TopologyDim,  //topology dimension of the element for which the basis is to be returned
+            std::size_t ElementID>    //element ID (0, ... num-1) of the element at dimension 'topology_dim'
+  struct local_basis
+  {
+    typedef typename BasisTag::ERROR_BASIS_NOT_DEFINED_FOR_THE_PROVIDED_PARAMETER_SET   error_type;
+  };                    
+  
+  
+  
   
   
   //Integration domain:

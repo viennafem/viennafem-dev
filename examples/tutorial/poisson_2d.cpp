@@ -202,8 +202,8 @@ int main()
     fem_assembler(viennafem::make_linear_pde_system(poisson_equ_1, 
                                                     u,
                                                     viennafem::make_linear_pde_options(0, 
-                                                                                      viennafem::LinearBasisfunctionTag(),
-                                                                                      viennafem::LinearBasisfunctionTag())
+                                                                                       viennafem::lagrange_tag<1>(),
+                                                                                       viennafem::lagrange_tag<1>())
                                                   ),
                   my_domain.segments()[i],
                   system_matrix_1,
@@ -213,8 +213,8 @@ int main()
     fem_assembler(viennafem::make_linear_pde_system(poisson_equ_2, 
                                                     u,
                                                     viennafem::make_linear_pde_options(1, 
-                                                                                      viennafem::LinearBasisfunctionTag(),
-                                                                                      viennafem::LinearBasisfunctionTag())
+                                                                                       viennafem::lagrange_tag<1>(),
+                                                                                       viennafem::lagrange_tag<1>())
                                                   ),
                   my_domain.segments()[i],
                   system_matrix_2,
@@ -222,7 +222,8 @@ int main()
                 );
   }
   
-  //std::cout << poisson_config_1.load_vector() << std::endl;
+  std::cout << system_matrix_2 << std::endl;
+  std::cout << load_vector_2 << std::endl;
   
   VectorType pde_result_1 = solve(system_matrix_1, load_vector_1);
   VectorType pde_result_2 = solve(system_matrix_2, load_vector_2);

@@ -336,8 +336,8 @@ int main()
   fem_assembler(viennafem::make_linear_pde_system(weak_form_lame, 
                                                   u,
                                                   viennafem::make_linear_pde_options(0, 
-                                                                                     viennafem::LinearBasisfunctionTag(),
-                                                                                     viennafem::LinearBasisfunctionTag())
+                                                                                     viennafem::lagrange_tag<1>(),
+                                                                                     viennafem::lagrange_tag<1>())
                                                  ),
                 my_domain,
                 system_matrix,

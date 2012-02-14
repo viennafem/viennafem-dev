@@ -10,8 +10,8 @@
    license:    MIT (X11), see file LICENSE in the ViennaFEM base directory
 ======================================================================================= */
 
-#ifndef VIENNAFEM_BASES_TRIANGLE_HPP
-#define VIENNAFEM_BASES_TRIANGLE_HPP
+#ifndef VIENNAFEM_BASES_LINE_HPP
+#define VIENNAFEM_BASES_LINE_HPP
 
 #include <vector>
 #include "viennagrid/topology/triangle.hpp"
@@ -33,17 +33,15 @@ namespace viennafem
   template <typename InterfaceType, std::size_t order>
   struct local_basis <InterfaceType,
                       viennafem::lagrange_tag<order>,
-                      unit_triangle,
+                      unit_interval,
                       0,   // vertex level
-                      0>   // vertex (0,0)
+                      0>   // vertex at x=0
   {
     typedef viennamath::rt_expr<InterfaceType>   expression_type;
     
-    typedef viennamath::ct_expr< viennamath::ct_expr< viennamath::ct_constant<1>,
-                                                      viennamath::op_minus<viennafem::numeric_type>,
-                                                      viennamath::ct_variable<0> >,
+    typedef viennamath::ct_expr< viennamath::ct_constant<1>,
                                  viennamath::op_minus<viennafem::numeric_type>,
-                                 viennamath::ct_variable<1>
+                                 viennamath::ct_variable<0> 
                                >                 type;
                                  
     static std::vector<expression_type> get()
@@ -57,9 +55,9 @@ namespace viennafem
   template <typename InterfaceType, std::size_t order>
   struct local_basis <InterfaceType,
                       viennafem::lagrange_tag<order>,
-                      unit_triangle,
+                      unit_interval,
                       0,   //vertex level
-                      1>   //vertex (1,0)
+                      1>   //vertex at x=1
   {
     typedef viennamath::rt_expr<InterfaceType>   expression_type;
     
@@ -73,26 +71,6 @@ namespace viennafem
     }
   };
 
-  
-  template <typename InterfaceType, std::size_t order>
-  struct local_basis <InterfaceType,
-                      viennafem::lagrange_tag<order>,
-                      unit_triangle,
-                      0,   //vertex level
-                      2>   //vertex (0,1)
-  {
-    typedef viennamath::rt_expr<InterfaceType>   expression_type;
-    
-    typedef viennamath::ct_variable<1>           type;
-    
-    static std::vector<expression_type> get()
-    {
-      std::vector<expression_type> ret(1);
-      ret[0] = expression_type(type());
-      return ret;    
-    }
-  };
-  
   
 }
 
