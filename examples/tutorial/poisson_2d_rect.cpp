@@ -13,6 +13,9 @@
 // include necessary system headers
 #include <iostream>
 
+#define VIENNAGRID_DEBUG_IO
+
+
 // ViennaFEM includes:
 //#include "viennafem/afftrans.hpp"
 //#include "viennafem/dtdx_tetrahedron.h"
@@ -31,7 +34,7 @@
 
 // ViennaGrid includes:
 #include "viennagrid/domain.hpp"
-#include <viennagrid/config/simplex.hpp>
+#include "viennagrid/config/others.hpp"
 #include "viennagrid/io/netgen_reader.hpp"
 #include "viennagrid/io/vtk_writer.hpp"
 
@@ -64,6 +67,7 @@
 #include "viennacl/linalg/cg.hpp"
 #include "viennacl/linalg/norm_2.hpp"
 #include "viennacl/linalg/prod.hpp"
+#include "viennacl/io/matrix_market.hpp"
 
 
 //      
@@ -106,21 +110,14 @@ VectorType solve(MatrixType const & system_matrix,
   return result;
 }
 
-struct permittivity_key
-{
-  bool operator<(permittivity_key const & other) const { return false; }
-};
 
 int main()
 {
-  typedef viennagrid::config::triangular_2d                             ConfigType;
-  typedef viennagrid::result_of::domain<ConfigType>::type               DomainType;
-  typedef viennagrid::segment_t<ConfigType>                             SegmentType;
+  typedef viennagrid::config::quadrilateral_2d                           ConfigType;
+  typedef viennagrid::result_of::domain<ConfigType>::type                DomainType;
 
-  typedef viennagrid::result_of::ncell_range<DomainType, 0>::type    VertexContainer;
+  typedef viennagrid::result_of::ncell_range<DomainType, 0>::type        VertexContainer;
   typedef viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
-  typedef viennagrid::result_of::ncell_range<SegmentType, 2>::type   CellContainer;
-  typedef viennagrid::result_of::iterator<CellContainer>::type           CellIterator;
   typedef viennagrid::result_of::ncell<ConfigType, 2>::type              CellType;
   
   typedef boost::numeric::ublas::compressed_matrix<viennafem::numeric_type>  MatrixType;
@@ -138,34 +135,26 @@ int main()
 
   try
   {
-    viennagrid::io::netgen_reader my_netgen_reader;
-    my_netgen_reader(my_domain, "../examples/data/square224.mesh");
+    viennagrid::io::netgen_reader my_reader;
+    my_reader(my_domain, "../examples/data/square16_rect.mesh");
   }
-  catch (...)
+  catch (std::exception const & e)
   {
+    std::cout << "what() : " << e.what() << std::endl;
     std::cerr << "File-Reader failed. Aborting program..." << std::endl;
     return EXIT_FAILURE;
   }
   
   
   //
-  // Specify Poisson equation with inhomogeneous permittivity:
+  // Specify two PDEs:
   //
   FunctionSymbol u(0, viennamath::unknown_tag<>());   //an unknown function used for PDE specification
-  FunctionSymbol v(0, viennamath::test_tag<>());   //an unknown function used for PDE specification
-  viennafem::cell_quan<CellType, viennamath::expr::interface_type>  permittivity; permittivity.wrap_constant( permittivity_key() );  
+  Equation poisson_equ_1 = viennamath::make_equation( viennamath::laplace(u), -1);
+  Equation poisson_equ_2 = viennamath::make_equation( viennamath::laplace(u), 0);
 
-  //the strong form (not yet functional because of ViennaMath limitations)
-  //Equation poisson_equ = viennamath::make_equation( viennamath::div(permittivity * viennamath::grad(u)), 0);
-
-  //the weak form:
-  Equation poisson_equ = viennamath::make_equation( 
-                          viennamath::integral(viennamath::symbolic_interval(),
-                                               permittivity * (viennamath::grad(u) * viennamath::grad(v)) ),
-                          0);
-
-  MatrixType system_matrix;
-  VectorType load_vector;
+  MatrixType system_matrix_1, system_matrix_2;
+  VectorType load_vector_1, load_vector_2;
   
   //
   // Setting boundary information on domain (this should come from device specification)
@@ -176,19 +165,26 @@ int main()
       vit != vertices.end();
       ++vit)
   {
+    //boundary for first equation: Homogeneous Dirichlet everywhere
+    if (vit->point()[0] == 0.0 || vit->point()[0] == 1.0 
+      || vit->point()[1] == 0.0 || vit->point()[1] == 1.0 )
+      viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = true;
+    else
+      viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = false;
+    
     //boundary for second equation: 0 at left boundary, 1 at right boundary
     if (vit->point()[0] == 0.0)
     {
-      viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = true;
-      viennadata::access<BoundaryKey, double>(BoundaryKey(0))(*vit) = 0.0;
+      viennadata::access<BoundaryKey, bool>(BoundaryKey(1))(*vit) = true;
+      viennadata::access<BoundaryKey, double>(BoundaryKey(1))(*vit) = 0.0;
     }
     else if (vit->point()[0] == 1.0)
     {
-      viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = true;
-      viennadata::access<BoundaryKey, double>(BoundaryKey(0))(*vit) = 1.0;
+      viennadata::access<BoundaryKey, bool>(BoundaryKey(1))(*vit) = true;
+      viennadata::access<BoundaryKey, double>(BoundaryKey(1))(*vit) = 1.0;
     }
     else
-      viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = false;
+      viennadata::access<BoundaryKey, bool>(BoundaryKey(1))(*vit) = false;
     
   }
   
@@ -205,41 +201,40 @@ int main()
   //
   for (size_t i=0; i<my_domain.segments().size(); ++i)
   {
-    //set permittivity:
-    CellContainer cells = viennagrid::ncells<2>(my_domain.segments()[i]);
-    for (CellIterator cit  = cells.begin();
-                      cit != cells.end();
-                    ++cit)
-    {
-      if (i==0) //Si
-        viennadata::access<permittivity_key, double>(permittivity_key())(*cit) = 3.9; 
-      else //SiO2
-        viennadata::access<permittivity_key, double>(permittivity_key())(*cit) = 11.9; 
-    }
-    
-    
-    fem_assembler(viennafem::make_linear_pde_system(poisson_equ, 
+    fem_assembler(viennafem::make_linear_pde_system(poisson_equ_1, 
                                                     u,
                                                     viennafem::make_linear_pde_options(0, 
                                                                                        viennafem::lagrange_tag<1>(),
                                                                                        viennafem::lagrange_tag<1>())
                                                   ),
                   my_domain.segments()[i],
-                  system_matrix,
-                  load_vector
+                  system_matrix_1,
+                  load_vector_1
+                );
+    
+    fem_assembler(viennafem::make_linear_pde_system(poisson_equ_2, 
+                                                    u,
+                                                    viennafem::make_linear_pde_options(1, 
+                                                                                       viennafem::lagrange_tag<1>(),
+                                                                                       viennafem::lagrange_tag<1>())
+                                                  ),
+                  my_domain.segments()[i],
+                  system_matrix_2,
+                  load_vector_2
                 );
   }
   
-  //std::cout << poisson_config_1.load_vector() << std::endl;
-  
-  VectorType pde_result = solve(system_matrix, load_vector);
+  VectorType pde_result_1 = solve(system_matrix_1, load_vector_1);
+  VectorType pde_result_2 = solve(system_matrix_2, load_vector_2);
 
   //std::cout << "RESULT" << std::endl;
   //std::cout << pde_result_1 << std::endl;
+  
   //
   // Writing solution back to domain (discussion about proper way of returning a solution required...)
   //
-  viennafem::io::write_solution_to_VTK_file(pde_result, "poisson_1", my_domain, 0);
+  viennafem::io::write_solution_to_VTK_file(pde_result_1, "poisson_1_rect", my_domain, 0);
+  viennafem::io::write_solution_to_VTK_file(pde_result_2, "poisson_2_rect", my_domain, 1);
   
   std::cout << "*****************************************" << std::endl;
   std::cout << "* Poisson solver finished successfully! *" << std::endl;

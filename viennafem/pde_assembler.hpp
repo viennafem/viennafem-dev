@@ -22,6 +22,8 @@
 #include "viennafem/eval.hpp"
 #include "viennafem/transform/dtdx_triangle.hpp"
 #include "viennafem/transform/dtdx_tetrahedron.hpp"
+#include "viennafem/transform/dtdx_quadrilateral.hpp"
+#include "viennafem/transform/dtdx_hexahedron.hpp"
 #include "viennafem/weak_form.hpp"
 #include "viennafem/linear_pde_system.hpp"
 #include "viennafem/linear_pde_options.hpp"

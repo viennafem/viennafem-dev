@@ -107,7 +107,7 @@ int main()
   std::cout << "Weak form: " << viennafem::make_weak_form(equ_5) << std::endl;  
   std::cout << "-------------" << std::endl;
   
-  viennafem::cell_quan<CellType, viennamath::expr::interface_type>  permittivity; permittivity.wrap( testkey() );  
+  viennafem::cell_quan<CellType, viennamath::expr::interface_type>  permittivity; permittivity.wrap_constant( testkey() );  
   Equation equ_6 = viennamath::make_equation( viennamath::div( permittivity * viennamath::grad(u)), -1);
   std::cout << "Strong form: " << equ_6 << std::endl;
   std::cout << "Weak form: " << viennafem::make_weak_form(equ_6) << std::endl;  

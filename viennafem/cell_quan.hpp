@@ -23,39 +23,73 @@
 namespace viennafem
 {
   
-  template <typename CellType, typename DataType>
+  template <typename CellType, typename NumericT = viennafem::numeric_type>
   class cell_quan_interface
   {
-    public: 
-      virtual DataType operator()(CellType const & cell) const = 0;
+    protected:
+      typedef NumericT          numeric_type;
       
-      virtual cell_quan_interface<CellType, DataType> * clone() const = 0;
+    public: 
+      virtual numeric_type eval(CellType const & cell, numeric_type v) const = 0;
+      virtual numeric_type eval(CellType const & cell, std::vector<numeric_type> const & v) const = 0;
+      
+      virtual cell_quan_interface<CellType, NumericT> * clone() const = 0;
   };
 
-  
+  //
   template <typename CellType, typename KeyType, typename DataType>
-  class quan_accessor : public cell_quan_interface<CellType, DataType>
+  class cell_quan_constant : public cell_quan_interface<CellType>
   {
-    typedef quan_accessor<CellType, KeyType, DataType>    self_type;
+      typedef cell_quan_constant<CellType, KeyType, DataType>         self_type;
+      typedef typename cell_quan_interface<CellType>::numeric_type    numeric_type;
     
     public:
-      quan_accessor(KeyType const & key) : key_(key) {}
+      cell_quan_constant(KeyType const & key) : key_(key) {}
       
-      DataType operator()(CellType const & cell) const
+      numeric_type eval(CellType const & cell, numeric_type v) const
       {
         return viennadata::access<KeyType, DataType>(key_)(cell);
       }
-      
-      cell_quan_interface<CellType, DataType> * clone() const { return new self_type(key_); }
+
+      numeric_type eval(CellType const & cell, std::vector<numeric_type> const & v) const
+      {
+        return viennadata::access<KeyType, DataType>(key_)(cell);
+      }
+
+      cell_quan_interface<CellType> * clone() const { return new self_type(key_); }
       
     private:
       KeyType key_;
   };
   
+  template <typename CellType, typename KeyType, typename DataType>
+  class cell_quan_expr : public cell_quan_interface<CellType>
+  {
+      typedef cell_quan_expr<CellType, KeyType, DataType>             self_type;
+      typedef typename cell_quan_interface<CellType>::numeric_type    numeric_type;
+    
+    public:
+      cell_quan_expr(KeyType const & key) : key_(key) {}
+      
+      numeric_type eval(CellType const & cell, numeric_type v) const
+      {
+        return viennadata::access<KeyType, DataType>(key_)(cell)(v);
+      }
+
+      numeric_type eval(CellType const & cell, std::vector<numeric_type> const & v) const
+      {
+        return viennadata::access<KeyType, DataType>(key_)(cell)(v);
+      }
+
+      cell_quan_interface<CellType> * clone() const { return new self_type(key_); }
+      
+    private:
+      KeyType key_;
+  };
   
 
   
-  template <typename CellType, typename DataType>
+  template <typename CellType, typename NumericT = viennafem::numeric_type>
   class cell_quan_wrapper
   {
     public:
@@ -70,15 +104,22 @@ namespace viennafem
         return *this;
       }
       
-      DataType operator()(CellType const & cell) const
+      NumericT eval(CellType const & cell,
+                    numeric_type v) const
       {
-        return functor_->operator()(cell); 
+        return functor_->eval(cell, v); 
       }
-      
-      cell_quan_interface<CellType, DataType> * clone() const { return functor_->clone(); }
+
+      NumericT eval(CellType const & cell,
+                    std::vector<numeric_type> const & v) const
+      {
+        return functor_->eval(cell, v); 
+      }
+
+      cell_quan_interface<CellType> * clone() const { return functor_->clone(); }
 
     private:
-      std::auto_ptr< const cell_quan_interface<CellType, DataType> > functor_;
+      std::auto_ptr< const cell_quan_interface<CellType> > functor_;
   };
   
   
@@ -101,11 +142,11 @@ namespace viennafem
       InterfaceType * clone() const { return new self_type(current_cell, accessor); }
       numeric_type eval(std::vector<numeric_type> const & v) const
       {
-        return accessor(*current_cell);
+        return accessor.eval(*current_cell, v);
       }
       numeric_type eval(numeric_type v) const 
       {
-        return accessor(*current_cell);
+        return accessor.eval(*current_cell, v);
       }
       
       std::string deep_str() const
@@ -159,12 +200,19 @@ namespace viennafem
       void update(CellType const & cell) const { current_cell = &cell; }
       
       template <typename T>
-      void wrap(T const & t) 
+      void wrap_constant(T const & t) 
       {
-        cell_quan_wrapper<CellType, numeric_type> temp( new quan_accessor<CellType, T, numeric_type>(t) );
+        cell_quan_wrapper<CellType, numeric_type> temp( new cell_quan_constant<CellType, T, numeric_type>(t) );
         accessor = temp;
       }
-      
+
+      template <typename T>
+      void wrap_expr(T const & t) 
+      {
+        cell_quan_wrapper<CellType, numeric_type> temp( new cell_quan_expr<CellType, T, viennamath::expr>(t) );
+        accessor = temp;
+      }
+
     private:
       mutable const CellType * current_cell;
       cell_quan_wrapper<CellType, numeric_type> accessor;

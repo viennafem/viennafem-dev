@@ -64,12 +64,39 @@ namespace viennafem
       return ret;
     }
     
+    static std::vector<expression_type> get(viennafem::unit_quadrilateral)
+    {
+      std::vector<expression_type> ret;
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_quadrilateral, 0, 0>::get()[0] );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_quadrilateral, 0, 1>::get()[0] );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_quadrilateral, 0, 2>::get()[0] );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_quadrilateral, 0, 3>::get()[0] );
+      
+      return ret;
+    }
+
     static std::vector<expression_type> get(viennafem::unit_triangle)
     {
       std::vector<expression_type> ret;
       ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_triangle, 0, 0>::get()[0] );
       ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_triangle, 0, 1>::get()[0] );
       ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_triangle, 0, 2>::get()[0] );
+      
+      return ret;
+    }
+
+    static std::vector<expression_type> get(viennafem::unit_hexahedron)
+    {
+      std::vector<expression_type> ret;
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 0>::get()[0] );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 1>::get()[0] );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 2>::get()[0] );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 3>::get()[0] );
+
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 4>::get()[0] );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 5>::get()[0] );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 6>::get()[0] );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 7>::get()[0] );
       
       return ret;
     }
@@ -84,6 +111,7 @@ namespace viennafem
       
       return ret;
     }
+
 
   };
   

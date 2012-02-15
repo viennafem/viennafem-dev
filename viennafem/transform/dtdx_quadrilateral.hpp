@@ -48,20 +48,20 @@ namespace viennafem
         numeric_type coeff_x = p0[0] - p1[0] - p2[0] + p3[0];
         numeric_type coeff_y = p0[1] - p1[1] - p2[1] + p3[1];
         
-        std::vector<numeric_type> coeff_J(3);
-        coeff_J[0] =   x1_x0 * y2_y0   -   y1_y0 * x2_x0;  //constant coefficent
-        coeff_J[1] =   x1_x0 * coeff_y -   y1_y0 * coeff_x;
-        coeff_J[2] = coeff_x * y2_y0   - coeff_y * x2_x0;
+        viennamath::variable  xi(0);
+        viennamath::variable eta(1);
         
-        viennadata::access<det_dF_dt_key, std::vector<numeric_type> >()(cell) = coeff_J;
+        viennamath::expr det_J = (x1_x0 + eta * coeff_x) * (y2_y0 + xi * coeff_y) - (y1_y0 + eta * coeff_y) * (x2_x0 + xi * coeff_x);
+        
+        viennadata::access<det_dF_dt_key, viennamath::expr>()(cell) = det_J;
         
         //Step 2: store partial derivatives:
-        typedef std::pair<numeric_type, numeric_type>   Pair;
+        typedef viennamath::expr   ValueType;
         
-        viennadata::access<dt_dx_key<0, 0>, Pair>()(cell) = std::make_pair(y2_y0, coeff_y);
-        viennadata::access<dt_dx_key<0, 1>, Pair>()(cell) = std::make_pair(-x2_x0, -coeff_x);
-        viennadata::access<dt_dx_key<1, 0>, Pair>()(cell) = std::make_pair(-y1_y0, -coeff_y);
-        viennadata::access<dt_dx_key<1, 1>, Pair>()(cell) = std::make_pair(x1_x0, coeff_x);
+        viennadata::access<dt_dx_key<0, 0>, ValueType>()(cell) = ( y2_y0 +  xi * coeff_y) / det_J;
+        viennadata::access<dt_dx_key<0, 1>, ValueType>()(cell) = (-x2_x0 -  xi * coeff_x) / det_J;
+        viennadata::access<dt_dx_key<1, 0>, ValueType>()(cell) = (-y1_y0 - eta * coeff_y) / det_J;
+        viennadata::access<dt_dx_key<1, 1>, ValueType>()(cell) = ( x1_x0 + eta * coeff_x) / det_J;
         
       }
 

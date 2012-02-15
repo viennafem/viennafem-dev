@@ -151,9 +151,22 @@ namespace viennafem
   };
 
   template <std::size_t order>
+  struct reference_cell_for_basis < viennagrid::quadrilateral_tag, lagrange_tag<order> >
+  {
+    typedef unit_quadrilateral   type;
+  };
+
+  
+  template <std::size_t order>
   struct reference_cell_for_basis < viennagrid::tetrahedron_tag, lagrange_tag<order> >
   {
     typedef unit_tetrahedron   type;
+  };
+  
+  template <std::size_t order>
+  struct reference_cell_for_basis < viennagrid::hexahedron_tag, lagrange_tag<order> >
+  {
+    typedef unit_hexahedron   type;
   };
   
 

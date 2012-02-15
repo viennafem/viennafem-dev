@@ -26,7 +26,42 @@
 namespace viennafem
 {
 
-  template <typename CellType, typename InterfaceType>
+  namespace detail
+  {
+    template <typename CellType, typename InterfaceType>
+    void wrap_jacobian(viennafem::cell_quan<CellType, InterfaceType> & det_dF_dt, viennafem::unit_interval)
+    {
+      det_dF_dt.wrap_constant( viennafem::det_dF_dt_key() );
+    }
+
+    template <typename CellType, typename InterfaceType>
+    void wrap_jacobian(viennafem::cell_quan<CellType, InterfaceType> & det_dF_dt, viennafem::unit_triangle)
+    {
+      det_dF_dt.wrap_constant( viennafem::det_dF_dt_key() );
+    }
+
+    template <typename CellType, typename InterfaceType>
+    void wrap_jacobian(viennafem::cell_quan<CellType, InterfaceType> & det_dF_dt, viennafem::unit_tetrahedron)
+    {
+      det_dF_dt.wrap_constant( viennafem::det_dF_dt_key() );
+    }
+
+    template <typename CellType, typename InterfaceType>
+    void wrap_jacobian(viennafem::cell_quan<CellType, InterfaceType> & det_dF_dt, viennafem::unit_quadrilateral)
+    {
+      det_dF_dt.wrap_expr( viennafem::det_dF_dt_key() );
+    }
+
+    template <typename CellType, typename InterfaceType>
+    void wrap_jacobian(viennafem::cell_quan<CellType, InterfaceType> & det_dF_dt, viennafem::unit_hexahedron)
+    {
+      det_dF_dt.wrap_expr( viennafem::det_dF_dt_key() );
+    }
+    
+  }
+  
+  
+  template <typename CellType, typename InterfaceType, typename ReferenceCellTag>
   struct jacobian_adder : public viennamath::rt_manipulation_interface<InterfaceType>
   {
     public:
@@ -43,14 +78,15 @@ namespace viennafem
           const SymbolicIntegrationOperation * op_symb_tmp = dynamic_cast<const SymbolicIntegrationOperation *>(integral_expression->op());
 
           viennafem::cell_quan<CellType, InterfaceType> det_dF_dt;
-          det_dF_dt.wrap( viennafem::det_dF_dt_key() );
+          detail::wrap_jacobian(det_dF_dt, ReferenceCellTag());
           
           if (op_symb_tmp != NULL)
           {
-            return new viennamath::rt_unary_expr<InterfaceType>( new viennamath::rt_binary_expr<InterfaceType>(integral_expression->lhs()->clone(),
-                                                                                                               new viennamath::op_binary<viennamath::op_mult<numeric_type>, InterfaceType>(),
-                                                                                                               det_dF_dt.clone()),
-                                                                 op_symb_tmp->clone());
+            return new viennamath::rt_unary_expr<InterfaceType>(
+                        new viennamath::rt_binary_expr<InterfaceType>(integral_expression->lhs()->clone(),
+                                                                      new viennamath::op_binary<viennamath::op_mult<numeric_type>, InterfaceType>(),
+                                                                      det_dF_dt.clone()),
+                        op_symb_tmp->clone());
           }
         }
         
@@ -75,10 +111,51 @@ namespace viennafem
   };
   
   
-  template <typename CellType, typename EquationType, typename PDESystemType>
-  EquationType transform_to_reference_cell(EquationType const & weak_form,
-                                           PDESystemType const & pde_system,
-                                           viennagrid::triangle_tag)
+  
+  namespace detail
+  {
+    template <long i, long j, typename CellType, typename InterfaceType>
+    void wrap_dt_dx(viennafem::cell_quan<CellType, InterfaceType> & dt_dx, viennafem::unit_interval)
+    {
+      dt_dx.wrap_constant( viennafem::dt_dx_key<i,j>() );
+    }
+    
+    template <long i, long j, typename CellType, typename InterfaceType>
+    void wrap_dt_dx(viennafem::cell_quan<CellType, InterfaceType> & dt_dx, viennafem::unit_triangle)
+    {
+      dt_dx.wrap_constant( viennafem::dt_dx_key<i,j>() );
+    }
+
+    template <long i, long j, typename CellType, typename InterfaceType>
+    void wrap_dt_dx(viennafem::cell_quan<CellType, InterfaceType> & dt_dx, viennafem::unit_tetrahedron)
+    {
+      dt_dx.wrap_constant( viennafem::dt_dx_key<i,j>() );
+    }
+
+    template <long i, long j, typename CellType, typename InterfaceType>
+    void wrap_dt_dx(viennafem::cell_quan<CellType, InterfaceType> & dt_dx, viennafem::unit_quadrilateral)
+    {
+      dt_dx.wrap_expr( viennafem::dt_dx_key<i,j>() );
+    }
+
+    template <long i, long j, typename CellType, typename InterfaceType>
+    void wrap_dt_dx(viennafem::cell_quan<CellType, InterfaceType> & dt_dx, viennafem::unit_hexahedron)
+    {
+      dt_dx.wrap_expr( viennafem::dt_dx_key<i,j>() );
+    }
+    
+  }
+  
+  //////////////////////////         2d          //////////////////////////////
+  
+  
+  //
+  // Triangles and Quadrilaterals:
+  //
+  template <typename CellType, typename EquationType, typename PDESystemType, typename ReferenceCellTag>
+  EquationType transform_to_reference_cell_2d(EquationType const & weak_form,
+                                              PDESystemType const & pde_system,
+                                              ReferenceCellTag)
   {
     typedef typename EquationType::interface_type             InterfaceType;
     typedef typename InterfaceType::numeric_type              numeric_type;
@@ -96,11 +173,11 @@ namespace viennafem
     Variable        s(1);
     
     //using local coordinates (r, s) and global coordinates (x, y)
-    viennafem::cell_quan<CellType, InterfaceType>  dr_dx; dr_dx.wrap( viennafem::dt_dx_key<0,0>() );
-    viennafem::cell_quan<CellType, InterfaceType>  ds_dx; ds_dx.wrap( viennafem::dt_dx_key<1,0>() );
+    viennafem::cell_quan<CellType, InterfaceType>  dr_dx; detail::wrap_dt_dx<0,0>(dr_dx, ReferenceCellTag());
+    viennafem::cell_quan<CellType, InterfaceType>  ds_dx; detail::wrap_dt_dx<1,0>(ds_dx, ReferenceCellTag());
     
-    viennafem::cell_quan<CellType, InterfaceType>  dr_dy; dr_dy.wrap( viennafem::dt_dx_key<0,1>() );
-    viennafem::cell_quan<CellType, InterfaceType>  ds_dy; ds_dy.wrap( viennafem::dt_dx_key<1,1>() );
+    viennafem::cell_quan<CellType, InterfaceType>  dr_dy; detail::wrap_dt_dx<0,1>(dr_dy, ReferenceCellTag());
+    viennafem::cell_quan<CellType, InterfaceType>  ds_dy; detail::wrap_dt_dx<1,1>(ds_dy, ReferenceCellTag());
     
     Expression new_lhs = weak_form.lhs();
     Expression new_rhs = weak_form.rhs();
@@ -125,7 +202,7 @@ namespace viennafem
     new_lhs = viennamath::substitute(search_types, replace_types, weak_form.lhs());
     new_rhs = viennamath::substitute(search_types, replace_types, weak_form.rhs());
     
-    viennamath::rt_manipulation_wrapper<InterfaceType> jacobian_manipulator( new jacobian_adder<CellType, InterfaceType>() );
+    viennamath::rt_manipulation_wrapper<InterfaceType> jacobian_manipulator( new jacobian_adder<CellType, InterfaceType, ReferenceCellTag>() );
     Expression new_lhs_with_jacobian(new_lhs.get()->recursive_manipulation(jacobian_manipulator));
     Expression new_rhs_with_jacobian(new_rhs.get()->recursive_manipulation(jacobian_manipulator));
     
@@ -134,10 +211,16 @@ namespace viennafem
 
 
 
-  template <typename CellType, typename EquationType, typename PDESystemType>
-  EquationType transform_to_reference_cell(EquationType const & weak_form,
-                                           PDESystemType const & pde_system,
-                                           viennagrid::tetrahedron_tag)
+
+  //////////////////////////         3d          //////////////////////////////
+
+  //
+  // Tetrahedra and Hexahedra
+  //
+  template <typename CellType, typename EquationType, typename PDESystemType, typename ReferenceCellTag>
+  EquationType transform_to_reference_cell_3d(EquationType const & weak_form,
+                                              PDESystemType const & pde_system,
+                                              ReferenceCellTag)
   {
     typedef typename EquationType::interface_type             InterfaceType;
     typedef viennamath::rt_function_symbol<InterfaceType>   FunctionSymbol;
@@ -165,17 +248,17 @@ namespace viennafem
     Variable      t(2);
     
     //using local coordinates (r, s) and global coordinates (x, y)
-    viennafem::cell_quan<CellType, InterfaceType>  dr_dx; dr_dx.wrap( viennafem::dt_dx_key<0,0>() );
-    viennafem::cell_quan<CellType, InterfaceType>  ds_dx; ds_dx.wrap( viennafem::dt_dx_key<1,0>() );
-    viennafem::cell_quan<CellType, InterfaceType>  dt_dx; dt_dx.wrap( viennafem::dt_dx_key<2,0>() );
+    viennafem::cell_quan<CellType, InterfaceType>  dr_dx; detail::wrap_dt_dx<0,0>(dr_dx, ReferenceCellTag());
+    viennafem::cell_quan<CellType, InterfaceType>  ds_dx; detail::wrap_dt_dx<1,0>(ds_dx, ReferenceCellTag());
+    viennafem::cell_quan<CellType, InterfaceType>  dt_dx; detail::wrap_dt_dx<2,0>(dt_dx, ReferenceCellTag());
     
-    viennafem::cell_quan<CellType, InterfaceType>  dr_dy; dr_dy.wrap( viennafem::dt_dx_key<0,1>() );
-    viennafem::cell_quan<CellType, InterfaceType>  ds_dy; ds_dy.wrap( viennafem::dt_dx_key<1,1>() );
-    viennafem::cell_quan<CellType, InterfaceType>  dt_dy; dt_dy.wrap( viennafem::dt_dx_key<2,1>() );
+    viennafem::cell_quan<CellType, InterfaceType>  dr_dy; detail::wrap_dt_dx<0,1>(dr_dy, ReferenceCellTag());
+    viennafem::cell_quan<CellType, InterfaceType>  ds_dy; detail::wrap_dt_dx<1,1>(ds_dy, ReferenceCellTag());
+    viennafem::cell_quan<CellType, InterfaceType>  dt_dy; detail::wrap_dt_dx<2,1>(dt_dy, ReferenceCellTag());
 
-    viennafem::cell_quan<CellType, InterfaceType>  dr_dz; dr_dz.wrap( viennafem::dt_dx_key<0,2>() );
-    viennafem::cell_quan<CellType, InterfaceType>  ds_dz; ds_dz.wrap( viennafem::dt_dx_key<1,2>() );
-    viennafem::cell_quan<CellType, InterfaceType>  dt_dz; dt_dz.wrap( viennafem::dt_dx_key<2,2>() );
+    viennafem::cell_quan<CellType, InterfaceType>  dr_dz; detail::wrap_dt_dx<0,2>(dr_dz, ReferenceCellTag());
+    viennafem::cell_quan<CellType, InterfaceType>  ds_dz; detail::wrap_dt_dx<1,2>(ds_dz, ReferenceCellTag());
+    viennafem::cell_quan<CellType, InterfaceType>  dt_dz; detail::wrap_dt_dx<2,2>(dt_dz, ReferenceCellTag());
     
     Expression new_lhs = weak_form.lhs();
     Expression new_rhs = weak_form.rhs();
@@ -211,18 +294,75 @@ namespace viennafem
     new_lhs = viennamath::substitute(search_types, replace_types, weak_form.lhs());
     new_rhs = viennamath::substitute(search_types, replace_types, weak_form.rhs());
     
-    viennamath::rt_manipulation_wrapper<InterfaceType> jacobian_manipulator( new jacobian_adder<CellType, InterfaceType>() );
+    viennamath::rt_manipulation_wrapper<InterfaceType> jacobian_manipulator( new jacobian_adder<CellType,
+                                                                                                InterfaceType,
+                                                                                                ReferenceCellTag>() );
     Expression new_lhs_with_jacobian(new_lhs.get()->recursive_manipulation(jacobian_manipulator));
     Expression new_rhs_with_jacobian(new_rhs.get()->recursive_manipulation(jacobian_manipulator));
     
     return EquationType(new_lhs_with_jacobian, new_rhs_with_jacobian);
   }
 
+
+  ///////// Public Interface //////////////////
+
+  // 1d
+
+  template <typename CellType, typename EquationType, typename PDESystemType>
+  EquationType transform_to_reference_cell(EquationType const & weak_form,
+                                           PDESystemType const & pde_system,
+                                           viennafem::unit_interval)
+  {
+    return  transform_to_reference_cell_2d<CellType>(weak_form, pde_system, viennafem::unit_interval());
+  }
+
+  // 2d
+
+  template <typename CellType, typename EquationType, typename PDESystemType>
+  EquationType transform_to_reference_cell(EquationType const & weak_form,
+                                           PDESystemType const & pde_system,
+                                           viennafem::unit_quadrilateral)
+  {
+    return  transform_to_reference_cell_2d<CellType>(weak_form, pde_system, viennafem::unit_quadrilateral());
+  }
+
+  template <typename CellType, typename EquationType, typename PDESystemType>
+  EquationType transform_to_reference_cell(EquationType const & weak_form,
+                                           PDESystemType const & pde_system,
+                                           viennafem::unit_triangle)
+  {
+    return  transform_to_reference_cell_2d<CellType>(weak_form, pde_system, viennafem::unit_triangle());
+  }
+
+  // 3d
+
+  template <typename CellType, typename EquationType, typename PDESystemType>
+  EquationType transform_to_reference_cell(EquationType const & weak_form,
+                                           PDESystemType const & pde_system,
+                                           viennafem::unit_hexahedron)
+  {
+    return  transform_to_reference_cell_3d<CellType>(weak_form, pde_system, viennafem::unit_hexahedron());
+  }
+
+  template <typename CellType, typename EquationType, typename PDESystemType>
+  EquationType transform_to_reference_cell(EquationType const & weak_form,
+                                           PDESystemType const & pde_system,
+                                           viennafem::unit_tetrahedron)
+  {
+    return  transform_to_reference_cell_3d<CellType>(weak_form, pde_system, viennafem::unit_tetrahedron());
+  }
+
+
+  // entry point:
   template <typename CellType, typename EquationType, typename PDESystemType>
   EquationType transform_to_reference_cell(EquationType const & weak_form,
                                            PDESystemType const & pde_system)
   {
-    return  transform_to_reference_cell<CellType>(weak_form, pde_system, typename CellType::tag());
+    typedef typename CellType::tag        CellTag;
+    
+    return  transform_to_reference_cell<CellType>(weak_form, 
+                                                  pde_system,
+                                                  typename reference_cell_for_basis<CellTag, viennafem::lagrange_tag<1> >::type());
   }
   
   
@@ -232,7 +372,7 @@ namespace viennafem
   
   
   
-  
+  ///////// Basis function insertion ///////////////
   
 
 
