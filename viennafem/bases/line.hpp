@@ -25,7 +25,7 @@ namespace viennafem
   
  
   //
-  // Lagrange family on triangles
+  // Lagrange family on the unit interval
   //
   
   
@@ -44,12 +44,7 @@ namespace viennafem
                                  viennamath::ct_variable<0> 
                                >                 type;
                                  
-    static std::vector<expression_type> get()
-    {
-      std::vector<expression_type> ret(1);
-      ret[0] = expression_type(type());
-      return ret;    
-    }
+    static expression_type get() { return expression_type(type()); }
   };
 
   template <typename InterfaceType, std::size_t order>
@@ -63,14 +58,119 @@ namespace viennafem
     
     typedef viennamath::ct_variable<0>           type;
     
-    static std::vector<expression_type> get()
-    {
-      std::vector<expression_type> ret(1);
-      ret[0] = expression_type(type());
-      return ret;    
-    }
+    static expression_type get() { return expression_type(type()); }
   };
 
+  
+  //
+  // quadratic
+  //
+  template <typename InterfaceType>
+  struct local_basis <InterfaceType,
+                      viennafem::lagrange_tag<2>,
+                      unit_interval,
+                      1,   //edge level
+                      0>
+  {
+    typedef viennamath::rt_expr<InterfaceType>   expression_type;
+    typedef typename InterfaceType::numeric_type NumericT;
+    
+    typedef typename local_basis <InterfaceType,
+                                  viennafem::lagrange_tag<2>,
+                                  unit_interval,
+                                  0,
+                                  0>::type       phi_0;
+
+    typedef typename local_basis <InterfaceType,
+                                  viennafem::lagrange_tag<2>,
+                                  unit_interval,
+                                  0,
+                                  1>::type       phi_1;
+                         
+    //x * (1-x)
+    typedef viennamath::ct_expr<phi_0,
+                                viennamath::op_mult<NumericT>,
+                                phi_1
+                               > type;
+    
+    static expression_type get() { return expression_type(type()); }
+  };
+  
+  //
+  // cubic
+  //
+  template <typename InterfaceType>
+  struct local_basis <InterfaceType,
+                      viennafem::lagrange_tag<3>,
+                      unit_interval,
+                      1,   //edge level
+                      0>
+  {
+    typedef viennamath::rt_expr<InterfaceType>   expression_type;
+    typedef typename InterfaceType::numeric_type NumericT;
+    
+    typedef typename local_basis <InterfaceType,
+                                  viennafem::lagrange_tag<3>,
+                                  unit_interval,
+                                  0,
+                                  0>::type       phi_0;
+
+    typedef typename local_basis <InterfaceType,
+                                  viennafem::lagrange_tag<3>,
+                                  unit_interval,
+                                  0,
+                                  1>::type       phi_1;
+                         
+    //(1-x)^2 * x
+    typedef viennamath::ct_expr<phi_0,
+                                viennamath::op_mult<NumericT>,
+                                phi_0
+                               > phi_0_squared;
+
+    typedef viennamath::ct_expr<phi_0_squared,
+                                viennamath::op_mult<NumericT>,
+                                phi_1
+                               > type;
+                               
+    static expression_type get() { return expression_type(type()); }
+  };
+
+  
+  template <typename InterfaceType>
+  struct local_basis <InterfaceType,
+                      viennafem::lagrange_tag<3>,
+                      unit_interval,
+                      1,   //edge level
+                      1>
+  {
+    typedef viennamath::rt_expr<InterfaceType>   expression_type;
+    typedef typename InterfaceType::numeric_type NumericT;
+    
+    typedef typename local_basis <InterfaceType,
+                                  viennafem::lagrange_tag<3>,
+                                  unit_interval,
+                                  0,
+                                  0>::type       phi_0;
+
+    typedef typename local_basis <InterfaceType,
+                                  viennafem::lagrange_tag<3>,
+                                  unit_interval,
+                                  0,
+                                  1>::type       phi_1;
+    
+    //(1-x) * x^2
+    typedef viennamath::ct_expr<phi_1,
+                                viennamath::op_mult<NumericT>,
+                                phi_1
+                               > phi_1_squared;
+
+    typedef viennamath::ct_expr<phi_0,
+                                viennamath::op_mult<NumericT>,
+                                phi_1_squared
+                               > type;
+    
+    static expression_type get() { return expression_type(type()); }
+  };
   
 }
 

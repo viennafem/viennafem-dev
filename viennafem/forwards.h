@@ -132,7 +132,7 @@ namespace viennafem
   template <std::size_t order>
   struct space_to_id< lagrange_tag<order> >
   {
-    enum { value = 1 };
+    enum { value = order };
   };
   
   template <typename Cell, typename T>
@@ -280,6 +280,33 @@ namespace viennadata
       static size_t get(viennagrid::element_t<ConfigType, viennagrid::point_tag> const & obj) { return obj.id(); }
     };
 
+    /*template <typename ConfigType>
+    struct object_identifier<viennagrid::element_t<ConfigType, viennagrid::quadrilateral_tag> >
+    {
+      typedef object_provided_id    tag;
+      typedef size_t                id_type;
+
+      static size_t get(viennagrid::element_t<ConfigType, viennagrid::quadrilateral_tag> const & obj) { return obj.id(); }
+    };
+
+    template <typename ConfigType>
+    struct object_identifier<viennagrid::element_t<ConfigType, viennagrid::triangle_tag> >
+    {
+      typedef object_provided_id    tag;
+      typedef size_t                id_type;
+
+      static size_t get(viennagrid::element_t<ConfigType, viennagrid::triangle_tag> const & obj) { return obj.id(); }
+    }; */
+
+    template <typename ConfigType>
+    struct object_identifier<viennagrid::element_t<ConfigType, viennagrid::hexahedron_tag> >
+    {
+      typedef object_provided_id    tag;
+      typedef size_t                id_type;
+
+      static size_t get(viennagrid::element_t<ConfigType, viennagrid::hexahedron_tag> const & obj) { return obj.id(); }
+    };
+
     template <typename ConfigType>
     struct object_identifier<viennagrid::element_t<ConfigType, viennagrid::tetrahedron_tag> >
     {
@@ -289,11 +316,30 @@ namespace viennadata
       static size_t get(viennagrid::element_t<ConfigType, viennagrid::tetrahedron_tag> const & obj) { return obj.id(); }
     };
     
+    
     //
     // store data densely, no matter which key type is used:
     //
     template <typename KeyType, typename ValueType, typename ConfigType>
     struct storage<KeyType, ValueType, viennagrid::element_t<ConfigType, viennagrid::point_tag> >
+    {
+      typedef dense_data_tag    tag;
+    };
+
+    /*template <typename KeyType, typename ValueType, typename ConfigType>
+    struct storage<KeyType, ValueType, viennagrid::element_t<ConfigType, viennagrid::quadrilateral_tag> >
+    {
+      typedef dense_data_tag    tag;
+    };
+
+    template <typename KeyType, typename ValueType, typename ConfigType>
+    struct storage<KeyType, ValueType, viennagrid::element_t<ConfigType, viennagrid::triangle_tag> >
+    {
+      typedef dense_data_tag    tag;
+    };*/
+
+    template <typename KeyType, typename ValueType, typename ConfigType>
+    struct storage<KeyType, ValueType, viennagrid::element_t<ConfigType, viennagrid::hexahedron_tag> >
     {
       typedef dense_data_tag    tag;
     };

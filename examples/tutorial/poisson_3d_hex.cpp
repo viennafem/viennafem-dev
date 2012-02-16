@@ -10,6 +10,9 @@
    license:    MIT (X11), see file LICENSE in the ViennaFEM base directory
 ======================================================================================= */
 
+#define NDEBUG
+#define VIENNAFEMDEBUG
+
 // include necessary system headers
 #include <iostream>
 
@@ -76,7 +79,7 @@ VectorType solve(MatrixType const & system_matrix,
   typedef typename VectorType::value_type        numeric_type;
   VectorType result(load_vector.size());
   
-  std::cout << "* solve(): Solving linear system" << std::endl;
+  std::cout << "* solve(): Solving linear system with " << result.size() << " unknowns." << std::endl;
 
 #ifdef USE_OPENCL
   viennacl::matrix<viennafem::numeric_type> vcl_matrix(load_vector.size(), load_vector.size());
@@ -134,7 +137,7 @@ int main()
   try
   {
     viennagrid::io::netgen_reader my_reader;
-    my_reader(my_domain, "../examples/data/cube1_hex.mesh");
+    my_reader(my_domain, "../examples/data/cube343_hex.mesh");
   }
   catch (...)
   {
@@ -163,10 +166,10 @@ int main()
       ++vit)
   {
     //boundary for first equation: Homogeneous Dirichlet everywhere
-    /*if (vit->point()[0] == 0.0 || vit->point()[0] == 1.0 
+    if (vit->point()[0] == 0.0 || vit->point()[0] == 1.0 
       || vit->point()[1] == 0.0 || vit->point()[1] == 1.0 )
       viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = true;
-    else*/
+    else
       viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = false;
     
     //boundary for second equation: Homogeneous Dirichlet at (x == 0) and (x == 1)
@@ -197,7 +200,7 @@ int main()
                 system_matrix_1,
                 load_vector_1
                );
-  
+  /*
   fem_assembler(viennafem::make_linear_pde_system(poisson_equ_2, 
                                                   u,
                                                   viennafem::make_linear_pde_options(1, 
@@ -207,23 +210,50 @@ int main()
                 my_domain,
                 system_matrix_2,
                 load_vector_2
-               );
+               );*/
   
+  /*std::vector<double> p(3); p[0] = 0.5; p[1] = 0.5; p[2] = 0.5;
+  std::cout << "dt_dx<0,0> " << viennadata::access< viennafem::dt_dx_key<0,0>,
+                                                    viennamath::expr>()(viennagrid::ncells<3>(my_domain)[0])(p) << std::endl;
+  std::cout << "dt_dx<0,1> " << viennadata::access< viennafem::dt_dx_key<0,1>,
+                                                    viennamath::expr>()(viennagrid::ncells<3>(my_domain)[0])(p) << std::endl;
+  std::cout << "dt_dx<0,2> " << viennadata::access< viennafem::dt_dx_key<0,2>,
+                                                    viennamath::expr>()(viennagrid::ncells<3>(my_domain)[0])(p) << std::endl;
+                                                    
+  std::cout << "dt_dx<1,0> " << viennadata::access< viennafem::dt_dx_key<1,0>,
+                                                    viennamath::expr>()(viennagrid::ncells<3>(my_domain)[0])(p) << std::endl;
+  std::cout << "dt_dx<1,1> " << viennadata::access< viennafem::dt_dx_key<1,1>,
+                                                    viennamath::expr>()(viennagrid::ncells<3>(my_domain)[0])(p) << std::endl;
+  std::cout << "dt_dx<1,2> " << viennadata::access< viennafem::dt_dx_key<1,2>,
+                                                    viennamath::expr>()(viennagrid::ncells<3>(my_domain)[0])(p) << std::endl;
+
+  std::cout << "dt_dx<2,0> " << viennadata::access< viennafem::dt_dx_key<2,0>,
+                                                    viennamath::expr>()(viennagrid::ncells<3>(my_domain)[0])(p) << std::endl;
+  std::cout << "dt_dx<2,1> " << viennadata::access< viennafem::dt_dx_key<2,1>,
+                                                    viennamath::expr>()(viennagrid::ncells<3>(my_domain)[0])(p) << std::endl;
+  std::cout << "dt_dx<2,2> " << viennadata::access< viennafem::dt_dx_key<2,2>,
+                                                    viennamath::expr>()(viennagrid::ncells<3>(my_domain)[0])(p) << std::endl;
+
+  std::cout << "det_dF_dt " << viennadata::access< viennafem::det_dF_dt_key,
+                                                    viennamath::expr>()(viennagrid::ncells<3>(my_domain)[0])(p) << std::endl;
+  std::cout << "det_dF_dt " << viennadata::access< viennafem::det_dF_dt_key,
+                                                    viennamath::expr>()(viennagrid::ncells<3>(my_domain)[0]) << std::endl;
+                                                    
   std::cout << "System matrix 1: " << system_matrix_1 << std::endl;
   std::cout << "System matrix 2: " << system_matrix_2 << std::endl;
-  //std::cout << poisson_config_1.load_vector() << std::endl;
+  //std::cout << poisson_config_1.load_vector() << std::endl;*/
   
-  //VectorType pde_result_1 = solve(system_matrix_1, load_vector_1);
+  VectorType pde_result_1 = solve(system_matrix_1, load_vector_1);
   //VectorType pde_result_2 = solve(system_matrix_2, load_vector_2);
 
-  VectorType pde_result_1(load_vector_1.size()); // = solve(system_matrix_1, load_vector_1);
+  /*VectorType pde_result_1(load_vector_1.size()); // = solve(system_matrix_1, load_vector_1);
   VectorType pde_result_2(load_vector_2.size()); // = solve(system_matrix_2, load_vector_2);
   
   for (std::size_t i=0; i<pde_result_1.size(); ++i)
     pde_result_1[i] = 0;
 
   for (std::size_t i=0; i<pde_result_2.size(); ++i)
-    pde_result_2[i] = 0;
+    pde_result_2[i] = 0;*/
   
   //std::cout << "RESULT" << std::endl;
   //std::cout << pde_result_1 << std::endl;
@@ -231,7 +261,7 @@ int main()
   // Writing solution back to domain (discussion about proper way of returning a solution required...)
   //
   viennafem::io::write_solution_to_VTK_file(pde_result_1, "poisson_1_hex", my_domain, 0);
-  viennafem::io::write_solution_to_VTK_file(pde_result_2, "poisson_2_hex", my_domain, 1);
+  //viennafem::io::write_solution_to_VTK_file(pde_result_2, "poisson_2_hex", my_domain, 1);
   
   std::cout << "*****************************************" << std::endl;
   std::cout << "* Poisson solver finished successfully! *" << std::endl;

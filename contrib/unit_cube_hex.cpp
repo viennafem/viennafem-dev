@@ -7,6 +7,7 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include <cstdlib>
 
 struct point
 {
@@ -50,6 +51,15 @@ int main()
         p.y = j * 1.0 / (points_per_coord - 1.0);
         p.z = k * 1.0 / (points_per_coord - 1.0);
 
+        //add some jitter:
+        if (p.x != 0.0 && p.x != 1.0)
+          p.x += (rand() % 9 - 4.0) * 0.1 / (points_per_coord - 1.0);
+        if (p.y != 0.0 && p.y != 1.0)
+          p.y += (rand() % 9 - 4.0) * 0.1 / (points_per_coord - 1.0);
+        if (p.z != 0.0 && p.z != 1.0)
+          p.z += (rand() % 9 - 4.0) * 0.1 / (points_per_coord - 1.0);
+
+
         points[i][j][k] = p;
       }
     }
@@ -60,7 +70,9 @@ int main()
   //
 
   // print points
-  std::ofstream writer("cube_hex.mesh");
+  std::stringstream ss;
+  ss << "cube" << (points_per_coord - 1) * (points_per_coord - 1) * (points_per_coord - 1) << "_hex.mesh";
+  std::ofstream writer(ss.str().c_str());
   writer << (points_per_coord * points_per_coord * points_per_coord) << std::endl;
   
   for (std::size_t i=0; i<points_per_coord; ++i)

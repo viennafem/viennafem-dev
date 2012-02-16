@@ -47,8 +47,8 @@ ELSE()
 ENDIF()
 
 IF(CMAKE_COMPILER_IS_GNUCXX)
-   ADD_DEFINITIONS(-Wall -O0 -g -lpthread)
-   #ADD_DEFINITIONS(-Wall -pedantic -O3)
+   #ADD_DEFINITIONS(-Wall -O0 -g -lpthread)
+   ADD_DEFINITIONS(-Wall -pedantic -O3)
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 #list all source files here
