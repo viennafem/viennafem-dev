@@ -37,7 +37,6 @@
 
 namespace viennafem
 {
-  
   class linear_pde_options
   {
     public:      
