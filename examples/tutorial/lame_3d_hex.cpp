@@ -20,7 +20,7 @@
 
 // ViennaGrid includes:
 #include "viennagrid/domain.hpp"
-#include <viennagrid/config/simplex.hpp>
+#include "viennagrid/config/others.hpp"
 #include "viennagrid/io/netgen_reader.hpp"
 #include "viennagrid/io/vtk_writer.hpp"
 
@@ -229,8 +229,8 @@ void apply_displacements(DomainType & domain, VectorType const & result)
 
 int main()
 {
-  typedef viennagrid::config::tetrahedral_3d                             ConfigType;
-  typedef viennagrid::result_of::domain<viennagrid::config::tetrahedral_3d>::type         DomainType;
+  typedef viennagrid::config::hexahedral_3d                             ConfigType;
+  typedef viennagrid::result_of::domain<ConfigType>::type         DomainType;
 
   typedef viennagrid::result_of::ncell_range<DomainType, 0>::type    VertexContainer;
   typedef viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
@@ -255,7 +255,7 @@ int main()
   try
   {
     viennagrid::io::netgen_reader my_reader;
-    my_reader(my_domain, "../examples/data/cube3072.mesh");
+    my_reader(my_domain, "../examples/data/cube343_hex.mesh");
   }
   catch (...)
   {
@@ -349,7 +349,7 @@ int main()
   //std::cout << displacements << std::endl;
 
   apply_displacements(my_domain, displacements);
-  viennafem::io::write_solution_to_VTK_file(displacements, "lame", my_domain, 0);
+  viennafem::io::write_solution_to_VTK_file(displacements, "lame_hex", my_domain, 0);
 
   std::cout << "*****************************************" << std::endl;
   std::cout << "* Lame solver finished successfully! *" << std::endl;

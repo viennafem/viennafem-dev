@@ -164,11 +164,11 @@ namespace viennafem
   struct pde_assembler_internal
   {
     
-    template <typename EquationType, typename PDESystemType, typename DomainType, typename LinerSystemT>
+    template <typename EquationType, typename PDESystemType, typename DomainType, typename LinearSystemT>
     void operator()(EquationType const & transformed_weak_form,
                     PDESystemType const & pde_system,
                     DomainType & domain,
-                    LinerSystemT & linear_system
+                    LinearSystemT & linear_system
                    ) const
     {
       typedef typename DomainType::config_type              Config;
@@ -202,7 +202,7 @@ namespace viennafem
       
       if (basis_is_uniform)
       {
-        std::cout << "Using globally uniform basis";
+        //std::cout << "Using globally uniform basis";
         local_weak_form = make_local_weak_form<CellTag>(transformed_weak_form, pde_system);
       }
           
@@ -218,8 +218,9 @@ namespace viennafem
       //exit(0);
       
       //Integrator setup:
-      typedef typename reference_cell_for_basis<CellTag, viennafem::lagrange_tag<1> >::type    ReferenceCell;
-      viennamath::numerical_quadrature integrator(new viennafem::rt_gauss_quad_element<ReferenceCell, 3, typename EquationType::interface_type>());
+      
+      viennamath::numerical_quadrature integrator = viennafem::make_quadrature_rule(pde_system, domain);
+      //viennamath::numerical_quadrature integrator(new viennafem::rt_gauss_quad_element<ReferenceCell, 3, typename EquationType::interface_type>());
       
       CellContainer cells = viennagrid::ncells<CellTag::dim>(domain);
       for (CellIterator cell_iter = cells.begin();

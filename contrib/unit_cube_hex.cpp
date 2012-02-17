@@ -53,11 +53,11 @@ int main()
 
         //add some jitter:
         if (p.x != 0.0 && p.x != 1.0)
-          p.x += (rand() % 9 - 4.0) * 0.1 / (points_per_coord - 1.0);
+          p.x += (rand() % 9 - 4.0) * 0.07 / (points_per_coord - 1.0);
         if (p.y != 0.0 && p.y != 1.0)
-          p.y += (rand() % 9 - 4.0) * 0.1 / (points_per_coord - 1.0);
+          p.y += (rand() % 9 - 4.0) * 0.07 / (points_per_coord - 1.0);
         if (p.z != 0.0 && p.z != 1.0)
-          p.z += (rand() % 9 - 4.0) * 0.1 / (points_per_coord - 1.0);
+          p.z += (rand() % 9 - 4.0) * 0.07 / (points_per_coord - 1.0);
 
 
         points[i][j][k] = p;

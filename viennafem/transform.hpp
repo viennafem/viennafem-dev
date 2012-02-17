@@ -146,6 +146,59 @@ namespace viennafem
     
   }
   
+  //////////////////////////         1d          //////////////////////////////
+  
+  //
+  // Triangles and Quadrilaterals:
+  //
+  template <typename CellType, typename EquationType, typename PDESystemType, typename ReferenceCellTag>
+  EquationType transform_to_reference_cell_1d(EquationType const & weak_form,
+                                              PDESystemType const & pde_system,
+                                              ReferenceCellTag)
+  {
+    typedef typename EquationType::interface_type             InterfaceType;
+    typedef typename InterfaceType::numeric_type              numeric_type;
+    typedef viennamath::rt_function_symbol<InterfaceType>   FunctionSymbol;
+    typedef viennamath::rt_expr<InterfaceType>              Expression;
+    typedef viennamath::rt_unary_expr<InterfaceType>        UnaryExpression;
+    typedef viennamath::rt_variable<InterfaceType>          Variable;
+    typedef viennamath::op_unary<viennamath::op_partial_deriv<viennamath::default_numeric_type>, InterfaceType >   d_dx;
+    
+    
+    
+    FunctionSymbol  u(0, viennamath::unknown_tag<>());
+    FunctionSymbol  v(0, viennamath::test_tag<>());
+    Variable        r(0);
+    
+    //using local coordinates (r, s) and global coordinates (x, y)
+    viennafem::cell_quan<CellType, InterfaceType>  dr_dx; detail::wrap_dt_dx<0,0>(dr_dx, ReferenceCellTag());
+    
+    Expression new_lhs = weak_form.lhs();
+    Expression new_rhs = weak_form.rhs();
+    
+    //std::cout << "New lhs init: " << std::endl;
+    //std::cout << new_lhs << std::endl;
+    
+    std::vector<Expression> search_types(2);
+    search_types[0] = UnaryExpression(u.clone(), new d_dx(0));
+    search_types[1] = UnaryExpression(v.clone(), new d_dx(0));
+    
+    std::vector<Expression> replace_types(2);
+    replace_types[0] = viennamath::diff(u, r) * dr_dx;
+    replace_types[1] = viennamath::diff(v, r) * dr_dx;
+    
+    //substitute expressions in lhs and rhs:
+    new_lhs = viennamath::substitute(search_types, replace_types, weak_form.lhs());
+    new_rhs = viennamath::substitute(search_types, replace_types, weak_form.rhs());
+    
+    viennamath::rt_manipulation_wrapper<InterfaceType> jacobian_manipulator( new jacobian_adder<CellType, InterfaceType, ReferenceCellTag>() );
+    Expression new_lhs_with_jacobian(new_lhs.get()->recursive_manipulation(jacobian_manipulator));
+    Expression new_rhs_with_jacobian(new_rhs.get()->recursive_manipulation(jacobian_manipulator));
+    
+    return EquationType(new_lhs_with_jacobian, new_rhs_with_jacobian);
+  }
+  
+  
   //////////////////////////         2d          //////////////////////////////
   
   
@@ -313,7 +366,7 @@ namespace viennafem
                                            PDESystemType const & pde_system,
                                            viennafem::unit_interval)
   {
-    return  transform_to_reference_cell_2d<CellType>(weak_form, pde_system, viennafem::unit_interval());
+    return  transform_to_reference_cell_1d<CellType>(weak_form, pde_system, viennafem::unit_interval());
   }
 
   // 2d

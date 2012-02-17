@@ -10,9 +10,6 @@
    license:    MIT (X11), see file LICENSE in the ViennaFEM base directory
 ======================================================================================= */
 
-#define NDEBUG
-#define VIENNAFEMDEBUG
-
 // include necessary system headers
 #include <iostream>
 
@@ -34,7 +31,7 @@
 
 // ViennaGrid includes:
 #include "viennagrid/domain.hpp"
-#include "viennagrid/config/others.hpp"
+#include "viennagrid/config/simplex.hpp"
 #include "viennagrid/io/netgen_reader.hpp"
 #include "viennagrid/io/vtk_writer.hpp"
 
@@ -67,6 +64,7 @@
 #include "viennacl/linalg/cg.hpp"
 #include "viennacl/linalg/norm_2.hpp"
 #include "viennacl/linalg/prod.hpp"
+#include "viennacl/io/matrix_market.hpp"
 
 
 //      
@@ -79,7 +77,7 @@ VectorType solve(MatrixType const & system_matrix,
   typedef typename VectorType::value_type        numeric_type;
   VectorType result(load_vector.size());
   
-  std::cout << "* solve(): Solving linear system with " << result.size() << " unknowns." << std::endl;
+  std::cout << "* solve(): Solving linear system" << std::endl;
 
 #ifdef USE_OPENCL
   viennacl::matrix<viennafem::numeric_type> vcl_matrix(load_vector.size(), load_vector.size());
@@ -110,39 +108,39 @@ VectorType solve(MatrixType const & system_matrix,
 }
 
 
-
 int main()
 {
-  typedef viennagrid::config::hexahedral_3d                       ConfigType;
+  typedef viennagrid::config::line_1d                            ConfigType;
   typedef viennagrid::result_of::domain<ConfigType>::type         DomainType;
 
   typedef viennagrid::result_of::ncell_range<DomainType, 0>::type    VertexContainer;
   typedef viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
-  typedef viennagrid::result_of::ncell<ConfigType, 3>::type              CellType;
+  typedef viennagrid::result_of::ncell<ConfigType, 2>::type              CellType;
   
   typedef boost::numeric::ublas::compressed_matrix<viennafem::numeric_type>  MatrixType;
   typedef boost::numeric::ublas::vector<viennafem::numeric_type>             VectorType;
-  
+
   typedef viennamath::function_symbol   FunctionSymbol;
   typedef viennamath::equation          Equation;
   
   typedef viennafem::boundary_key      BoundaryKey;
   
-  
   //
   // Create a domain from file
   //
   DomainType my_domain;
+
+  //my_domain.create_segments(2);
   
   try
   {
     viennagrid::io::netgen_reader my_reader;
-    my_reader(my_domain, "../examples/data/cube343_hex.mesh");
+    my_reader(my_domain, "../examples/data/line8.mesh");
   }
   catch (...)
   {
     std::cerr << "File-Reader failed. Aborting program..." << std::endl;
-    exit(EXIT_FAILURE);
+    return EXIT_FAILURE;
   }
   
   
@@ -151,8 +149,8 @@ int main()
   //
   FunctionSymbol u(0, viennamath::unknown_tag<>());   //an unknown function used for PDE specification
   Equation poisson_equ_1 = viennamath::make_equation( viennamath::laplace(u), -1);
-  Equation poisson_equ_2 = viennamath::make_equation( viennamath::laplace(u), -1);
-  
+  Equation poisson_equ_2 = viennamath::make_equation( viennamath::laplace(u), 0);
+
   MatrixType system_matrix_1, system_matrix_2;
   VectorType load_vector_1, load_vector_2;
   
@@ -166,17 +164,25 @@ int main()
       ++vit)
   {
     //boundary for first equation: Homogeneous Dirichlet everywhere
-    if (vit->point()[0] == 0.0 || vit->point()[0] == 1.0 
-      || vit->point()[1] == 0.0 || vit->point()[1] == 1.0 )
+    if (vit->point()[0] == 0.0 || vit->point()[0] == 1.0 )
       viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = true;
     else
       viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = false;
     
-    //boundary for second equation: Homogeneous Dirichlet at (x == 0) and (x == 1)
-    if (vit->point()[0] == 0.0 || vit->point()[0] == 1.0 )
+    //boundary for second equation: 0 at left boundary, 1 at right boundary
+    if (vit->point()[0] == 0.0)
+    {
       viennadata::access<BoundaryKey, bool>(BoundaryKey(1))(*vit) = true;
+      viennadata::access<BoundaryKey, double>(BoundaryKey(1))(*vit) = 0.0;
+    }
+    else if (vit->point()[0] == 1.0)
+    {
+      viennadata::access<BoundaryKey, bool>(BoundaryKey(1))(*vit) = true;
+      viennadata::access<BoundaryKey, double>(BoundaryKey(1))(*vit) = 1.0;
+    }
     else
       viennadata::access<BoundaryKey, bool>(BoundaryKey(1))(*vit) = false;
+    
   }
   
   
@@ -190,40 +196,43 @@ int main()
   // Solve system and write solution vector to pde_result:
   // (discussion about proper interface required. Introduce a pde_result class?)
   //
-  fem_assembler(viennafem::make_linear_pde_system(poisson_equ_1, 
-                                                  u,
-                                                  viennafem::make_linear_pde_options(0, 
-                                                                                     viennafem::lagrange_tag<1>(),
-                                                                                     viennafem::lagrange_tag<1>())
-                                                 ),
-                my_domain,
-                system_matrix_1,
-                load_vector_1
-               );
-
-  fem_assembler(viennafem::make_linear_pde_system(poisson_equ_2, 
-                                                  u,
-                                                  viennafem::make_linear_pde_options(1, 
-                                                                                     viennafem::lagrange_tag<1>(),
-                                                                                     viennafem::lagrange_tag<1>())
-                                                 ),
-                my_domain,
-                system_matrix_2,
-                load_vector_2
-               );
-  
-  //std::cout << "System matrix 1: " << system_matrix_1 << std::endl;
-  //std::cout << "System matrix 2: " << system_matrix_2 << std::endl;
-  //std::cout << poisson_config_1.load_vector() << std::endl;*/
+  for (size_t i=0; i<my_domain.segments().size(); ++i)
+  {
+    fem_assembler(viennafem::make_linear_pde_system(poisson_equ_1, 
+                                                    u,
+                                                    viennafem::make_linear_pde_options(0, 
+                                                                                       viennafem::lagrange_tag<1>(),
+                                                                                       viennafem::lagrange_tag<1>())
+                                                  ),
+                  my_domain.segments()[i],
+                  system_matrix_1,
+                  load_vector_1
+                );
+    
+    fem_assembler(viennafem::make_linear_pde_system(poisson_equ_2, 
+                                                    u,
+                                                    viennafem::make_linear_pde_options(1, 
+                                                                                       viennafem::lagrange_tag<1>(),
+                                                                                       viennafem::lagrange_tag<1>())
+                                                  ),
+                  my_domain.segments()[i],
+                  system_matrix_2,
+                  load_vector_2
+                );
+  }
   
   VectorType pde_result_1 = solve(system_matrix_1, load_vector_1);
   VectorType pde_result_2 = solve(system_matrix_2, load_vector_2);
 
+  //std::cout << "RESULT" << std::endl;
+  //std::cout << pde_result_1 << std::endl;
+  
+  
   //
   // Writing solution back to domain (discussion about proper way of returning a solution required...)
   //
-  viennafem::io::write_solution_to_VTK_file(pde_result_1, "poisson_1_hex", my_domain, 0);
-  viennafem::io::write_solution_to_VTK_file(pde_result_2, "poisson_2_hex", my_domain, 1);
+  viennafem::io::write_solution_to_VTK_file(pde_result_1, "poisson_1d_1", my_domain, 0);
+  viennafem::io::write_solution_to_VTK_file(pde_result_2, "poisson_1d_2", my_domain, 1);
   
   std::cout << "*****************************************" << std::endl;
   std::cout << "* Poisson solver finished successfully! *" << std::endl;
