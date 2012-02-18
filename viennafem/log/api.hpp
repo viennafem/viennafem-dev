@@ -22,6 +22,8 @@
 #include "viennagrid/segment.hpp"
 #include "viennagrid/iterators.hpp"
 
+#include "viennafem/log/latex.hpp"
+
 namespace viennafem
 {
   
@@ -44,16 +46,22 @@ namespace viennafem
   }
 
 
-  template <typename EquationArray, typename PDESystem>
+  template <typename CellType, typename EquationArray, typename PDESystem>
   void log_transformed_weak_form(EquationArray const & weak_form, PDESystem const & pde_system)
   {
+    // make cell type known to logger
+    // TODO: Better encapsulation
+    pde_system.logger().translator().add_processor(new rt_latex_dt_dx_processor<CellType, viennamath::default_interface_type>());
+    
     pde_system.logger().write_transformed_weak_form(weak_form);
   }
 
-  template <typename PDESystem>
-  void log_test_and_trial_space(PDESystem const & pde_system)
+  template <typename EquationArray, typename PDESystem>
+  void log_test_and_trial_space(EquationArray const & test_space,
+                                EquationArray const & trial_space,
+                                PDESystem const & pde_system)
   {
-    pde_system.logger().write_test_and_trial_space(pde_system);
+    pde_system.logger().write_test_and_trial_space(test_space, trial_space);
   }
   
   

@@ -212,6 +212,8 @@ namespace viennafem
         cell_quan_wrapper<CellType, numeric_type> temp( new cell_quan_expr<CellType, T, viennamath::expr>(t) );
         accessor = temp;
       }
+      
+      cell_quan_wrapper<CellType, numeric_type> const & wrapper() const { return accessor; }
 
     private:
       mutable const CellType * current_cell;

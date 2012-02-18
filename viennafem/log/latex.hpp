@@ -18,6 +18,7 @@
 #include <fstream>
 #include "viennafem/forwards.h"
 #include "viennafem/log/interface.hpp"
+#include "viennafem/cell_quan.hpp"
 
 #include "viennamath/manipulation/latex.hpp"
 
@@ -51,6 +52,111 @@ namespace viennafem
   template <typename InterfaceType>
   void write_linear_solver_stats(latex_logger<InterfaceType> & log);
   
+  
+
+  //
+  // cell_quan_handler
+  //
+  template <typename CellType, typename InterfaceType>
+  class rt_latex_dt_dx_processor : public viennamath::rt_latex_processor_interface<InterfaceType>
+  {
+      typedef typename InterfaceType::numeric_type              NumericType;
+      typedef viennafem::cell_quan<CellType, InterfaceType>               CellQuanType;
+    
+    public:
+      
+      std::string process(InterfaceType const * ptr, bool use_parenthesis, viennamath::rt_latex_translator<InterfaceType> const & translator) const 
+      {
+        if (dynamic_cast< const CellQuanType * >(ptr) != NULL)
+        {
+          const CellQuanType * temp = dynamic_cast< const CellQuanType * >(ptr);
+          return process_impl(*temp, use_parenthesis, translator);
+        }
+        
+        return "";
+      }
+       
+      bool customize(InterfaceType const * e, std::string const & str)
+      {
+        return false;
+      }
+      
+    private:
+
+      std::string process_impl(CellQuanType const & e, bool use_parenthesis, viennamath::rt_latex_translator<InterfaceType> const & translator) const 
+      {
+        typedef viennamath::expr      ExpressionType;
+        
+        std::stringstream ss;
+        
+        viennamath::variable x(0);
+        viennamath::variable y(1);
+        viennamath::variable z(2);
+        
+        std::auto_ptr< cell_quan_interface<CellType> > temp(e.wrapper().clone());  //create a clone in order to dispatch with respect to the type
+        
+        if (dynamic_cast< cell_quan_expr<CellType, viennafem::dt_dx_key<0,0>, ExpressionType> * >(temp.get()) != NULL
+            || dynamic_cast< cell_quan_constant<CellType, viennafem::dt_dx_key<0,0>, NumericType> * >(temp.get()) != NULL)
+        {
+          ss << " \\frac{\\partial \\xi}{\\partial x} ";
+        }
+        else if (dynamic_cast< cell_quan_expr<CellType, viennafem::dt_dx_key<1,0>, ExpressionType> * >(temp.get()) != NULL
+                 || dynamic_cast< cell_quan_constant<CellType, viennafem::dt_dx_key<1,0>, NumericType> * >(temp.get()) != NULL)
+        {
+          ss << " \\frac{\\partial \\eta}{\\partial x} ";
+        }
+        else if (dynamic_cast< cell_quan_expr<CellType, viennafem::dt_dx_key<2,0>, ExpressionType> * >(temp.get()) != NULL
+                 || dynamic_cast< cell_quan_constant<CellType, viennafem::dt_dx_key<2,0>, NumericType> * >(temp.get()) != NULL)
+        {
+          ss << " \\frac{\\partial \\nu}{\\partial x} ";
+        }
+
+        else if (dynamic_cast< cell_quan_expr<CellType, viennafem::dt_dx_key<0,1>, ExpressionType> * >(temp.get()) != NULL
+                 || dynamic_cast< cell_quan_constant<CellType, viennafem::dt_dx_key<0,1>, NumericType> * >(temp.get()) != NULL)
+        {
+          ss << " \\frac{\\partial \\xi}{\\partial y} ";
+        }
+        else if (dynamic_cast< cell_quan_expr<CellType, viennafem::dt_dx_key<1,1>, ExpressionType> * >(temp.get()) != NULL
+                 || dynamic_cast< cell_quan_constant<CellType, viennafem::dt_dx_key<1,1>, NumericType> * >(temp.get()) != NULL)
+        {
+          ss << " \\frac{\\partial \\eta}{\\partial y} ";
+        }
+        else if (dynamic_cast< cell_quan_expr<CellType, viennafem::dt_dx_key<2,1>, ExpressionType> * >(temp.get()) != NULL
+                 || dynamic_cast< cell_quan_constant<CellType, viennafem::dt_dx_key<2,1>, NumericType> * >(temp.get()) != NULL)
+        {
+          ss << " \\frac{\\partial \\nu}{\\partial y} ";
+        }
+
+        else if (dynamic_cast< cell_quan_expr<CellType, viennafem::dt_dx_key<0,2>, ExpressionType> * >(temp.get()) != NULL
+                 || dynamic_cast< cell_quan_constant<CellType, viennafem::dt_dx_key<0,2>, NumericType> * >(temp.get()) != NULL)
+        {
+          ss << " \\frac{\\partial \\xi}{\\partial z} ";
+        }
+        else if (dynamic_cast< cell_quan_expr<CellType, viennafem::dt_dx_key<1,2>, ExpressionType> * >(temp.get()) != NULL
+                 || dynamic_cast< cell_quan_constant<CellType, viennafem::dt_dx_key<1,2>, NumericType> * >(temp.get()) != NULL)
+        {
+          ss << " \\frac{\\partial \\eta}{\\partial z} ";
+        }
+        else if (dynamic_cast< cell_quan_expr<CellType, viennafem::dt_dx_key<2,2>, ExpressionType> * >(temp.get()) != NULL
+                 || dynamic_cast< cell_quan_constant<CellType, viennafem::dt_dx_key<2,2>, NumericType> * >(temp.get()) != NULL)
+        {
+          ss << " \\frac{\\partial \\nu}{\\partial z} ";
+        }
+
+        else if (dynamic_cast< cell_quan_expr<CellType, viennafem::det_dF_dt_key, ExpressionType> * >(temp.get()) != NULL
+                 || dynamic_cast< cell_quan_constant<CellType, viennafem::det_dF_dt_key, NumericType> * >(temp.get()) != NULL)
+        {
+          ss << " \\mathrm{det} F ";
+        }
+        else       
+          std::cerr << "Warning: could not find string for cell_quan!" << std::endl;
+
+        return ss.str();        
+      }
+      
+  }; 
+ 
+    
   
   
   template <typename InterfaceType>
@@ -159,7 +265,7 @@ namespace viennafem
     log << "\\begin{align}\n";
     log << log.translator()(pdes[0]) << " \n";
     log << "\\end{align}\n";
-    log << "in $\\Omega$ and equipped with suitable boundary conditions.\n";
+    log << "in $\\Omega$ with suitable boundary conditions.\n";
   }
 
   template <typename EquationArray, typename InterfaceType>
@@ -199,17 +305,26 @@ namespace viennafem
     log << "\\section{Discrete Approximation by Finite Elements}\n";
     log << "The discrete approximation to the continuous problem is obtained by a Galerkin approach:\n";
     log << "\\begin{align}\n";
-    log << " u_h = \\sum \\alpha_j \\varphi_j  \n";
+    log << " u_h = \\sum_j \\alpha_j \\varphi_j  \n";
     log << "\\end{align}\n";
-    log << "with trial functions $\\varphi_j$\n";
+    log << "with trial functions $\\varphi_j$.\n";
     //log << "Thus, instead of solving for the continuous function $u$, only the coefficients $\\alpha_i$ need to be computed.\n";
     log << "In a Galerkin approach, test functions $v$ are also chosen from a finite-dimensional space:\n";
     log << "\\begin{align}\n";
-    log << " v_h = \\sum \\beta_i \\psi_i  \n";
+    log << " v_h = \\sum_i \\beta_i \\psi_i  \n";
     log << "\\end{align}\n";
     log << "Due to integral transformations, it is sufficient to define the trial and test functions on the reference cell.\n";
     log << "After transformation to the reference cell, the weak form on a cell reads\n";
+    
+    // give new name to local variables:
+    viennamath::variable xi(0);
+    viennamath::variable eta(1);
+    viennamath::variable nu(2);
 
+    log.translator().customize(xi, "\\xi");
+    log.translator().customize(eta, "\\eta");
+    log.translator().customize(nu, "\\nu");
+    
     viennamath::function_symbol u0(0, viennamath::unknown_tag<>());
     viennamath::function_symbol u1(1, viennamath::unknown_tag<>());
     viennamath::function_symbol u2(2, viennamath::unknown_tag<>());
@@ -230,7 +345,7 @@ namespace viennafem
     for (typename EquationArray::const_iterator it = weak_form.begin();
                                                 it != weak_form.end();
                                               ++it)
-      log << log.translator()(*it) << " \n";
+      log << log.translator()(*it) << " \\  . \n";
     log << "\\end{align}\n";
    
     
@@ -243,7 +358,35 @@ namespace viennafem
                                   EquationArray const & trial_space,
                                   latex_logger<InterfaceType> & log)
   {
-    log << "write test and trial space\n";
+    log << "The trial functions used for the discrete approximation of $u_h$ on the reference element are \n";
+    log << "\\begin{align*}\n";
+    std::size_t func_index = 0;
+    for (typename EquationArray::const_iterator it = trial_space.begin();
+                                                it != trial_space.end();
+                                              ++it)
+    {
+      if (func_index > 0) //finish previous line
+        log << " \\ , \\\\ \n";
+      
+      log << "\\varphi_{" << func_index << "} &= " << log.translator()(*it);
+      ++func_index;
+    }
+    log << " \\ . \n \\end{align*}\n";
+    log << "The test functions on the reference element are\n";
+    log << "\\begin{align*}\n";
+    func_index = 0;
+    for (typename EquationArray::const_iterator it = test_space.begin();
+                                                it != test_space.end();
+                                              ++it)
+    {
+      if (func_index > 0) //finish previous line
+        log << " \\ , \\\\ \n";
+      
+      log << "\\psi_{" << func_index << "} &= " << log.translator()(*it);
+      ++func_index;
+    }
+    log << " \\ . \n \\end{align*}\n";
+    log << "\n";
   }
   
   template <typename InterfaceType>

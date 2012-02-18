@@ -130,7 +130,7 @@ namespace viennafem
      #ifdef VIENNAFEMDEBUG        
         std::cout << "* pde_solver::operator(): Create Mapping:" << std::endl;
      #endif
-        size_t map_index = create_mapping(pde_system, domain);
+        std::size_t map_index = create_mapping(pde_system, domain);
         
      #ifdef VIENNAFEMDEBUG                
         std::cout << "* pde_solver::operator(): Assigned degrees of freedom in domain so far: " << map_index << std::endl;
@@ -286,8 +286,8 @@ namespace viennafem
         std::cout << "* pde_solver::operator(): Transform to reference element" << std::endl;
      #endif
         EquationType transformed_weak_form = viennafem::transform_to_reference_cell<CellType>(weak_form, pde_system);
-        //temp[0] = transformed_weak_form;
-        //log_transformed_weak_form(temp, pde_system);
+        temp[0] = transformed_weak_form;
+        log_transformed_weak_form<CellType>(temp, pde_system);
         
         std::cout << "* pde_solver::operator(): Transformed weak form:" << std::endl;
         std::cout << transformed_weak_form << std::endl;
