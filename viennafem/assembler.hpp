@@ -18,7 +18,6 @@
 #include "viennafem/cell_quan.hpp"
 #include "viennafem/transform.hpp"
 #include "viennafem/bases/all.hpp"
-#include "viennafem/eval.hpp"
 #include "viennafem/transform/dtdx_triangle.hpp"
 #include "viennafem/transform/dtdx_tetrahedron.hpp"
 #include "viennafem/weak_form.hpp"

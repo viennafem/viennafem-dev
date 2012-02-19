@@ -40,14 +40,14 @@ namespace viennafem
     typedef viennamath::rt_expr<InterfaceType>   expression_type;
     
     //
-    typedef viennamath::ct_expr< viennamath::ct_expr< viennamath::ct_constant<1>,
-                                                      viennamath::op_minus<viennafem::numeric_type>,
-                                                      viennamath::ct_variable<0> >,
-                                 viennamath::op_mult<viennafem::numeric_type>,
-                                 viennamath::ct_expr< viennamath::ct_constant<1>,
-                                                      viennamath::op_minus<viennafem::numeric_type>,
-                                                      viennamath::ct_variable<1> >
-                               >                 type;
+    typedef viennamath::ct_binary_expr< viennamath::ct_binary_expr< viennamath::ct_constant<1>,
+                                                                    viennamath::op_minus<viennafem::numeric_type>,
+                                                                    viennamath::ct_variable<0> >,
+                                        viennamath::op_mult<viennafem::numeric_type>,
+                                        viennamath::ct_binary_expr< viennamath::ct_constant<1>,
+                                                                    viennamath::op_minus<viennafem::numeric_type>,
+                                                                    viennamath::ct_variable<1> >
+                                      >                 type;
                                  
     static expression_type get() { return expression_type(type()); }
   };
@@ -61,12 +61,12 @@ namespace viennafem
   {
     typedef viennamath::rt_expr<InterfaceType>   expression_type;
     
-    typedef viennamath::ct_expr< viennamath::ct_variable<0>,
-                                 viennamath::op_mult<viennafem::numeric_type>,
-                                 viennamath::ct_expr< viennamath::ct_constant<1>,
-                                                      viennamath::op_minus<viennafem::numeric_type>,
-                                                      viennamath::ct_variable<1> >
-                               >                 type;
+    typedef viennamath::ct_binary_expr< viennamath::ct_variable<0>,
+                                        viennamath::op_mult<viennafem::numeric_type>,
+                                        viennamath::ct_binary_expr< viennamath::ct_constant<1>,
+                                                                    viennamath::op_minus<viennafem::numeric_type>,
+                                                                    viennamath::ct_variable<1> >
+                                      >                 type;
     
     static expression_type get() { return expression_type(type()); }
   };
@@ -81,12 +81,12 @@ namespace viennafem
   {
     typedef viennamath::rt_expr<InterfaceType>   expression_type;
     
-    typedef viennamath::ct_expr< viennamath::ct_expr< viennamath::ct_constant<1>,
-                                                      viennamath::op_minus<viennafem::numeric_type>,
-                                                      viennamath::ct_variable<0> >,
-                                 viennamath::op_mult<viennafem::numeric_type>,
-                                 viennamath::ct_variable<1>
-                               >                 type;
+    typedef viennamath::ct_binary_expr< viennamath::ct_binary_expr< viennamath::ct_constant<1>,
+                                                                    viennamath::op_minus<viennafem::numeric_type>,
+                                                                    viennamath::ct_variable<0> >,
+                                        viennamath::op_mult<viennafem::numeric_type>,
+                                        viennamath::ct_variable<1>
+                                      >                 type;
     
     static expression_type get() { return expression_type(type()); }
   };
@@ -101,10 +101,10 @@ namespace viennafem
   {
     typedef viennamath::rt_expr<InterfaceType>   expression_type;
     
-    typedef viennamath::ct_expr< viennamath::ct_variable<0>,
-                                 viennamath::op_mult<viennafem::numeric_type>,
-                                 viennamath::ct_variable<1>
-                               >                 type;
+    typedef viennamath::ct_binary_expr< viennamath::ct_variable<0>,
+                                        viennamath::op_mult<viennafem::numeric_type>,
+                                        viennamath::ct_variable<1>
+                                      >                 type;
     
     static expression_type get() { return expression_type(type()); }
   };
@@ -136,10 +136,10 @@ namespace viennafem
                                   0,
                                   1>::type       phi_1;
                          
-    typedef viennamath::ct_expr<phi_0,
-                                viennamath::op_mult<NumericT>,
-                                phi_1
-                               > type;
+    typedef viennamath::ct_binary_expr<phi_0,
+                                       viennamath::op_mult<NumericT>,
+                                       phi_1
+                                      > type;
     
     static expression_type get() { return expression_type(type()); }
   };
@@ -166,10 +166,10 @@ namespace viennafem
                                   0,
                                   2>::type       phi_1;
                          
-    typedef viennamath::ct_expr<phi_0,
-                                viennamath::op_mult<NumericT>,
-                                phi_1
-                               > type;
+    typedef viennamath::ct_binary_expr<phi_0,
+                                       viennamath::op_mult<NumericT>,
+                                       phi_1
+                                      > type;
     
     static expression_type get() { return expression_type(type()); }
   };
@@ -196,10 +196,10 @@ namespace viennafem
                                   0,
                                   3>::type       phi_1;
                          
-    typedef viennamath::ct_expr<phi_0,
-                                viennamath::op_mult<NumericT>,
-                                phi_1
-                               > type;
+    typedef viennamath::ct_binary_expr<phi_0,
+                                       viennamath::op_mult<NumericT>,
+                                       phi_1
+                                      > type;
     
     static expression_type get() { return expression_type(type()); }
   };
@@ -227,10 +227,10 @@ namespace viennafem
                                   0,
                                   3>::type       phi_1;
                          
-    typedef viennamath::ct_expr<phi_0,
-                                viennamath::op_mult<NumericT>,
-                                phi_1
-                               > type;
+    typedef viennamath::ct_binary_expr<phi_0,
+                                       viennamath::op_mult<NumericT>,
+                                       phi_1
+                                      > type;
     
     static expression_type get() { return expression_type(type()); }
   };

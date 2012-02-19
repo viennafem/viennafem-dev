@@ -22,7 +22,6 @@
 //#include "viennafem/mapping.hpp"
 #include "viennafem/cell_quan.hpp"
 #include "viennafem/transform.hpp"
-#include "viennafem/eval.hpp"
 #include "viennafem/unknown_config.hpp"
 #include "viennafem/pde_assembler.hpp"
 #include "viennafem/linear_pde_system.hpp"

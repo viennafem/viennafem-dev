@@ -10,7 +10,6 @@
 #include "viennamath/manipulation/diff.hpp"
 
 #include "viennamath/runtime/equation.hpp"
-#include "viennamath/manipulation/integral.hpp"
 #include "viennamath/manipulation/apply_coordinate_system.hpp"
 
 #include "viennafem/weak_form.hpp"

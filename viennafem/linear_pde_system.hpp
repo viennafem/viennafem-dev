@@ -21,7 +21,6 @@
 #include "viennafem/transform.hpp"
 #include "viennafem/bases/tetrahedron.hpp"
 #include "viennafem/bases/triangle.hpp"
-#include "viennafem/eval.hpp"
 #include "viennafem/transform/dtdx_triangle.hpp"
 #include "viennafem/transform/dtdx_tetrahedron.hpp"
 #include "viennafem/weak_form.hpp"

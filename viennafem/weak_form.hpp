@@ -17,7 +17,6 @@
 
 #include "viennamath/expression.hpp"
 #include "viennamath/manipulation/substitute.hpp"
-#include "viennamath/manipulation/integral.hpp"
 
 namespace viennafem
 {

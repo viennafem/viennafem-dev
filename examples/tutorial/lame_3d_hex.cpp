@@ -12,7 +12,6 @@
 //#include "viennafem/mapping.hpp"
 #include "viennafem/cell_quan.hpp"
 #include "viennafem/transform.hpp"
-#include "viennafem/eval.hpp"
 #include "viennafem/unknown_config.hpp"
 #include "viennafem/pde_assembler.hpp"
 #include "viennafem/weak_form.hpp"
@@ -33,7 +32,6 @@
 #include "viennamath/manipulation/diff.hpp"
 
 #include "viennamath/runtime/equation.hpp"
-#include "viennamath/manipulation/integral.hpp"
 #include "viennamath/manipulation/apply_coordinate_system.hpp"
 
 
