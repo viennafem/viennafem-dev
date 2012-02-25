@@ -113,12 +113,7 @@ void print_entry(expr const & e, size_t test_index, size_t unknown_index)
     if (test_index != 2)
       result = viennamath::substitute(v3, 0, result);
     
-    //while (result.get()->optimizable())
-    for (size_t i=0; i<5; ++i)
-    {
-      std::cout << "optimizing binary_expr..." << std::endl;
-      result = result.get()->optimize();
-    }
+    inplace_simplify(result);
     
     std::cout << result << std::endl;
 }

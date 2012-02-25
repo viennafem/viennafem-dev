@@ -20,7 +20,7 @@
 #include "viennagrid/domain.hpp"
 #include "viennafem/forwards.h"
 
-#include "viennamath/manipulation/optimize.hpp"
+#include "viennamath/manipulation/simplify.hpp"
 
 
 namespace viennafem
@@ -66,23 +66,23 @@ namespace viennafem
         viennamath::variable eta(1);
         viennamath::variable  nu(2);
         
-        viennamath::expr J_00 = a_0[0] + a_01[0] * eta + a_02[0] * nu + a_012[0] * eta * nu; viennamath::inplace_optimize(J_00);
-        viennamath::expr J_10 = a_0[1] + a_01[1] * eta + a_02[1] * nu + a_012[1] * eta * nu; viennamath::inplace_optimize(J_10);
-        viennamath::expr J_20 = a_0[2] + a_01[2] * eta + a_02[2] * nu + a_012[2] * eta * nu; viennamath::inplace_optimize(J_20);
+        viennamath::expr J_00 = a_0[0] + a_01[0] * eta + a_02[0] * nu + a_012[0] * eta * nu; viennamath::inplace_simplify(J_00);
+        viennamath::expr J_10 = a_0[1] + a_01[1] * eta + a_02[1] * nu + a_012[1] * eta * nu; viennamath::inplace_simplify(J_10);
+        viennamath::expr J_20 = a_0[2] + a_01[2] * eta + a_02[2] * nu + a_012[2] * eta * nu; viennamath::inplace_simplify(J_20);
 
-        viennamath::expr J_01 = a_1[0] + a_01[0] * xi + a_12[0] * nu + a_012[0] * xi * nu; viennamath::inplace_optimize(J_01);
-        viennamath::expr J_11 = a_1[1] + a_01[1] * xi + a_12[1] * nu + a_012[1] * xi * nu; viennamath::inplace_optimize(J_11);
-        viennamath::expr J_21 = a_1[2] + a_01[2] * xi + a_12[2] * nu + a_012[2] * xi * nu; viennamath::inplace_optimize(J_21);
+        viennamath::expr J_01 = a_1[0] + a_01[0] * xi + a_12[0] * nu + a_012[0] * xi * nu; viennamath::inplace_simplify(J_01);
+        viennamath::expr J_11 = a_1[1] + a_01[1] * xi + a_12[1] * nu + a_012[1] * xi * nu; viennamath::inplace_simplify(J_11);
+        viennamath::expr J_21 = a_1[2] + a_01[2] * xi + a_12[2] * nu + a_012[2] * xi * nu; viennamath::inplace_simplify(J_21);
 
-        viennamath::expr J_02 = a_2[0] + a_02[0] * xi + a_12[0] * eta + a_012[0] * xi * eta; viennamath::inplace_optimize(J_02);
-        viennamath::expr J_12 = a_2[1] + a_02[1] * xi + a_12[1] * eta + a_012[1] * xi * eta; viennamath::inplace_optimize(J_12);
-        viennamath::expr J_22 = a_2[2] + a_02[2] * xi + a_12[2] * eta + a_012[2] * xi * eta; viennamath::inplace_optimize(J_22);
+        viennamath::expr J_02 = a_2[0] + a_02[0] * xi + a_12[0] * eta + a_012[0] * xi * eta; viennamath::inplace_simplify(J_02);
+        viennamath::expr J_12 = a_2[1] + a_02[1] * xi + a_12[1] * eta + a_012[1] * xi * eta; viennamath::inplace_simplify(J_12);
+        viennamath::expr J_22 = a_2[2] + a_02[2] * xi + a_12[2] * eta + a_012[2] * xi * eta; viennamath::inplace_simplify(J_22);
         
         // determinant:
         viennamath::expr det_J =   J_00 * J_11 * J_22 + J_01 * J_12 * J_20 + J_02 * J_10 * J_21
                                  - J_20 * J_11 * J_02 - J_21 * J_12 * J_00 - J_22 * J_10 * J_01;
 
-        viennamath::inplace_optimize(det_J);
+        viennamath::inplace_simplify(det_J);
                                  
         viennadata::access<det_dF_dt_key, viennamath::expr >()(cell) = det_J;
         

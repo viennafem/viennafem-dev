@@ -19,7 +19,7 @@
 #include "viennagrid/algorithm/spanned_volume.hpp"
 #include "viennagrid/domain.hpp"
 #include "viennafem/forwards.h"
-
+#include "viennamath/manipulation/simplify.hpp"
 
 namespace viennafem
 {
@@ -52,6 +52,7 @@ namespace viennafem
         viennamath::variable eta(1);
         
         viennamath::expr det_J = (x1_x0 + eta * coeff_x) * (y2_y0 + xi * coeff_y) - (y1_y0 + eta * coeff_y) * (x2_x0 + xi * coeff_x);
+        viennamath::inplace_simplify(det_J);
         
         viennadata::access<det_dF_dt_key, viennamath::expr>()(cell) = det_J;
         
