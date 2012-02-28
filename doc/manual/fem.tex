@@ -1,18 +1,91 @@
 
 \chapter{Finite Element Simulations}  \label{chap:fem}
 
-Describe how to run a 
+In this chapter all steps required for solving a PDE using the finite element method in {\ViennaFEM} are discussed.
+Basically, the discussion follows the tutorials in \lstinline|examples/tutorial/|. 
+Familiarity with the very basics of the finite element method is expected. However, since {\ViennaFEM} aims at hiding unimportant low-level details from the
+user, no detailed knowledge is required.
 
 \section{Grid Setup}
+The first step is to set up the discrete grid using {\ViennaGrid},
+which is accomplished by reading the mesh from a file. 
+File readers for the VTK format \cite{VTK,VTKfileformat} and the Netgen legacy format \cite{netgen} are provided by {\ViennaGrid}.
+The domain type is instantiated by first retrieving the domain type, and then by instantiating the domain as usual:
+\begin{lstlisting}
+ //retrieve domain type:
+ typedef viennagrid::config::triangular_2d                 ConfigType;
+ typedef viennagrid::result_of::domain<ConfigType>::type   DomainType;
+
+ DomainType my_domain;
+ viennagrid::io::netgen_reader my_reader;
+ my_reader(my_domain, "../examples/data/square512.mesh");
+\end{lstlisting}
+Here, the Netgen file reader is used to read the mesh '\texttt{square512.mesh}' included in the {\ViennaFEM} release.
+
+\TIP{ The easiest way of generating meshes for use within {\ViennaFEM} is to use Netgen \cite{netgen}, which also offers a graphical user interface. }
 
 
 \section{Boundary Conditions}
+The next step is to set boundary conditions for the respective partial differential equation.
+Only Dirichlet boundary conditions and homogeneous Neumann are supported in {\ViennaFEMversion}.
+Inhomogeneous Neumann boundary conditions as well as Robin-type boundary conditions are scheduled for future releases.
+
+Boundary conditions are imposed by interpolation at boundary vertices. Using {\ViennaGrid}, this is achieved by iterating over all vertices and
+calling the function \lstinline|set_dirichlet_boundary()| from {\ViennaFEM} for the respective vertices. For example, to specify inhomogeneous Dirichlet
+boundary conditions $ = 1$ for all vertices with $x$-coordinate equal to zero, the required code is:
+\begin{lstlisting}
+ typedef viennagrid::result_of::ncell_range<DomainType, 0>::type  
+                                                           VertexContainer;
+ typedef viennagrid::result_of::iterator<VertexContainer>::type 
+                                                           VertexIterator;
+
+ VertexContainer vertices = viennagrid::ncells<0>(my_domain);
+ for (VertexIterator vit = vertices.begin();
+      vit != vertices.end();
+      ++vit)
+ {
+   if ( (*vit)[0] == 0.0 )
+    viennafem::set_dirichlet_boundary(*vit, 1.0, 0);
+ }
+\end{lstlisting}
+The first argument to \lstinline|set_dirichlet_boundary| is the vertex, the second argument is the Dirichlet boundary value, and the third argument is
+the simulation ID. The simulation ID allows to distinguish between different finite element solutions of possibly different partial differential equations and
+should be chosen uniquely for each solution to be computed. However, it is not required to pass a simulation ID to \lstinline|set_dirichlet_boundary|, in which
+case it defaults to zero.
+
+The identification of boundary vertices may not be possible in the cases where the simulation domain is complicated. In such cases, the indices of boundary
+vertices may be either read from a separate file, or boundary nodes are flagged in the VTK file already. In addition, boundary and/or interface detection
+functionality from {\ViennaGrid} can be used.
 
 
 \section{PDE Specification}
+The actual PDE to be solved is specified using the symbolic math library {\ViennaMath}. 
+Either the strong form or the weak form can be specified. For the case of the Poisson equation
+\begin{align}
+ \Delta u = -1 \ ,
+\end{align}
+the representation using {\ViennaMath} is
+\begin{lstlisting}
+ function_symbol u;
+ equation poisson_eq = make_equation( laplace(u), -1);
+\end{lstlisting}
+where all functions and types reside in the namespace \lstinline|viennamath|.
 
+It is also possible to supply an inhomogeneous right hand side $f$ instead of a constant value $-1$.
+In {\ViennaMathversion}, $f$ is required to be constant within each cell of the mesh.
+The values of $f$ are accessed via objects of type \lstinline|cell_quan<T>|, where \lstinline|T| is the cell type of the {\ViennaGrid}
+domain:
+\begin{lstlisting}
+  viennafem::cell_quan<CellType>  f;
+  f.wrap_constant( data_key );  
+\end{lstlisting}
+Here, \lstinline|data_key| denotes the key to be used in order to access the values of $f$ of type \lstinline|double| from the respective cell.
+
+\TIP{Have a look at \lstinline|examples/tutorial/poisson_cellquan_2d| for an example of using \lstinline|cell_quan|.}
 
 \section{Launching a Simulation}
+
+
 
 
 \section{Postprocessing Results}
