@@ -1,17 +1,30 @@
-/* ====================================================================================
-   Copyright (c) 2010, Institute for Microelectronics, Vienna University of Technology.
-   http://www.iue.tuwien.ac.at
-                                  -----------------
-               ViennaFEM - The Vienna Finite Element Method Library
-                                  -----------------
-                            
-   authors:    Karl Rupp                          rupp@iue.tuwien.ac.at
-
-   license:    MIT (X11), see file LICENSE in the ViennaFEM base directory
-======================================================================================= */
-
 #ifndef VIENNAFEM_FORWARDS_H
 #define VIENNAFEM_FORWARDS_H
+
+/* =========================================================================
+   Copyright (c) 2012, Institute for Microelectronics,
+                       Institute for Analysis and Scientific Computing,
+                       TU Wien.
+                             -----------------
+               ViennaFEM - The Vienna Finite Element Method Library
+                             -----------------
+
+   Author:     Karl Rupp                          rupp@iue.tuwien.ac.at
+
+   License:    MIT (X11), see file LICENSE in the ViennaFEM base directory
+============================================================================ */
+
+/**
+ @mainpage Source Code Documentation for ViennaFEM 1.0.0
+
+ Thank you for downloading ViennaFEM!
+ These pages provide the Doxygen-generated source code documentation with the many details on the functions implemented in ViennaFEM.
+ 
+ For a general overview over the types and functionality provided by ViennaFEM, please refer to the file doc/viennafem.pdf. 
+ Since ViennaFEM depends on the libraries ViennaCL, ViennaData, ViennaGrid and ViennaMath, you might also want to check out the PDF manuals
+ doc/viennacl.pdf, doc/viennadata.pdf, doc/viennagrid.pdf and doc/viennamath.pdf.
+*/
+
 
 #include "viennadata/api.hpp"
 #include "viennagrid/forwards.h"
@@ -21,12 +34,22 @@
     @brief This file provides the forward declarations for the main types used within ViennaFEM
 */
 
+/** @brief The main namespace for ViennaFEM. All user functionality resides in this namespace. */
 namespace viennafem
 {
   
+  /** @brief The default floating point type to be used in ViennaFEM.
+   * 
+   *  Feel free to change this typedef to a high-precision type if required. 
+   *  Keep in mind that only float and double types can be used for GPU acceleration.
+   */
   typedef double             numeric_type;
 
-  //a tag for storing mapping indices on the grid
+  
+  /** @brief A tag for storing mapping indices on the grid  
+   * 
+   *  @tparam id    An ID for the simulation to allow for several simulations on the same grid.
+   */
   template <long id>
   struct mapping_key_type {}; 
 
@@ -121,20 +144,26 @@ namespace viennafem
   // Basis functions
   //
   
-  // Family of Lagrange basis functions
+  /** @brief A tag identifying the family of Lagrange basis functions
+   * 
+   * @tparam order     Polynomial degree of the basis along edges (degree might be higher or lower in the cell interior)
+   */
   template <std::size_t order>
   struct lagrange_tag {};
   
-
+  /** @brief Provides a unique ID from a basis function tag (compiletime-runtime translation)  */
   template <typename T>
   struct space_to_id {};
   
+  /** @brief Specialization of the unique ID facility for the Lagrange family */
   template <std::size_t order>
   struct space_to_id< lagrange_tag<order> >
   {
     enum { value = order };
   };
   
+  
+  /** @brief Metafunction for returning the reference cell for a cell type and a basis function type */
   template <typename Cell, typename T>
   struct reference_cell_for_basis {};
   
@@ -248,7 +277,7 @@ namespace viennafem
 
 }
 
-//configure vienndata for type-based dispatch on boundary_key, mapping_key, dt_dx and det_F:
+/** @brief Contains the configuration of ViennaData for type-based dispatch on boundary_key, mapping_key, dt_dx and det_F: */
 namespace viennadata
 {
   namespace config
