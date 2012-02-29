@@ -77,6 +77,7 @@ namespace viennafem
       typedef viennafem::cell_quan<CellType, InterfaceType>     CellQuanType;
     
     public:
+      viennamath::rt_latex_processor_interface<InterfaceType> * clone() const { return new rt_latex_dt_dx_processor(); }
       
       std::string process(InterfaceType const * ptr, bool use_parenthesis, viennamath::rt_latex_translator<InterfaceType> const & translator) const 
       {
