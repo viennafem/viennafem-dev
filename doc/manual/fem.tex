@@ -1,5 +1,5 @@
 
-\chapter{Finite Element Simulations}  \label{chap:fem}
+\chapter{The Finite Element Solver}  \label{chap:fem}
 
 In this chapter all steps required for solving a PDE using the finite element method in {\ViennaFEM} are discussed.
 Basically, the discussion follows the tutorials in \lstinline|examples/tutorial/|. 
@@ -83,16 +83,74 @@ Here, \lstinline|data_key| denotes the key to be used in order to access the val
 
 \TIP{Have a look at \lstinline|examples/tutorial/poisson_cellquan_2d| for an example of using \lstinline|cell_quan|.}
 
-\section{Launching a Simulation}
+\section{Running the FE Solver}
+After the boundary conditions and the partial differential equation are specified, the finite element solver can be started.
+This is accomplished in three steps:
+\begin{itemize}
+ \item Instantiate the PDE assembler object, the system matrix and the load vector
+ \item Run the assembly
+ \item Solve the resulting system of linear equations
+\end{itemize}
 
+The first step is accomplished by the lines
+\begin{lstlisting}
+ viennafem::pde_assembler                         fem_assembler;
+ boost::numeric::ublas::compressed_matrix<double> system_matrix;
+ boost::numeric::ublas::vector<double>            load_vector;
+\end{lstlisting}
+Other matrix and vector types can also be used as long as they offer access to their entries using \lstinline|operator()| as well as \lstinline|size()| and \lstinline|resize()| member functions.
 
+The second step, namely the assembly of the linear system of equations, is triggered by passing the PDE system, the domain, the system matrix and the load vector objects to the functor interface:
+\begin{lstlisting}
+  fem_assembler(viennafem::make_linear_pde_system(poisson_eq, u),
+                my_domain,
+                system_matrix,
+                load_vector);
+\end{lstlisting}
+The convenience function \lstinline|make_linear_pde_system()| sets up a system given by the Poisson equation defined in the previous section, and specifies the unknown function to be \lstinline|u|. By default, a linear finite element simulation using the simulation ID $0$ is triggered.
+Additional options can be specified for the PDE system using the optional third parameter. In {\ViennaFEMversion}, three parameters can be specified:
+The first parameter is the simulation ID, while the second and third parameter denote the basis function tag used for the trial space and the test space, respectively.
+Currently, only Lagrange basis functions are supported using the tag \lstinline|lagrange_tag<order>|, where the parameter \lstinline|order| denotes the polynomial order along cell edges.
+Note that only linear basis functions are supported at the moment.
+Thus, the previous call to \lstinline|make_linear_pde_system| is equivalent to
+\begin{lstlisting}
+  make_linear_pde_system(poisson_eq, u,
+                         make_linear_pde_options(0, lagrange_tag<1>(),
+                                                    lagrange_tag<1>()) ),
+\end{lstlisting}
+
+The third step is to solve the assembled system of linear equations. For this purpose, the solvers in {\ViennaCL} are used.
+For example, the iterative conjugate gradient solver is launched via
+\begin{lstlisting}
+  VectorType pde_result = solve(system_matrix,
+                                load_vector,
+                                cg_tag() );
+\end{lstlisting}
+where \lstinline|solve()| and \lstinline|cg_tag| reside in namespace \lstinline|viennacl::linalg|.
+An overview of solvers and preconditioners available in {\ViennaCL} can be found in the {\ViennaCL} manual in \lstinline|doc/viennacl.pdf|.
 
 
 \section{Postprocessing Results}
-
+For a visualization of results, a VTK exporter is included in {\ViennaFEM} in the namespace \lstinline|viennafem::io| and defined in the header file \lstinline|viennafem/io/vtk_writer.hpp|
+\begin{lstlisting}
+ write_solution_to_VTK_file(pde_result, "filename", my_domain, 0);
+\end{lstlisting}
+The first argument is the computed solution vector, the second is the filename, the third is the domain object, and the forth parameter is the simulation ID (optional, defaults to $0$). 
 
 
 \section{{\LaTeX} Simulation Protocol}
-
+{\ViennaFEM} by default writes a protocol named \lstinline|protocol_<ID>.tex|, where \lstinline|<ID>| is replaced by the respective simulation ID.
+This file can directly be processed with a {\LaTeX} compiler and prints a summary containing the strong formulation, the weak formulation, the basis functions used, etc.
+The document is compiled on Unix-based systems using either the standard {\LaTeX} toolchain
+\begin{lstlisting}
+ $> latex  protocol_0.tex
+ $> dvips  protocol_0.dvi  #optional
+ $> ps2pdf protocol_0.ps   #optional
+\end{lstlisting}
+or using PDF{\LaTeX}:
+\begin{lstlisting}
+ $> pdflatex protocol_0.tex
+\end{lstlisting}
+Any {\LaTeX}-environment can be used on Windows-based systems. The resulting PDF file can then be viewed with your favorite PDF viewer.
 
 

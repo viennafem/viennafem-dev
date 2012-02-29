@@ -1,31 +1,27 @@
-/* ====================================================================================
-   Copyright (c) 2010, Institute for Microelectronics, Vienna University of Technology.
-   http://www.iue.tuwien.ac.at
-                                  -----------------
-               ViennaFEM - The Vienna Finite Element Method Library
-                                  -----------------
-                            
-   authors:    Karl Rupp                          rupp@iue.tuwien.ac.at
+/* =======================================================================
+   Copyright (c) 2012, Institute for Microelectronics,
+                       Institute for Analysis and Scientific Computing,
+                       TU Wien.
+                             -----------------
+               ViennaMath - Symbolic and Numerical Math in C++
+                             -----------------
 
-   license:    MIT (X11), see file LICENSE in the ViennaFEM base directory
-======================================================================================= */
+   Author:     Karl Rupp                          rupp@iue.tuwien.ac.at
+
+   License:    MIT (X11), see file LICENSE in the ViennaMath base directory
+======================================================================= */
+
 
 // include necessary system headers
 #include <iostream>
 
 // ViennaFEM includes:
-#include "viennafem/forwards.h"
-#include "viennafem/cell_quan.hpp"
-#include "viennafem/transform.hpp"
-#include "viennafem/unknown_config.hpp"
-#include "viennafem/pde_assembler.hpp"
-#include "viennafem/linear_pde_system.hpp"
-#include "viennafem/linear_pde_options.hpp"
+#include "viennafem/fem.hpp"
 #include "viennafem/io/vtk_writer.hpp"
 
 // ViennaGrid includes:
 #include "viennagrid/domain.hpp"
-#include <viennagrid/config/simplex.hpp>
+#include "viennagrid/config/simplex.hpp"
 #include "viennagrid/io/netgen_reader.hpp"
 #include "viennagrid/io/vtk_writer.hpp"
 
@@ -35,15 +31,11 @@
 // ViennaMath includes:
 #include "viennamath/expression.hpp"
 
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/ublas/triangular.hpp>
+// Boost.uBLAS includes:
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/operation.hpp>
 #include <boost/numeric/ublas/operation_sparse.hpp>
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/ublas/lu.hpp>
 
 
 //ViennaCL includes:
@@ -51,57 +43,15 @@
  #define VIENNACL_HAVE_UBLAS
 #endif
     
-#ifdef USE_OPENCL
-  #include "viennacl/matrix.hpp"
-  #include "viennacl/vector.hpp"
-#endif
 #include "viennacl/linalg/cg.hpp"
 #include "viennacl/linalg/norm_2.hpp"
 #include "viennacl/linalg/prod.hpp"
 
 
-//      
-// Solve system of linear equations:
-//
-template <typename MatrixType, typename VectorType>
-VectorType solve(MatrixType const & system_matrix,
-                 VectorType const & load_vector)
-{
-  typedef typename VectorType::value_type        numeric_type;
-  VectorType result(load_vector.size());
-  
-  std::cout << "* solve(): Solving linear system" << std::endl;
-
-#ifdef USE_OPENCL
-  viennacl::matrix<viennafem::numeric_type> vcl_matrix(load_vector.size(), load_vector.size());
-  viennacl::vector<viennafem::numeric_type> vcl_rhs(load_vector.size());
-  viennacl::vector<viennafem::numeric_type> vcl_result(load_vector.size());
-  
-  viennacl::copy(system_matrix, vcl_matrix);
-  viennacl::copy(load_vector, vcl_rhs);
-  
-  vcl_result = viennacl::linalg::solve(vcl_matrix, vcl_rhs, viennacl::linalg::cg_tag());
-  
-  viennacl::copy(vcl_result, result);
-#else
-  result = viennacl::linalg::solve(system_matrix, load_vector, viennacl::linalg::cg_tag());
-  std::cout << "* solve(): Residual: " << norm_2(prod(system_matrix, result) - load_vector) << std::endl;
-#endif
-    
-  //std::cout << load_vector << std::endl;
-  
-  //print solution:
-  //std::cout << "Solution: ";
-  //for (size_t i=0; i<ublas_result.size(); ++i)
-  //  std::cout << ublas_result(i) << " ";
-  //std::cout << std::endl;
-  //std::cout << std::endl;
-
-  return result;
-}
-
+/** @brief A tag class used for storing the permittivity (i.e. a cell quantity) with ViennaData */
 struct permittivity_key
 {
+  // Operator< is required for compatibility with std::map
   bool operator<(permittivity_key const & other) const { return false; }
 };
 
@@ -170,19 +120,11 @@ int main()
       vit != vertices.end();
       ++vit)
   {
-    //boundary for second equation: 0 at left boundary, 1 at right boundary
-    if (vit->point()[0] == 0.0)
-    {
-      viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = true;
-      viennadata::access<BoundaryKey, double>(BoundaryKey(0))(*vit) = 0.0;
-    }
-    else if (vit->point()[0] == 1.0)
-    {
-      viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = true;
-      viennadata::access<BoundaryKey, double>(BoundaryKey(0))(*vit) = 1.0;
-    }
-    else
-      viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = false;
+    // Boundary condition: 0 at left boundary, 1 at right boundary
+    if ( (*vit)[0] == 0.0)
+      viennafem::set_dirichlet_boundary(*vit, 0.0);
+    else if ( (*vit)[0] == 1.0)
+      viennafem::set_dirichlet_boundary(*vit, 1.0);
     
   }
   
@@ -224,16 +166,12 @@ int main()
                 );
   }
   
-  //std::cout << poisson_config_1.load_vector() << std::endl;
-  
-  VectorType pde_result = solve(system_matrix, load_vector);
+  VectorType pde_result = viennacl::linalg::solve(system_matrix, load_vector, viennacl::linalg::cg_tag());
 
-  //std::cout << "RESULT" << std::endl;
-  //std::cout << pde_result_1 << std::endl;
   //
   // Writing solution back to domain (discussion about proper way of returning a solution required...)
   //
-  viennafem::io::write_solution_to_VTK_file(pde_result, "poisson_1", my_domain, 0);
+  viennafem::io::write_solution_to_VTK_file(pde_result, "poisson_cellquan_2d", my_domain, 0);
   
   std::cout << "*****************************************" << std::endl;
   std::cout << "* Poisson solver finished successfully! *" << std::endl;

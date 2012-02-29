@@ -1,0 +1,96 @@
+***********************************************
+****          ViennaFEM Readme             ****
+***********************************************
+
+Table of Contents
+------------------
+1. Requirements
+2. Installation
+3. Project Layout
+4. Authors and Contact
+A. License
+
+
+(for detailed informations, have a look into the doc/ folder containing a PDF manual and doxygen-created reference documentation)
+
+
+
+1. Requirements
+-----------------
+ * A not too dated C++ compiler (e.g. gcc 4.x.x)
+ * Boost.uBLAS (version 1.42 is known to work, any other should do as well)
+ * ViennaCL (shipped with ViennaFEM)
+ * ViennaData (shipped with ViennaFEM)
+ * ViennaGrid (shipped with ViennaFEM)
+ * ViennaMath (shipped with ViennaFEM)
+ * CMake (optional, for building the examples)
+
+
+2. Installation
+-----------------
+
+The first step is to extract the file:
+
+Unix-based OS:
+$> gunzip ViennaFEM-1.0.0.tar.gz
+$> tar -xf ViennaFEM-1.0.0.tar
+$> cd ViennaFEM-1.0.0
+
+ViennaFEM is a header-only library, therefore it is sufficient to copy the subfolders viennacl/, viennadata/, viennafem/, viennagrid/ and viennamath/ (holding the header files) into your project directory or your system include directory. For instructions on how to set the include paths correctly, please refer to the documentation of your compiler.
+
+For building and running the examples, proceed as follows:
+
+Unix-based clients:
+ * change to the build directory:
+   $> cd build
+ * call cmake
+   $> cmake ..
+ * Use 'make' to build all examples:
+   $> make
+   (alternatively, you can build them individually via 'make example1', 'make example2', etc.
+ * Execute them via
+   $> ./poisson_1d
+   $> ./sshape_2d
+   etc.
+
+
+3. Project Layout
+-----------------
+
+---- ViennaFEM-1.X.X
+   |
+   |-- build/ - Build folder for the examples
+   | 
+   |-- doc/ - Documentation (LaTeX and doxygen)
+   | 
+   |-- examples/ - Tutorial and benchmarking applications
+        | 
+        |-- data/ - Test meshes for the tutorials
+        | 
+        |-- tutorial/ - Some tutorials explaining the usage of ViennaFEM
+   | 
+   |-- tests/ - Automated test suite
+   | 
+   |-- viennacl/   - ViennaCL sources
+   | 
+   |-- viennadata/ - ViennaData sources
+   | 
+   |-- viennafem/  - The library source code
+   | 
+   |-- viennagrid/ - ViennaGrid sources
+   | 
+   |-- viennamath/ - ViennaMath sources
+
+
+4. Authors and Contact
+------------------------
+
+Karl Rupp (rupp@iue.tuwien.ac.at)
+
+ViennaFEM was developed under the aegis of the 'Institute for Microelectronics' and the 'Institute for Analysis and Scientific Computing' at the 'Vienna University of Technology'.
+
+
+A. License
+------------
+ViennaFEM is distributed under the MIT (X11) License. See file LICENSE.
+

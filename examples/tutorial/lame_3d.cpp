@@ -1,6 +1,21 @@
+/* =======================================================================
+   Copyright (c) 2012, Institute for Microelectronics,
+                       Institute for Analysis and Scientific Computing,
+                       TU Wien.
+                             -----------------
+               ViennaMath - Symbolic and Numerical Math in C++
+                             -----------------
 
-#define NDEBUG
-#define VIENNAFEMDEBUG
+   Author:     Karl Rupp                          rupp@iue.tuwien.ac.at
+
+   License:    MIT (X11), see file LICENSE in the ViennaMath base directory
+======================================================================= */
+
+
+// remove assert() statements and the like in order to get reasonable performance
+#ifndef NDEBUG
+  #define NDEBUG
+#endif
 
 #include <iostream>
 #include <vector>
@@ -8,12 +23,7 @@
 #include <assert.h>
 
 #include "viennafem/forwards.h"
-//#include "viennafem/mapping.hpp"
-#include "viennafem/cell_quan.hpp"
-#include "viennafem/transform.hpp"
-#include "viennafem/unknown_config.hpp"
-#include "viennafem/pde_assembler.hpp"
-#include "viennafem/weak_form.hpp"
+#include "viennafem/fem.hpp"
 #include "viennafem/io/vtk_writer.hpp"
 
 // ViennaGrid includes:
@@ -34,15 +44,12 @@
 #include "viennamath/manipulation/apply_coordinate_system.hpp"
 
 
+// Boost.uBLAS includes:
 #include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/ublas/triangular.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/operation.hpp>
 #include <boost/numeric/ublas/operation_sparse.hpp>
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/ublas/lu.hpp>
 
 
 //ViennaCL includes:
@@ -50,11 +57,6 @@
  #define VIENNACL_HAVE_UBLAS
 #endif
     
-#ifdef USE_OPENCL
-  #include "viennacl/matrix.hpp"
-  #include "viennacl/vector.hpp"
-#endif
-#include "viennacl/linalg/cg.hpp"
 #include "viennacl/linalg/bicgstab.hpp"
 #include "viennacl/linalg/norm_2.hpp"
 #include "viennacl/linalg/prod.hpp"
@@ -132,7 +134,9 @@ std::vector< rt_expr<InterfaceType> > stress_tensor(std::vector< rt_function_sym
   return result;
 }
 
-
+//
+// Provides the operation a : b, where a and b are tensors
+//
 template <typename InterfaceType>
 rt_expr<InterfaceType> tensor_reduce(std::vector< rt_expr<InterfaceType> > lhs, std::vector< rt_expr<InterfaceType> > rhs)
 {
@@ -145,46 +149,9 @@ rt_expr<InterfaceType> tensor_reduce(std::vector< rt_expr<InterfaceType> > lhs, 
 }
 
 
-//      
-// Solve system of linear equations:
 //
-template <typename MatrixType, typename VectorType>
-VectorType solve(MatrixType const & system_matrix,
-                 VectorType const & load_vector)
-{
-  typedef typename VectorType::value_type        numeric_type;
-  VectorType result(load_vector.size());
-  
-  std::cout << "* solve(): Solving linear system" << std::endl;
-
-#ifdef USE_OPENCL
-  viennacl::matrix<viennafem::numeric_type> vcl_matrix(load_vector.size(), load_vector.size());
-  viennacl::vector<viennafem::numeric_type> vcl_rhs(load_vector.size());
-  viennacl::vector<viennafem::numeric_type> vcl_result(load_vector.size());
-  
-  viennacl::copy(system_matrix, vcl_matrix);
-  viennacl::copy(load_vector, vcl_rhs);
-  
-  vcl_result = viennacl::linalg::solve(vcl_matrix, vcl_rhs, viennacl::linalg::cg_tag());
-  
-  viennacl::copy(vcl_result, result);
-#else
-  result = viennacl::linalg::solve(system_matrix, load_vector, viennacl::linalg::bicgstab_tag());
-  std::cout << "* solve(): Residual: " << norm_2(prod(system_matrix, result) - load_vector) << std::endl;
-#endif
-    
-  //std::cout << load_vector << std::endl;
-  
-  //print solution:
-  //std::cout << "Solution: ";
-  //for (size_t i=0; i<ublas_result.size(); ++i)
-  //  std::cout << ublas_result(i) << " ";
-  //std::cout << std::endl;
-  //std::cout << std::endl;
-
-  return result;
-}
-
+// Writes displacements to domain
+//
 template <typename DomainType, typename VectorType>
 void apply_displacements(DomainType & domain, VectorType const & result)
 {
@@ -306,16 +273,12 @@ int main()
       ++vit)
   {
     //boundary for first equation: Homogeneous Dirichlet everywhere
-    if (vit->point()[0] == 0.0 || vit->point()[0] == 1.0 
-      //|| vit->point()[1] == 0.0 || vit->point()[1] == 1.0 
-       )
-      viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = true;
-    else
-      viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = false;
+    if (vit->point()[0] == 0.0 || vit->point()[0] == 1.0)
+      viennafem::set_dirichlet_boundary(*vit, 0);
     
     if (vit->point()[0] == 1.0)
     {
-      viennadata::access<BoundaryKey, std::vector<double> >(BoundaryKey(0))(*vit) = bnd_data_right; //this is the boundary data
+      viennafem::set_dirichlet_boundary(*vit, bnd_data_right);
       viennadata::access<BoundaryKey, double>(BoundaryKey(0))(*vit) = bnd_data_right[0]; //this is for the moment used for the VTK writer
     }
   }
@@ -326,7 +289,7 @@ int main()
   viennafem::pde_assembler fem_assembler;
 
   //
-  // Solve system and write solution vector to pde_result:
+  // Assemble and solve system and write solution vector to pde_result:
   // (discussion about proper interface required. Introduce a pde_result class?)
   //
   fem_assembler(viennafem::make_linear_pde_system(weak_form_lame, 
@@ -339,12 +302,10 @@ int main()
                 system_matrix,
                 load_vector
                );
-  
-  //std::cout << system_matrix << std::endl;
-  //std::cout << load_vector << std::endl;
-  VectorType displacements = solve(system_matrix, load_vector);
-  //std::cout << displacements << std::endl;
 
+  VectorType displacements = viennacl::linalg::solve(system_matrix, load_vector, viennacl::linalg::bicgstab_tag());
+  std::cout << "* solve(): Residual: " << norm_2(prod(system_matrix, displacements) - load_vector) << std::endl;
+  
   apply_displacements(my_domain, displacements);
   viennafem::io::write_solution_to_VTK_file(displacements, "lame", my_domain, 0);
 

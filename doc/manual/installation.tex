@@ -24,7 +24,8 @@ the mailing list at \\
  \item {\ViennaData}~\cite{ViennaData}, version 1.0.1 or above. To make {\ViennaFEM} self-contained, a copy of the {\ViennaData} sources is available in the \lstinline|viennadata/| folder.
  \item {\ViennaGrid}~\cite{ViennaGrid}, version 1.0.0 or above. To make {\ViennaFEM} self-contained, a copy of the {\ViennaGrid} sources is available in the \lstinline|viennagrid/| folder.
  \item {\ViennaMath}~\cite{ViennaMath}, version 1.0.0 or above. To make {\ViennaFEM} self-contained, a copy of the {\ViennaMath} sources is available in the \lstinline|viennamath/| folder.
- \item {[}Optional{]} {\OpenCL}~\cite{khronoscl} for GPU-acceleration in {\ViennaCL}.
+ \item A recent version of the {\Boost} libraries \cite{boost} for Boost.uBLAS. Version 1.42 is known to work, but other versions should work as well.
+ %\item {[}Optional{]} {\OpenCL}~\cite{khronoscl} for GPU-acceleration in {\ViennaCL}.
  \item {[}Optional{]} {\CMake}~\cite{cmake} as build system for building the examples and the standalone executable.
 \end{itemize}
 
@@ -57,16 +58,17 @@ on your system. In the following, instructions on how to build the examples on d
 
 \begin{table}[tb]
 \begin{center}
-\begin{tabular}{l|p{8.5cm}}
+\begin{tabular}{l|p{9.5cm}}
 File & Purpose\\
 \hline
+\texttt{basic\_poisson.cpp}           & Demonstrates the symbolic math operations in the background when solving the Poisson equation \\
 \texttt{poisson\_1d.cpp}              & One-dimensional solution of the Poisson equation \\
 \texttt{poisson\_2d.cpp}              & Two-dimensional solution of the Poisson equation on a triangular grid\\
 \texttt{poisson\_2d\_rect.cpp}        & Two-dimensional solution of the Poisson equation on a rectangular grid\\
 \texttt{poisson\_3d.cpp}              & One-dimensional solution of the Poisson equation on a tetrahedral grid\\
 \texttt{poisson\_3d\_hex.cpp}         & One-dimensional solution of the Poisson equation on a hexahedral grid\\
-\texttt{sshape\_2d.cpp}               & Two-dimensional solution of the Poisson equation on a S-shaped triangular grid\\
-\texttt{sshape\_3d.cpp}               & Three-dimensional solution of the Poisson equation on a S-shaped tetrahedral grid\\
+\texttt{sshape\_2d.cpp}               & Two-dimensional solution of the Poisson equation on an S-shaped triangular grid\\
+\texttt{sshape\_3d.cpp}               & Three-dimensional solution of the Poisson equation on an S-shaped tetrahedral grid\\
 \end{tabular}
 \caption{Overview of the examples in the \texttt{examples/tutorial/} folder}
 \label{tab:tutorial-dependencies}
@@ -89,7 +91,7 @@ to obtain a Makefile and type
 \end{lstlisting}
 to build the examples. If desired, one can build each example separately instead:
 \begin{lstlisting}
- $> make poisson_1d       #builds the 'basic' tutorial
+ $> make poisson_1d       #builds the 'poisson_1d' tutorial
  $> make sshape_3d        #builds the 'sshape_3d' tutorial
 \end{lstlisting}
 

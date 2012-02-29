@@ -15,6 +15,7 @@
 ============================================================================ */
 
 #include <vector>
+#include <sstream>
 
 //ViennaFEM includes:
 #include "viennafem/forwards.h"
@@ -102,7 +103,9 @@ namespace viennafem
                                                           viennamath::rt_function_symbol<InterfaceType> unknown_1,
                                                           viennafem::linear_pde_options options_1)
   {
-    linear_pde_system<InterfaceType> ret("protocol.tex");
+    std::stringstream ss;
+    ss << "protocol_" << options_1.data_id() << ".tex";
+    linear_pde_system<InterfaceType> ret(ss.str());
     std::vector<viennamath::rt_function_symbol<InterfaceType> > unknown_vec_1(1);
     unknown_vec_1[0] = unknown_1;
     ret.add_pde(equ_1, unknown_vec_1, options_1);
@@ -115,10 +118,49 @@ namespace viennafem
                                                           std::vector<viennamath::rt_function_symbol<InterfaceType> > unknowns_1,
                                                           viennafem::linear_pde_options options_1)
   {
-    linear_pde_system<InterfaceType> ret("protocol.tex");
+    std::stringstream ss;
+    ss << "protocol_" << options_1.data_id() << ".tex";
+    linear_pde_system<InterfaceType> ret(ss.str());
     ret.add_pde(equ_1, unknowns_1, options_1);
     return ret;
   }
+  
+  
+  
+  /** @brief Convenience function for the generation of a linear PDE for a scalar-valued unknown. */
+  template <typename InterfaceType>
+  linear_pde_system<InterfaceType> make_linear_pde_system(viennamath::rt_equation<InterfaceType> equ_1,
+                                                          viennamath::rt_function_symbol<InterfaceType> unknown_1)
+  {
+    linear_pde_system<InterfaceType> ret("protocol_0.tex");
+    
+    linear_pde_options options;
+    options.data_id(0);
+    options.trial_space_id(viennafem::space_to_id<lagrange_tag<1> >::value);
+    options.test_space_id(viennafem::space_to_id<lagrange_tag<1> >::value);
+    
+    std::vector<viennamath::rt_function_symbol<InterfaceType> > unknown_vec_1(1);
+    unknown_vec_1[0] = unknown_1;
+    ret.add_pde(equ_1, unknown_vec_1, options);
+    return ret;
+  }
+  
+  /** @brief Convenience function for the generation of a linear PDE for a vector-valued unknown. */
+  template <typename InterfaceType>
+  linear_pde_system<InterfaceType> make_linear_pde_system(viennamath::rt_equation<InterfaceType> equ_1,
+                                                          std::vector<viennamath::rt_function_symbol<InterfaceType> > unknowns_1)
+  {
+    linear_pde_system<InterfaceType> ret("protocol_0.tex");
+    
+    linear_pde_options options;
+    options.data_id(0);
+    options.trial_space_id(viennafem::space_to_id<lagrange_tag<1> >::value);
+    options.test_space_id(viennafem::space_to_id<lagrange_tag<1> >::value);
+    
+    ret.add_pde(equ_1, unknowns_1, options);
+    return ret;
+  }
+  
   
 }
 #endif

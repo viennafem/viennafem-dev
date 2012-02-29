@@ -1,31 +1,27 @@
-/* ====================================================================================
-   Copyright (c) 2010, Institute for Microelectronics, Vienna University of Technology.
-   http://www.iue.tuwien.ac.at
-                                  -----------------
-               ViennaFEM - The Vienna Finite Element Method Library
-                                  -----------------
-                            
-   authors:    Karl Rupp                          rupp@iue.tuwien.ac.at
+/* =======================================================================
+   Copyright (c) 2012, Institute for Microelectronics,
+                       Institute for Analysis and Scientific Computing,
+                       TU Wien.
+                             -----------------
+               ViennaMath - Symbolic and Numerical Math in C++
+                             -----------------
 
-   license:    MIT (X11), see file LICENSE in the ViennaFEM base directory
-======================================================================================= */
+   Author:     Karl Rupp                          rupp@iue.tuwien.ac.at
+
+   License:    MIT (X11), see file LICENSE in the ViennaMath base directory
+======================================================================= */
+
 
 // include necessary system headers
 #include <iostream>
 
 // ViennaFEM includes:
-#include "viennafem/forwards.h"
-#include "viennafem/cell_quan.hpp"
-#include "viennafem/transform.hpp"
-#include "viennafem/unknown_config.hpp"
-#include "viennafem/pde_assembler.hpp"
-#include "viennafem/linear_pde_system.hpp"
-#include "viennafem/linear_pde_options.hpp"
+#include "viennafem/fem.hpp"
 #include "viennafem/io/vtk_writer.hpp"
 
 // ViennaGrid includes:
 #include "viennagrid/domain.hpp"
-#include <viennagrid/config/simplex.hpp>
+#include "viennagrid/config/simplex.hpp"
 #include "viennagrid/io/netgen_reader.hpp"
 #include "viennagrid/io/vtk_writer.hpp"
 
@@ -35,15 +31,13 @@
 // ViennaMath includes:
 #include "viennamath/expression.hpp"
 
+
+// Boost.uBLAS includes:
 #include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/ublas/triangular.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/operation.hpp>
 #include <boost/numeric/ublas/operation_sparse.hpp>
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/ublas/lu.hpp>
 
 
 //ViennaCL includes:
@@ -51,54 +45,10 @@
  #define VIENNACL_HAVE_UBLAS
 #endif
     
-#ifdef USE_OPENCL
-  #include "viennacl/matrix.hpp"
-  #include "viennacl/vector.hpp"
-#endif
 #include "viennacl/linalg/cg.hpp"
 #include "viennacl/linalg/norm_2.hpp"
 #include "viennacl/linalg/prod.hpp"
 
-
-//      
-// Solve system of linear equations:
-//
-template <typename MatrixType, typename VectorType>
-VectorType solve(MatrixType const & system_matrix,
-                 VectorType const & load_vector)
-{
-  typedef typename VectorType::value_type        numeric_type;
-  VectorType result(load_vector.size());
-  
-  std::cout << "* solve(): Solving linear system" << std::endl;
-
-#ifdef USE_OPENCL
-  viennacl::matrix<viennafem::numeric_type> vcl_matrix(load_vector.size(), load_vector.size());
-  viennacl::vector<viennafem::numeric_type> vcl_rhs(load_vector.size());
-  viennacl::vector<viennafem::numeric_type> vcl_result(load_vector.size());
-  
-  viennacl::copy(system_matrix, vcl_matrix);
-  viennacl::copy(load_vector, vcl_rhs);
-  
-  vcl_result = viennacl::linalg::solve(vcl_matrix, vcl_rhs, viennacl::linalg::cg_tag());
-  
-  viennacl::copy(vcl_result, result);
-#else
-  result = viennacl::linalg::solve(system_matrix, load_vector, viennacl::linalg::cg_tag());
-  std::cout << "* solve(): Residual: " << norm_2(prod(system_matrix, result) - load_vector) << std::endl;
-#endif
-    
-  //std::cout << load_vector << std::endl;
-  
-  //print solution:
-  //std::cout << "Solution: ";
-  //for (size_t i=0; i<ublas_result.size(); ++i)
-  //  std::cout << ublas_result(i) << " ";
-  //std::cout << std::endl;
-  //std::cout << std::endl;
-
-  return result;
-}
 
 
 
@@ -156,18 +106,16 @@ int main()
       vit != vertices.end();
       ++vit)
   {
-    //boundary for first equation: Homogeneous Dirichlet everywhere
-    if (vit->point()[0] == 0.0 || vit->point()[0] == 1.0 
-      || vit->point()[1] == 0.0 || vit->point()[1] == 1.0 )
-      viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = true;
-    else
-      viennadata::access<BoundaryKey, bool>(BoundaryKey(0))(*vit) = false;
+    // First equation: Homogeneous boundary conditions at x=0, x=1, y=0, or y=1
+    if ( (*vit)[0] == 0.0 || (*vit)[0] == 1.0 
+         || (*vit)[1] == 0.0 || (*vit)[1] == 1.0 ) 
+      viennafem::set_dirichlet_boundary(*vit, 0.0, 0);  //simulation with ID 0 uses homogeneous boundary data
     
-    //boundary for second equation: Homogeneous Dirichlet at (x == 0) and (x == 1)
-    if (vit->point()[0] == 0.0 || vit->point()[0] == 1.0 )
-      viennadata::access<BoundaryKey, bool>(BoundaryKey(1))(*vit) = true;
-    else
-      viennadata::access<BoundaryKey, bool>(BoundaryKey(1))(*vit) = false;
+    // Boundary for second equation (ID 1): 0 at left boundary, 1 at right boundary
+    if ( (*vit)[0] == 0.0)
+      viennafem::set_dirichlet_boundary(*vit, 0.0, 1);
+    else if ( (*vit)[0] == 1.0)
+      viennafem::set_dirichlet_boundary(*vit, 1.0, 1);
   }
   
   
@@ -203,18 +151,18 @@ int main()
                 load_vector_2
                );
   
-  //std::cout << poisson_config_1.load_vector() << std::endl;
-  
-  VectorType pde_result_1 = solve(system_matrix_1, load_vector_1);
-  VectorType pde_result_2 = solve(system_matrix_2, load_vector_2);
+  VectorType pde_result_1 = viennacl::linalg::solve(system_matrix_1, load_vector_1, viennacl::linalg::cg_tag());
+  std::cout << "* solve(): Residual: " << norm_2(prod(system_matrix_1, pde_result_1) - load_vector_1) << std::endl;
 
-  //std::cout << "RESULT" << std::endl;
-  //std::cout << pde_result_1 << std::endl;
+  VectorType pde_result_2 = viennacl::linalg::solve(system_matrix_2, load_vector_2, viennacl::linalg::cg_tag());
+  std::cout << "* solve(): Residual: " << norm_2(prod(system_matrix_2, pde_result_2) - load_vector_2) << std::endl;
+  
+  
   //
   // Writing solution back to domain (discussion about proper way of returning a solution required...)
   //
-  viennafem::io::write_solution_to_VTK_file(pde_result_1, "poisson_1", my_domain, 0);
-  viennafem::io::write_solution_to_VTK_file(pde_result_2, "poisson_2", my_domain, 1);
+  viennafem::io::write_solution_to_VTK_file(pde_result_1, "poisson_3d_1", my_domain, 0);
+  viennafem::io::write_solution_to_VTK_file(pde_result_2, "poisson_3d_2", my_domain, 1);
   
   std::cout << "*****************************************" << std::endl;
   std::cout << "* Poisson solver finished successfully! *" << std::endl;

@@ -1,31 +1,27 @@
-/* ====================================================================================
-   Copyright (c) 2010, Institute for Microelectronics, Vienna University of Technology.
-   http://www.iue.tuwien.ac.at
-                                  -----------------
-               ViennaFEM - The Vienna Finite Element Method Library
-                                  -----------------
-                            
-   authors:    Karl Rupp                          rupp@iue.tuwien.ac.at
+/* =======================================================================
+   Copyright (c) 2012, Institute for Microelectronics,
+                       Institute for Analysis and Scientific Computing,
+                       TU Wien.
+                             -----------------
+               ViennaMath - Symbolic and Numerical Math in C++
+                             -----------------
 
-   license:    MIT (X11), see file LICENSE in the ViennaFEM base directory
-======================================================================================= */
+   Author:     Karl Rupp                          rupp@iue.tuwien.ac.at
+
+   License:    MIT (X11), see file LICENSE in the ViennaMath base directory
+======================================================================= */
+
 
 // include necessary system headers
 #include <iostream>
 
 // ViennaFEM includes:
-#include "viennafem/forwards.h"
-#include "viennafem/cell_quan.hpp"
-#include "viennafem/transform.hpp"
-#include "viennafem/unknown_config.hpp"
-#include "viennafem/pde_assembler.hpp"
-#include "viennafem/linear_pde_system.hpp"
-#include "viennafem/linear_pde_options.hpp"
+#include "viennafem/fem.hpp"
 #include "viennafem/io/vtk_writer.hpp"
 
 // ViennaGrid includes:
 #include "viennagrid/domain.hpp"
-#include <viennagrid/config/simplex.hpp>
+#include "viennagrid/config/simplex.hpp"
 #include "viennagrid/io/netgen_reader.hpp"
 #include "viennagrid/io/vtk_writer.hpp"
 
@@ -34,6 +30,10 @@
 
 // ViennaMath includes:
 #include "viennamath/expression.hpp"
+
+/*
+ *   Tutorial: Demonstration of weak form manipulation inside ViennaFEM
+ */
 
 
 // A test key used later for storing a cell quantity
@@ -44,37 +44,15 @@ struct testkey
 
 int main()
 {
-  typedef viennagrid::config::triangular_2d                             ConfigType;
+  typedef viennagrid::config::triangular_2d                       ConfigType;
   typedef viennagrid::result_of::domain<ConfigType>::type         DomainType;
-
-  typedef viennagrid::result_of::ncell_range<DomainType, 0>::type    VertexContainer;
-  typedef viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
-  typedef viennagrid::result_of::ncell<ConfigType, 2>::type              CellType;
+  typedef viennagrid::result_of::ncell<ConfigType, 2>::type       CellType;
   
   typedef viennamath::function_symbol   FunctionSymbol;
   typedef viennamath::equation          Equation;
   
-  typedef viennafem::boundary_key      BoundaryKey;
-  
   //
-  // Create a domain from file
-  //
-  DomainType my_domain;
-
-  try
-  {
-    viennagrid::io::netgen_reader my_netgen_reader;
-    my_netgen_reader(my_domain, "../examples/data/square224.mesh");
-  }
-  catch (...)
-  {
-    std::cerr << "File-Reader failed. Aborting program..." << std::endl;
-    return EXIT_FAILURE;
-  }
-  
-  
-  //
-  // Specify two PDEs:
+  // Specify PDEs and derive weak form:
   //
   FunctionSymbol u(0, viennamath::unknown_tag<>());   //an unknown function used for PDE specification
   Equation equ_1 = viennamath::make_equation( viennamath::laplace(u), -1);

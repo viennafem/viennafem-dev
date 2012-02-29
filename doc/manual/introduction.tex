@@ -1,5 +1,42 @@
 
 \chapter*{Introduction}   \addcontentsline{toc}{chapter}{Introduction} \label{intro}
 
+A considerable amount of codes for the Finite Element Method (FEM) are freely available, e.g.~deal.ii \cite{deal.II}, Getfem++ \cite{Getfem++}, the FEniCS project \cite{FEniCS}, or Sundance \cite{Sundance}.
+In addition to different functionalities provided by the packages, e.g.~dimensionality of the simulation domain, supported set of basis functions, etc., different software design approaches are also persued. 
 
+The main driver for the development of {\ViennaFEM} is the observation that most packages do not preserve the weak formulation at source code level.
+Moreover, existing finite element software is often monolithic, making a reuse of components such as the grid handling for other purposes difficult or even impossible.
+This is particularly a concern in the engineering environment surrounding the author, where FEM is just one possible numerical method among many others.
+Therefore, it is not affordable to redevelop code that is a-priori not specific to FEM, for instance the grid handling.
 
+To preserve productivity, {\ViennaFEM} follows a library-centric approach: Components are kept separate to the largest extent possible, i.e.~they are developed as individual libraries.
+This separation is achieved by the use of template metaprogramming techniques \cite{Vandevoorde:CppTemplates} and generic C++ programming tricks \cite{Alexandrescu:ModernCpp}.
+
+\section*{What\ \ {\ViennaFEM}\ \ Currently Is}
+{\ViennaFEMversion} is still a proof-of-concept. In particular, it shows that a symbolic math kernel (\ViennaMath) can be combined with a grid handling library (\ViennaGrid) by a data storage abstraction library (\ViennaData) in such a way that each of these libraries can be developed separately and even be used in entirely different contexts.
+Thus, {\ViennaFEMversion} already supports:
+\begin{itemize}
+ \item Automatic derivation of the weak formulation for second-order PDEs
+ \item Dimension-independent programming (1d, 2d, 3d)
+ \item Multiple FEM runs on the same mesh for different equations and boundary conditions
+ \item Mesh refinement for simplex-cells
+ \item Support for graphics processing units in the linear solver step
+\end{itemize}
+Last, but not least, a unique feature of {\ViennaFEM} is the {\LaTeX} logger, which protocols all the high-level math carried out inside {\ViennaFEM} during the simulation run.
+
+\section*{What\ \ {\ViennaFEM}\ \ Is Not (Yet)}
+{\ViennaFEM} is certainly not the general answer to the numeral solution of second-order partial differential equations\footnote{Neither is '42'.}.
+
+The first release of {\ViennaFEM} cannot outnumber the features of other packages, which have been developed for more than a decade already.
+A roadmap of features scheduled for the next releases is as follows:
+\begin{itemize}
+ \item Compiletime calculation of element matrices
+ \item Arbitrary-order basis functions from different families
+ \item Inhomogeneous Neumann boundary conditions
+ \item Automatic time-discretization for time-dependent problems 
+ \item Automatic linearization of nonlinear problems
+ \item Automatic deduction of error estimators
+ \item Better support for coupled systems
+\end{itemize}
+Several of these planned features are only possible thanks to preserving the weak formulation in code.
+The library-centric design of {\ViennaFEM} emphasizing well-defined interfaces between the different libraries is expected to aid in reaching these goals with shorter overall development effort compared to monolithic approaches.

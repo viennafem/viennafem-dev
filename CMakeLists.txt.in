@@ -1,0 +1,41 @@
+PROJECT(ViennaFEM)
+
+cmake_minimum_required(VERSION 2.6)
+
+#if you don't want the full compiler output, remove the following line
+#SET(CMAKE_VERBOSE_MAKEFILE ON)
+
+#specify custom boost path if needed:
+#SET(BOOSTPATH "/opt/boost")
+#SET(BOOSTPATH "C:/Program\ Files\ (x86)/boost/boost_1_42")
+
+# alternate boost path for macs
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+   INCLUDE_DIRECTORIES("/opt/local/include") 
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
+
+#specify include and source directory
+INCLUDE_DIRECTORIES(".")
+INCLUDE_DIRECTORIES(${BOOSTPATH})
+
+#add definitions, compiler switches, etc.
+IF(DEFINED CMAKE_BUILD_TYPE)
+ SET (CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+ELSE()
+ SET (CMAKE_BUILD_TYPE Release)
+ENDIF()
+
+#list all source files here
+ADD_EXECUTABLE(basic_poisson examples/tutorial/basic_poisson.cpp)
+ADD_EXECUTABLE(poisson_1d examples/tutorial/poisson_1d.cpp)
+ADD_EXECUTABLE(poisson_2d examples/tutorial/poisson_2d.cpp)
+ADD_EXECUTABLE(poisson_2d_rect examples/tutorial/poisson_2d_rect.cpp)
+ADD_EXECUTABLE(poisson_cellquan_2d examples/tutorial/poisson_cellquan_2d.cpp)
+ADD_EXECUTABLE(poisson_3d examples/tutorial/poisson_3d.cpp)
+ADD_EXECUTABLE(poisson_3d_hex examples/tutorial/poisson_3d_hex.cpp)
+ADD_EXECUTABLE(lame_3d_hex examples/tutorial/lame_3d_hex.cpp)
+ADD_EXECUTABLE(lame_3d examples/tutorial/lame_3d.cpp)
+ADD_EXECUTABLE(sshape_2d examples/tutorial/sshape_2d.cpp)
+ADD_EXECUTABLE(sshape_3d examples/tutorial/sshape_3d.cpp)
+ADD_EXECUTABLE(weak_forms examples/tutorial/weak_forms.cpp)
