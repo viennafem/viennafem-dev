@@ -1,17 +1,18 @@
-/* ====================================================================================
-   Copyright (c) 2010, Institute for Microelectronics, Vienna University of Technology.
-   http://www.iue.tuwien.ac.at
-                                  -----------------
-               ViennaFEM - The Vienna Finite Element Method Library
-                                  -----------------
-                            
-   authors:    Karl Rupp                          rupp@iue.tuwien.ac.at
-
-   license:    MIT (X11), see file LICENSE in the ViennaFEM base directory
-======================================================================================= */
-
 #ifndef VIENNAFEM_QUADRATURE_TRIANGLE_HPP
 #define VIENNAFEM_QUADRATURE_TRIANGLE_HPP
+
+/* =========================================================================
+   Copyright (c) 2012, Institute for Microelectronics,
+                       Institute for Analysis and Scientific Computing,
+                       TU Wien.
+                             -----------------
+               ViennaFEM - The Vienna Finite Element Method Library
+                             -----------------
+
+   Author:     Karl Rupp                          rupp@iue.tuwien.ac.at
+
+   License:    MIT (X11), see file LICENSE in the ViennaFEM base directory
+============================================================================ */
 
 #include "viennafem/forwards.h"
 #include "viennafem/cell_quan.hpp"
@@ -26,6 +27,10 @@
 #include "viennagrid/topology/triangle.hpp"
 #include "viennagrid/topology/tetrahedron.hpp"
 
+/** @file   viennafem/quadrature/triangle.hpp
+    @brief  Provides quadrature rules for triangles
+*/
+
 namespace viennafem
 {
   
@@ -34,6 +39,7 @@ namespace viennafem
   // Exact for polynomials up to order 1
   //
   //
+  /** @brief Gaussian quadrature rule exact for polynomials up to order 1 */
   template <typename InterfaceType>
   class rt_gauss_quad_element <viennafem::unit_triangle, 1, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
@@ -68,6 +74,10 @@ namespace viennafem
   // Exact for polynomials up to degree 2
   //
   //
+  /** @brief Quadrature rule exact for polynomials up to order two (cf. Strang, Fix: An Analysis of the Finite Element Method) 
+   * 
+   *  Also have a look at the datasets by J. Burkardt at http://people.sc.fsu.edu/~jburkardt/datasets/datasets.html
+   */
   template <typename InterfaceType>
   class rt_strang_quad_element <viennafem::unit_triangle, 2, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
@@ -104,6 +114,10 @@ namespace viennafem
   // Exact for polynomials up to degree 3
   //
   //
+  /** @brief Quadrature rule exact for polynomials up to order three (cf. Strang, Fix: An Analysis of the Finite Element Method) 
+   * 
+   *  Also have a look at the datasets by J. Burkardt at http://people.sc.fsu.edu/~jburkardt/datasets/datasets.html
+   */
   template <typename InterfaceType>
   class rt_strang_quad_element <viennafem::unit_triangle, 3, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
@@ -154,6 +168,10 @@ namespace viennafem
   // Exact for polynomials up to degree 4
   //
   //
+  /** @brief Quadrature rule exact for polynomials up to order four (cf. Strang, Fix: An Analysis of the Finite Element Method) 
+   * 
+   *  Also have a look at the datasets by J. Burkardt at http://people.sc.fsu.edu/~jburkardt/datasets/datasets.html
+   */
   template <typename InterfaceType>
   class rt_strang_quad_element <viennafem::unit_triangle, 4, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
@@ -203,6 +221,10 @@ namespace viennafem
   // Exact for polynomials up to degree 5
   //
   //
+  /** @brief Quadrature rule exact for polynomials up to order five (cf. Strang, Fix: An Analysis of the Finite Element Method) 
+   * 
+   *  Also have a look at the datasets by J. Burkardt at http://people.sc.fsu.edu/~jburkardt/datasets/datasets.html
+   */
   template <typename InterfaceType>
   class rt_strang_quad_element <viennafem::unit_triangle, 5, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
@@ -254,6 +276,10 @@ namespace viennafem
   // Exact for polynomials up to degree 6
   //
   //
+  /** @brief Quadrature rule exact for polynomials up to order six (cf. Strang, Fix: An Analysis of the Finite Element Method) 
+   * 
+   *  Also have a look at the datasets by J. Burkardt at http://people.sc.fsu.edu/~jburkardt/datasets/datasets.html
+   */
   template <typename InterfaceType>
   class rt_strang_quad_element <viennafem::unit_triangle, 6, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
@@ -309,6 +335,10 @@ namespace viennafem
   // Exact for polynomials up to degree 7:
   //
   //
+  /** @brief Gauss quadrature rule exact for polynomials up to order seven 
+   * 
+   *  Also have a look at the datasets by J. Burkardt at http://people.sc.fsu.edu/~jburkardt/datasets/datasets.html
+   */
   template <typename InterfaceType>
   class rt_gauss_quad_element <viennafem::unit_triangle, 7, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
@@ -374,6 +404,10 @@ namespace viennafem
   };
   
   
+  /** @brief Quadrature rule exact for polynomials up to order seven (cf. Strang, Fix: An Analysis of the Finite Element Method) 
+   * 
+   *  Also have a look at the datasets by J. Burkardt at http://people.sc.fsu.edu/~jburkardt/datasets/datasets.html
+   */
   template <typename InterfaceType>
   class rt_strang_quad_element <viennafem::unit_triangle, 7, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
@@ -444,6 +478,7 @@ namespace viennafem
   //
 
   // TOMS algorithm #706
+  /** @brief Quadrature rule exact for polynomials up to order 13 (TOMS algorithm 706) */
   template <typename InterfaceType>
   class rt_strang_quad_element <viennafem::unit_triangle, 13, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {

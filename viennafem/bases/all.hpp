@@ -1,17 +1,18 @@
-/* ====================================================================================
-   Copyright (c) 2010, Institute for Microelectronics, Vienna University of Technology.
-   http://www.iue.tuwien.ac.at
-                                  -----------------
-               ViennaFEM - The Vienna Finite Element Method Library
-                                  -----------------
-                            
-   authors:    Karl Rupp                          rupp@iue.tuwien.ac.at
-
-   license:    MIT (X11), see file LICENSE in the ViennaFEM base directory
-======================================================================================= */
-
 #ifndef VIENNAFEM_BASES_ALL_HPP
 #define VIENNAFEM_BASES_ALL_HPP
+
+/* =========================================================================
+   Copyright (c) 2012, Institute for Microelectronics,
+                       Institute for Analysis and Scientific Computing,
+                       TU Wien.
+                             -----------------
+               ViennaFEM - The Vienna Finite Element Method Library
+                             -----------------
+
+   Author:     Karl Rupp                          rupp@iue.tuwien.ac.at
+
+   License:    MIT (X11), see file LICENSE in the ViennaFEM base directory
+============================================================================ */
 
 #include "viennafem/forwards.h"
 
@@ -23,9 +24,14 @@
 #include "viennafem/bases/hexahedron.hpp"
 #include "viennafem/bases/tetrahedron.hpp"
 
+/** @file   viennafem/bases/all.hpp
+    @brief  Provides a factory which returns the respective basis functions on the reference cell.
+*/
+
 namespace viennafem
 {
 
+  /** @brief Runtime dispatcher class: Translates the runtime space_id to a compiletime basis tag */
   template <typename InterfaceType,
             typename BasisTag = viennafem::none>
   struct basis_factory 
@@ -50,7 +56,7 @@ namespace viennafem
     
   };
   
-  
+  /** @brief Returns the Lagrange basis of order 1 ('linear FEM') */
   template <typename InterfaceType>
   struct basis_factory <InterfaceType, lagrange_tag<1> >
   {
@@ -66,14 +72,14 @@ namespace viennafem
       return ret;
     }
     
-    static std::vector<expression_type> get(viennafem::unit_quadrilateral)
+    static std::vector<expression_type> get(viennafem::unit_square)
     {
       std::vector<expression_type> ret;
       ret.reserve(4);
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_quadrilateral, 0, 0>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_quadrilateral, 0, 1>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_quadrilateral, 0, 2>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_quadrilateral, 0, 3>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_square, 0, 0>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_square, 0, 1>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_square, 0, 2>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_square, 0, 3>::get() );
       
       return ret;
     }
@@ -89,19 +95,19 @@ namespace viennafem
       return ret;
     }
 
-    static std::vector<expression_type> get(viennafem::unit_hexahedron)
+    static std::vector<expression_type> get(viennafem::unit_cube)
     {
       std::vector<expression_type> ret;
       ret.reserve(8);
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 0>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 1>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 2>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 3>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 0, 0>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 0, 1>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 0, 2>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 0, 3>::get() );
 
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 4>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 5>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 6>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 7>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 0, 4>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 0, 5>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 0, 6>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 0, 7>::get() );
       
       return ret;
     }
@@ -124,6 +130,7 @@ namespace viennafem
   //
   // quadratic
   //
+  /** @brief Returns the Lagrange basis of order 2 ('quadratic FEM')  */
   template <typename InterfaceType>
   struct basis_factory <InterfaceType, lagrange_tag<2> >
   {
@@ -141,19 +148,19 @@ namespace viennafem
       return ret;
     }
     
-    static std::vector<expression_type> get(viennafem::unit_quadrilateral)
+    static std::vector<expression_type> get(viennafem::unit_square)
     {
       std::vector<expression_type> ret;
       ret.reserve(8);
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_quadrilateral, 0, 0>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_quadrilateral, 0, 1>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_quadrilateral, 0, 2>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_quadrilateral, 0, 3>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_square, 0, 0>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_square, 0, 1>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_square, 0, 2>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_square, 0, 3>::get() );
 
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_quadrilateral, 1, 0>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_quadrilateral, 1, 1>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_quadrilateral, 1, 2>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_quadrilateral, 1, 3>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_square, 1, 0>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_square, 1, 1>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_square, 1, 2>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_square, 1, 3>::get() );
       
       return ret;
     }
@@ -173,35 +180,35 @@ namespace viennafem
       return ret;
     }
 
-    static std::vector<expression_type> get(viennafem::unit_hexahedron)
+    static std::vector<expression_type> get(viennafem::unit_cube)
     {
       std::vector<expression_type> ret;
       ret.reserve(20);
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 0>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 1>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 2>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 3>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 0, 0>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 0, 1>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 0, 2>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 0, 3>::get() );
 
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 4>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 5>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 6>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 0, 7>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 0, 4>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 0, 5>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 0, 6>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 0, 7>::get() );
 
       //edges:
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 1, 0>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 1, 1>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 1, 2>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 1, 3>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 1, 0>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 1, 1>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 1, 2>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 1, 3>::get() );
 
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 1, 4>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 1, 5>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 1, 6>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 1, 7>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 1, 4>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 1, 5>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 1, 6>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 1, 7>::get() );
 
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 1,  8>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 1,  9>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 1, 10>::get() );
-      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_hexahedron, 1, 11>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 1,  8>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 1,  9>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 1, 10>::get() );
+      ret.push_back( local_basis<InterfaceType, basis_tag, viennafem::unit_cube, 1, 11>::get() );
       
       return ret;
     }
@@ -231,6 +238,7 @@ namespace viennafem
   //
   // cubic
   //
+  /** @brief Returns the Lagrange basis of order three ('cubic FEM') */
   template <typename InterfaceType>
   struct basis_factory <InterfaceType, lagrange_tag<3> >
   {

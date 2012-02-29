@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "viennafem/typelist.h"
 #include "viennafem/forwards.h"
 //#include "viennafem/mapping.hpp"
 #include "viennafem/cell_quan.hpp"

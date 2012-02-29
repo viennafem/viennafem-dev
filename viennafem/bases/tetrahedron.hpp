@@ -1,17 +1,18 @@
-/* ====================================================================================
-   Copyright (c) 2010, Institute for Microelectronics, Vienna University of Technology.
-   http://www.iue.tuwien.ac.at
-                                  -----------------
-               ViennaFEM - The Vienna Finite Element Method Library
-                                  -----------------
-                            
-   authors:    Karl Rupp                          rupp@iue.tuwien.ac.at
-
-   license:    MIT (X11), see file LICENSE in the ViennaFEM base directory
-======================================================================================= */
-
 #ifndef VIENNAFEM_BASES_TETRAHEDRON_HPP
 #define VIENNAFEM_BASES_TETRAHEDRON_HPP
+
+/* =========================================================================
+   Copyright (c) 2012, Institute for Microelectronics,
+                       Institute for Analysis and Scientific Computing,
+                       TU Wien.
+                             -----------------
+               ViennaFEM - The Vienna Finite Element Method Library
+                             -----------------
+
+   Author:     Karl Rupp                          rupp@iue.tuwien.ac.at
+
+   License:    MIT (X11), see file LICENSE in the ViennaFEM base directory
+============================================================================ */
 
 #include <vector>
 #include "viennagrid/topology/triangle.hpp"
@@ -19,6 +20,10 @@
 #include "viennagrid/forwards.h"
 #include "viennamath/expression.hpp"
 #include "viennafem/forwards.h"
+
+/** @file   viennafem/bases/tetrahedron.hpp
+    @brief  Defines the various basis functions for tetrahedra.
+*/
 
 namespace viennafem
 {
@@ -30,6 +35,7 @@ namespace viennafem
   
   
   // Vertex basis:
+  /** @brief Returns the first (linear) vertex basis function */
   template <typename InterfaceType, std::size_t order>
   struct local_basis <InterfaceType,
                       viennafem::lagrange_tag<order>,
@@ -51,6 +57,7 @@ namespace viennafem
     static expression_type get() { return expression_type(type()); }
   };
 
+  /** @brief Returns the second (linear) vertex basis function */
   template <typename InterfaceType, std::size_t order>
   struct local_basis <InterfaceType,
                       viennafem::lagrange_tag<order>,
@@ -66,6 +73,7 @@ namespace viennafem
   };
 
   
+  /** @brief Returns the third (linear) vertex basis function */
   template <typename InterfaceType, std::size_t order>
   struct local_basis <InterfaceType,
                       viennafem::lagrange_tag<order>,
@@ -80,6 +88,7 @@ namespace viennafem
     static expression_type get() { return expression_type(type()); }
   };
   
+  /** @brief Returns the forth (linear) vertex basis function */
   template <typename InterfaceType, std::size_t order>
   struct local_basis <InterfaceType,
                       viennafem::lagrange_tag<order>,
@@ -98,6 +107,7 @@ namespace viennafem
   //
   // quadratic
   //
+  /** @brief Returns the first (quadratic) edge basis function */
   template <typename InterfaceType>
   struct local_basis <InterfaceType,
                       viennafem::lagrange_tag<2>,
@@ -129,6 +139,7 @@ namespace viennafem
     static expression_type get() { return expression_type(type()); }
   };
 
+  /** @brief Returns the second (quadratic) edge basis function */
   template <typename InterfaceType>
   struct local_basis <InterfaceType,
                       viennafem::lagrange_tag<2>,
@@ -160,6 +171,7 @@ namespace viennafem
     static expression_type get() { return expression_type(type()); }
   };
   
+  /** @brief Returns the third (quadratic) edge basis function */
   template <typename InterfaceType>
   struct local_basis <InterfaceType,
                       viennafem::lagrange_tag<2>,
@@ -191,6 +203,7 @@ namespace viennafem
     static expression_type get() { return expression_type(type()); }
   };
   
+  /** @brief Returns the forth (quadratic) edge basis function */
   template <typename InterfaceType>
   struct local_basis <InterfaceType,
                       viennafem::lagrange_tag<2>,
@@ -222,6 +235,7 @@ namespace viennafem
     static expression_type get() { return expression_type(type()); }
   };
   
+  /** @brief Returns the fifth (quadratic) edge basis function */
   template <typename InterfaceType>
   struct local_basis <InterfaceType,
                       viennafem::lagrange_tag<2>,
@@ -253,6 +267,7 @@ namespace viennafem
     static expression_type get() { return expression_type(type()); }
   };
   
+  /** @brief Returns the sixth (quadratic) edge basis function */
   template <typename InterfaceType>
   struct local_basis <InterfaceType,
                       viennafem::lagrange_tag<2>,

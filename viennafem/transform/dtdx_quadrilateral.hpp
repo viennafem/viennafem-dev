@@ -1,17 +1,18 @@
-/* ====================================================================================
-   Copyright (c) 2010, Institute for Microelectronics, Vienna University of Technology.
-   http://www.iue.tuwien.ac.at
-                                  -----------------
-               ViennaFEM - The Vienna Finite Element Method Library
-                                  -----------------
-                            
-   authors:    Karl Rupp                          rupp@iue.tuwien.ac.at
-
-   license:    MIT (X11), see file LICENSE in the ViennaFEM base directory
-======================================================================================= */
-
 #ifndef VIENNAFEM_TRANSFORM_QUADRILATERAL_HPP
 #define VIENNAFEM_TRANSFORM_QUADRILATERAL_HPP
+
+/* =========================================================================
+   Copyright (c) 2012, Institute for Microelectronics,
+                       Institute for Analysis and Scientific Computing,
+                       TU Wien.
+                             -----------------
+               ViennaFEM - The Vienna Finite Element Method Library
+                             -----------------
+
+   Author:     Karl Rupp                          rupp@iue.tuwien.ac.at
+
+   License:    MIT (X11), see file LICENSE in the ViennaFEM base directory
+============================================================================ */
 
 #include <iostream>
 #include <utility>
@@ -21,11 +22,15 @@
 #include "viennafem/forwards.h"
 #include "viennamath/manipulation/simplify.hpp"
 
+/** @file    dtdx_quadrilateral.hpp
+    @brief   Provides the transformation coefficients of an arbitrary quadrilateral to the unit square
+*/
+
 namespace viennafem
 {
 
   template <>
-  struct dt_dx_handler<viennafem::unit_quadrilateral>
+  struct dt_dx_handler<viennafem::unit_square>
   {
     public:
       

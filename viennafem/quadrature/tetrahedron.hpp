@@ -1,17 +1,18 @@
-/* ====================================================================================
-   Copyright (c) 2010, Institute for Microelectronics, Vienna University of Technology.
-   http://www.iue.tuwien.ac.at
-                                  -----------------
-               ViennaFEM - The Vienna Finite Element Method Library
-                                  -----------------
-                            
-   authors:    Karl Rupp                          rupp@iue.tuwien.ac.at
-
-   license:    MIT (X11), see file LICENSE in the ViennaFEM base directory
-======================================================================================= */
-
 #ifndef VIENNAFEM_QUADRATURE_TETRAHEDRON_HPP
 #define VIENNAFEM_QUADRATURE_TETRAHEDRON_HPP
+
+/* =========================================================================
+   Copyright (c) 2012, Institute for Microelectronics,
+                       Institute for Analysis and Scientific Computing,
+                       TU Wien.
+                             -----------------
+               ViennaFEM - The Vienna Finite Element Method Library
+                             -----------------
+
+   Author:     Karl Rupp                          rupp@iue.tuwien.ac.at
+
+   License:    MIT (X11), see file LICENSE in the ViennaFEM base directory
+============================================================================ */
 
 #include "viennafem/forwards.h"
 #include "viennafem/cell_quan.hpp"
@@ -26,6 +27,10 @@
 #include "viennagrid/topology/triangle.hpp"
 #include "viennagrid/topology/tetrahedron.hpp"
 
+/** @file   viennafem/quadrature/tetrahedron.hpp
+    @brief  Provides quadrature rules for tetrahedra
+*/
+
 namespace viennafem
 {
   
@@ -38,6 +43,7 @@ namespace viennafem
   // Exact for polynomials up to order 1
   //
   //
+  /** @brief Gaussian quadrature rule exact for polynomials up to order 1 */
   template <typename InterfaceType>
   class rt_gauss_quad_element <viennafem::unit_tetrahedron, 1, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
@@ -72,7 +78,10 @@ namespace viennafem
   // Exact for polynomials up to degree 2
   //
   //
-  /** @brief Keast rule, exact for polynomials up to degree 2. */
+  /** @brief Keast rule, exact for polynomials up to degree 2.
+   * 
+   *  Also have a look at the datasets by J. Burkardt at http://people.sc.fsu.edu/~jburkardt/datasets/datasets.html
+   */
   template <typename InterfaceType>
   class rt_keast_quad_element <viennafem::unit_tetrahedron, 2, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
@@ -114,7 +123,10 @@ namespace viennafem
   //
   //
   
-  /** @brief Keast rule, exact for polynomials up to degree 3. Uses a negative weight, thus be careful with numerical stability! */
+  /** @brief Keast rule, exact for polynomials up to degree 3. Uses a negative weight, thus be careful with numerical stability!
+   * 
+   *  Also have a look at the datasets by J. Burkardt at http://people.sc.fsu.edu/~jburkardt/datasets/datasets.html
+   */
   template <typename InterfaceType>
   class rt_keast_quad_element <viennafem::unit_tetrahedron, 3, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
@@ -158,65 +170,6 @@ namespace viennafem
   
 
   
-  //  
-  //
-  // Exact for polynomials up to degree 4:
-  //
-  //
-  
-  /** @brief Keast rule, exact for polynomials up to degree 3. */
-  /*template <typename InterfaceType>
-  class rt_keast_quad_element <viennagrid::tetrahedron_tag, 3, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
-  {
-      typedef typename InterfaceType::numeric_type         NumericT;
-      typedef rt_keast_quad_element <viennagrid::tetrahedron_tag, 3, InterfaceType>  self_type;
-      typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
-    public:
-      enum { num_points = 10 };
-      
-      explicit rt_keast_quad_element() : abscissas_(num_points, std::vector<numeric_type>(3)),  weights_(num_points)
-      {
-        abscissas_[0][0] = 0.5684305841968444; abscissas_[0][1] = 0.1438564719343852; abscissas_[0][2] = 0.1438564719343852;
-        abscissas_[1][0] = 0.1438564719343852; abscissas_[1][1] = 0.1438564719343852; abscissas_[1][2] = 0.1438564719343852;
-        abscissas_[2][0] = 0.1438564719343852; abscissas_[2][1] = 0.1438564719343852; abscissas_[2][2] = 0.5684305841968444;
-        abscissas_[3][0] = 0.1438564719343852; abscissas_[3][1] = 0.5684305841968444; abscissas_[3][2] = 0.1438564719343852;
-        
-        abscissas_[4][0] = 0.0; abscissas_[4][1] = 0.5; abscissas_[4][2] = 0.5;
-        abscissas_[5][0] = 0.5; abscissas_[5][1] = 0.0; abscissas_[5][2] = 0.5;
-        abscissas_[6][0] = 0.5; abscissas_[6][1] = 0.5; abscissas_[6][2] = 0.0;
-        abscissas_[7][0] = 0.5; abscissas_[7][1] = 0.0; abscissas_[7][2] = 0.0;
-        abscissas_[8][0] = 0.0; abscissas_[8][1] = 0.5; abscissas_[8][2] = 0.0;
-        abscissas_[9][0] = 0.0; abscissas_[9][1] = 0.0; abscissas_[9][2] = 0.5;
-        
-        weights_[0] = 0.2177650698804054;
-        weights_[1] = 0.2177650698804054;
-        weights_[2] = 0.2177650698804054;
-        weights_[3] = 0.2177650698804054;
-        weights_[4] = 0.0214899534130631;
-        weights_[5] = 0.0214899534130631;
-        weights_[6] = 0.0214899534130631;
-        weights_[7] = 0.0214899534130631;
-        weights_[8] = 0.0214899534130631;
-        weights_[9] = 0.0214899534130631;
-      }
-      
-      BaseType * clone() const { return new self_type(); }
-      
-      NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
-                    viennamath::rt_expr<InterfaceType> const & e,
-                    viennamath::rt_variable<InterfaceType> const & var) const
-      {
-        NumericT result = 0;
-        for (std::size_t i=0; i<num_points; ++i)
-          result += weights_[i] * viennamath::eval(e, abscissas_[i]);
-        return result / 6.0;
-      }
-      
-    private:
-      std::vector<std::vector<NumericT> > abscissas_;
-      std::vector<NumericT> weights_;
-  }; */
-  
 
   //  
   //
@@ -224,7 +177,10 @@ namespace viennafem
   //
   //
   
-  /** @brief Keast rule, exact for polynomials up to degree 4. */
+  /** @brief Keast rule, exact for polynomials up to degree 4.
+   * 
+   *  Also have a look at the datasets by J. Burkardt at http://people.sc.fsu.edu/~jburkardt/datasets/datasets.html
+   */
   template <typename InterfaceType>
   class rt_keast_quad_element <viennafem::unit_tetrahedron, 4, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
@@ -295,7 +251,10 @@ namespace viennafem
   //
   //
   
-  /** @brief Keast rule, exact for polynomials up to degree 5. */
+  /** @brief Keast rule, exact for polynomials up to degree 5. 
+   * 
+   *  Also have a look at the datasets by J. Burkardt at http://people.sc.fsu.edu/~jburkardt/datasets/datasets.html
+   */
   template <typename InterfaceType>
   class rt_keast_quad_element <viennafem::unit_tetrahedron, 5, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
@@ -369,7 +328,10 @@ namespace viennafem
   //
   //
   
-  /** @brief Keast rule, exact for polynomials up to degree 6. */
+  /** @brief Keast rule, exact for polynomials up to degree 6.
+   * 
+   *  Also have a look at the datasets by J. Burkardt at http://people.sc.fsu.edu/~jburkardt/datasets/datasets.html
+   */
   template <typename InterfaceType>
   class rt_keast_quad_element <viennafem::unit_tetrahedron, 6, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {

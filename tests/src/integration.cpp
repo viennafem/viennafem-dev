@@ -17,7 +17,6 @@
 // ViennaFEM includes:
 //#include "viennafem/afftrans.hpp"
 //#include "viennafem/dtdx_tetrahedron.h"
-#include "viennafem/typelist.h"
 #include "viennafem/forwards.h"
 //#include "viennafem/assembling.hpp"
 //#include "viennafem/mapping.hpp"
@@ -221,10 +220,10 @@ void fill_integration_rules<viennafem::unit_interval>(std::vector<viennamath::nu
 
 
 template <>
-void fill_integration_rules<viennafem::unit_quadrilateral>(std::vector<viennamath::numerical_quadrature> & integrators,
+void fill_integration_rules<viennafem::unit_square>(std::vector<viennamath::numerical_quadrature> & integrators,
                                                            std::vector<std::string> & names)
 {
-  typedef viennafem::unit_quadrilateral  CellTag;
+  typedef viennafem::unit_square  CellTag;
   
   integrators.push_back(viennamath::numerical_quadrature(new viennafem::rt_gauss_quad_element<CellTag, 1>()));
   names.push_back("Gauss, exact up to degree 1");
@@ -238,10 +237,10 @@ void fill_integration_rules<viennafem::unit_quadrilateral>(std::vector<viennamat
 }
 
 template <>
-void fill_integration_rules<viennafem::unit_hexahedron>(std::vector<viennamath::numerical_quadrature> & integrators,
+void fill_integration_rules<viennafem::unit_cube>(std::vector<viennamath::numerical_quadrature> & integrators,
                                                         std::vector<std::string> & names)
 {
-  typedef viennafem::unit_hexahedron  CellTag;
+  typedef viennafem::unit_cube  CellTag;
   
   integrators.push_back(viennamath::numerical_quadrature(new viennafem::rt_gauss_quad_element<CellTag, 1>()));
   names.push_back("Gauss, exact up to degree 1");
@@ -367,10 +366,10 @@ int main()
   if (test<viennafem::unit_tetrahedron>(e_3d) != EXIT_SUCCESS)
     return EXIT_FAILURE;
   std::cout << "---- Quadrilateral ---" << std::endl;
-  if (test<viennafem::unit_quadrilateral>(e_2d) != EXIT_SUCCESS)
+  if (test<viennafem::unit_square>(e_2d) != EXIT_SUCCESS)
     return EXIT_FAILURE;
   std::cout << "---- Hexahedron ---" << std::endl;
-  if (test<viennafem::unit_hexahedron>(e_3d) != EXIT_SUCCESS)
+  if (test<viennafem::unit_cube>(e_3d) != EXIT_SUCCESS)
     return EXIT_FAILURE;
   
   std::cout << "******************************************" << std::endl;

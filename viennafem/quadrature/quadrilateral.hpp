@@ -1,17 +1,18 @@
-/* ====================================================================================
-   Copyright (c) 2010, Institute for Microelectronics, Vienna University of Technology.
-   http://www.iue.tuwien.ac.at
-                                  -----------------
-               ViennaFEM - The Vienna Finite Element Method Library
-                                  -----------------
-                            
-   authors:    Karl Rupp                          rupp@iue.tuwien.ac.at
-
-   license:    MIT (X11), see file LICENSE in the ViennaFEM base directory
-======================================================================================= */
-
 #ifndef VIENNAFEM_QUADRATURE_QUADRILATERAL_HPP
 #define VIENNAFEM_QUADRATURE_QUADRILATERAL_HPP
+
+/* =========================================================================
+   Copyright (c) 2012, Institute for Microelectronics,
+                       Institute for Analysis and Scientific Computing,
+                       TU Wien.
+                             -----------------
+               ViennaFEM - The Vienna Finite Element Method Library
+                             -----------------
+
+   Author:     Karl Rupp                          rupp@iue.tuwien.ac.at
+
+   License:    MIT (X11), see file LICENSE in the ViennaFEM base directory
+============================================================================ */
 
 #include "viennafem/forwards.h"
 #include "viennafem/cell_quan.hpp"
@@ -25,6 +26,10 @@
 
 #include "viennagrid/topology/triangle.hpp"
 #include "viennagrid/topology/tetrahedron.hpp"
+
+/** @file   viennafem/quadrature/quadrilateral.hpp
+    @brief  Provides quadrature rules for quadrilaterals
+*/
 
 namespace viennafem
 {
@@ -45,12 +50,13 @@ namespace viennafem
   // Exact for polynomials up to order 1
   //
   //
+  /** @brief Gaussian quadrature rule exact for polynomials up to order 1 */
   template <typename InterfaceType>
-  class rt_gauss_quad_element <viennafem::unit_quadrilateral, 1, InterfaceType> 
+  class rt_gauss_quad_element <viennafem::unit_square, 1, InterfaceType> 
    : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
-      typedef rt_gauss_quad_element <viennafem::unit_quadrilateral, 1, InterfaceType>  self_type;
+      typedef rt_gauss_quad_element <viennafem::unit_square, 1, InterfaceType>  self_type;
       typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
       enum { num_points = 1 };
@@ -80,12 +86,13 @@ namespace viennafem
   // Exact for polynomials up to order 3
   //
   //
+  /** @brief Gaussian quadrature rule exact for polynomials up to order 3 */
   template <typename InterfaceType>
-  class rt_gauss_quad_element <viennafem::unit_quadrilateral, 3, InterfaceType> 
+  class rt_gauss_quad_element <viennafem::unit_square, 3, InterfaceType> 
    : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
-      typedef rt_gauss_quad_element <viennafem::unit_quadrilateral, 3, InterfaceType>  self_type;
+      typedef rt_gauss_quad_element <viennafem::unit_square, 3, InterfaceType>  self_type;
       typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
       enum { num_points = 4 };
@@ -120,12 +127,13 @@ namespace viennafem
   // Exact for polynomials up to order 5
   //
   //
+  /** @brief Gaussian quadrature rule exact for polynomials up to order 5 */
   template <typename InterfaceType>
-  class rt_gauss_quad_element <viennafem::unit_quadrilateral, 5, InterfaceType> 
+  class rt_gauss_quad_element <viennafem::unit_square, 5, InterfaceType> 
    : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
-      typedef rt_gauss_quad_element <viennafem::unit_quadrilateral, 5, InterfaceType>  self_type;
+      typedef rt_gauss_quad_element <viennafem::unit_square, 5, InterfaceType>  self_type;
       typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
       enum { num_points = 9 };
@@ -179,21 +187,22 @@ namespace viennafem
   //
   // Quadrature rule generator
   //
+  /** @brief Convenience function returning the best (i.e. most economical) quadrature rule for a given polynomial order */
   template <typename InterfaceType>
-  viennamath::numerical_quadrature quadrature_for_reference_cell(viennafem::unit_quadrilateral const &,
+  viennamath::numerical_quadrature quadrature_for_reference_cell(viennafem::unit_square const &,
                                                                  std::size_t order)
   {
     switch (order)
     {
-      case 1: return viennamath::numerical_quadrature(new rt_gauss_quad_element <viennafem::unit_quadrilateral, 1, InterfaceType>());
+      case 1: return viennamath::numerical_quadrature(new rt_gauss_quad_element <viennafem::unit_square, 1, InterfaceType>());
       case 2:
-      case 3: return viennamath::numerical_quadrature(new rt_gauss_quad_element <viennafem::unit_quadrilateral, 3, InterfaceType>());
+      case 3: return viennamath::numerical_quadrature(new rt_gauss_quad_element <viennafem::unit_square, 3, InterfaceType>());
       case 4:
-      case 5: return viennamath::numerical_quadrature(new rt_gauss_quad_element <viennafem::unit_quadrilateral, 5, InterfaceType>());
+      case 5: return viennamath::numerical_quadrature(new rt_gauss_quad_element <viennafem::unit_square, 5, InterfaceType>());
     }
     
     std::cout << "Cannot find quadrature rule for order " << order << " - fallback to order 5." << std::endl;
-    return viennamath::numerical_quadrature(new rt_gauss_quad_element <viennafem::unit_quadrilateral, 5, InterfaceType>());
+    return viennamath::numerical_quadrature(new rt_gauss_quad_element <viennafem::unit_square, 5, InterfaceType>());
   }
   
 }

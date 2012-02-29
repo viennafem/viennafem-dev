@@ -1,17 +1,18 @@
-/* ====================================================================================
-   Copyright (c) 2010, Institute for Microelectronics, Vienna University of Technology.
-   http://www.iue.tuwien.ac.at
-                                  -----------------
-               ViennaFEM - The Vienna Finite Element Method Library
-                                  -----------------
-                            
-   authors:    Karl Rupp                          rupp@iue.tuwien.ac.at
-
-   license:    MIT (X11), see file LICENSE in the ViennaFEM base directory
-======================================================================================= */
-
 #ifndef VIENNAFEM_QUADRATURE_LINE_HPP
 #define VIENNAFEM_QUADRATURE_LINE_HPP
+
+/* =========================================================================
+   Copyright (c) 2012, Institute for Microelectronics,
+                       Institute for Analysis and Scientific Computing,
+                       TU Wien.
+                             -----------------
+               ViennaFEM - The Vienna Finite Element Method Library
+                             -----------------
+
+   Author:     Karl Rupp                          rupp@iue.tuwien.ac.at
+
+   License:    MIT (X11), see file LICENSE in the ViennaFEM base directory
+============================================================================ */
 
 #include "viennafem/forwards.h"
 #include "viennafem/cell_quan.hpp"
@@ -26,6 +27,10 @@
 #include "viennagrid/topology/triangle.hpp"
 #include "viennagrid/topology/tetrahedron.hpp"
 
+/** @file   viennafem/quadrature/line.hpp
+    @brief  Provides quadrature rules for lines
+*/
+
 namespace viennafem
 {
   
@@ -34,6 +39,7 @@ namespace viennafem
   // Exact for polynomials up to order 1
   //
   //
+  /** @brief Gaussian quadrature rule exact for polynomials up to order 1 */
   template <typename InterfaceType>
   class rt_gauss_quad_element <viennafem::unit_interval, 1, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
@@ -67,6 +73,7 @@ namespace viennafem
   // Exact for polynomials up to degree 3:
   //
   //
+  /** @brief Gaussian quadrature rule exact for polynomials up to order 3 */
   template <typename InterfaceType>
   class rt_gauss_quad_element <viennafem::unit_interval, 3, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
@@ -93,6 +100,7 @@ namespace viennafem
   // Exact for polynomials up to degree 5:
   //
   //
+  /** @brief Gaussian quadrature rule exact for polynomials up to order 5 */
   template <typename InterfaceType>
   class rt_gauss_quad_element <viennafem::unit_interval, 5, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {

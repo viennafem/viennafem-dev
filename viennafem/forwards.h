@@ -79,13 +79,14 @@ namespace viennafem
   // Reference elements
   //
   
-  /** @brief A tag representing the interval [-1,1]. Particularly useful for higher-order FEM. */
-  struct symmetric_interval {};
-
   /** @brief A tag for the unit interval [0,1].
    *
    * Some families of basis functions can be defined in a more compact manner here than on [-1,1]. */
   struct unit_interval {};
+
+  /** @brief A tag representing the interval [-1,1]. Particularly useful for higher-order FEM. */
+  struct symmetric_interval {};
+
 
   
   /** @brief A tag for the triangle with vertices (0,0), (1,0), (0,1).
@@ -101,19 +102,20 @@ namespace viennafem
   struct symmetric_triangle {};
 
   
-  /** @brief A tag for the quadrilateral with vertices at (0,0), (1,0), (0,1), (1,1)
+  /** @brief A tag for the square with vertices at (0,0), (1,0), (0,1), (1,1)
    * 
    * Often used in the engineering community for first and second order FEM.
    */
-  struct unit_quadrilateral {};
+  struct unit_square {};
   
-  /** @brief A tag for the quadrilateral with vertices at (-1,-1), (1, -1), (-1, 1), (1, 1)
+  /** @brief A tag for the square with vertices at (-1,-1), (1, -1), (-1, 1), (1, 1)
    * 
    * Allows for a construction of high-order FEM in a very natural way out of [-1,1].
    */
-  struct symmetric_quadrilateral {};
+  struct symmetric_square {};
   
   
+    
   /** @brief A tag for the tetrahedron with vertices at (0,0,0), (1,0,0), (0,1,0), (0,0,1)
    * 
    * Commonly used for simple form functions of first or second order. 
@@ -127,17 +129,17 @@ namespace viennafem
   struct symmetric_tetrahedron {};
   
   
-  /** @brief A tag for the hexahedron with vertices at (0,0,0), (1,0,0), (0,1,0), (1,1,0), (0,0,1), (1,0,1), (0,1,1), (1,1,1)
+  /** @brief A tag for the cube with vertices at (0,0,0), (1,0,0), (0,1,0), (1,1,0), (0,0,1), (1,0,1), (0,1,1), (1,1,1)
    * 
    * Commonly used for low-order form functions
    */
-  struct unit_hexahedron {};
+  struct unit_cube {};
   
-  /** @brief A tag for the hexahedron with vertices at (-1,-1,-1), (1,-1,-1), (-1,1,-1), (1,1,-1), (-1,-1,1), (1,-1,1), (-1,1,1), (1,1,1)
+  /** @brief A tag for the cube with vertices at (-1,-1,-1), (1,-1,-1), (-1,1,-1), (1,1,-1), (-1,-1,1), (1,-1,1), (-1,1,1), (1,1,1)
    * 
    * Used for high-order FEM, since basis functions can be constructed more easily out of [-1,1].
    */
-  struct symmetric_hexahedron {};
+  struct symmetric_cube {};
   
   
   //
@@ -167,40 +169,53 @@ namespace viennafem
   template <typename Cell, typename T>
   struct reference_cell_for_basis {};
   
+  /** @brief Defining the unit interval to be used for the Lagrange basis on lines */
   template <std::size_t order>
   struct reference_cell_for_basis < viennagrid::line_tag, lagrange_tag<order> >
   {
     typedef unit_interval   type;
   };
 
+  /** @brief Defining the unit interval to be used for the Lagrange basis on lines */
   template <std::size_t order>
   struct reference_cell_for_basis < viennagrid::triangle_tag, lagrange_tag<order> >
   {
     typedef unit_triangle   type;
   };
 
+  /** @brief Defining the unit interval to be used for the Lagrange basis on lines */
   template <std::size_t order>
   struct reference_cell_for_basis < viennagrid::quadrilateral_tag, lagrange_tag<order> >
   {
-    typedef unit_quadrilateral   type;
+    typedef unit_square   type;
   };
 
   
+  /** @brief Defining the unit tetrahedron to be used for the Lagrange basis on lines */
   template <std::size_t order>
   struct reference_cell_for_basis < viennagrid::tetrahedron_tag, lagrange_tag<order> >
   {
     typedef unit_tetrahedron   type;
   };
   
+  /** @brief Defining the unit cube to be used for the Lagrange basis on lines */
   template <std::size_t order>
   struct reference_cell_for_basis < viennagrid::hexahedron_tag, lagrange_tag<order> >
   {
-    typedef unit_hexahedron   type;
+    typedef unit_cube   type;
   };
   
 
   
   // Basis function retrieval:
+  /** @brief Facility for retrieving the local basis of a cell. Used internally only.
+   *
+   *  @tparam InterfaceType     Runtime interface type of ViennaMath expressions
+   *  @tparam BasisTag          A tag identifying the basis
+   *  @tparam ReferenceCell     The reference element used for the basis
+   *  @tparam TopologyDim       Topological dimension of the the element for which the basis function should be retrieved
+   *  @tparam ElementID         The ID of the topological element on the reference cell
+   */
   template <typename InterfaceType,
             typename BasisTag,
             typename ReferenceCell,
@@ -213,20 +228,12 @@ namespace viennafem
   
   
   
-  
-  
-  //Integration domain:
-  struct Omega {};
-  
-  template <long id>
-  struct Gamma {};
-  
-  
-  
+  /** @brief A tag class used for storing and accessing the partial derivatives of the element mappings */
   template <unsigned long local_index,
             unsigned long global_index>
   struct dt_dx_key {};
   
+  /** @brief Convenience overload for converting a det_dF_dt_key to a string and streaming it to an output-stream */
   template <unsigned long local_index,
             unsigned long global_index>
   std::ostream & operator<<(std::ostream & stream,
@@ -237,20 +244,22 @@ namespace viennafem
   }
 
 
+  /** @brief A tag class used for storing and accessing the Jacobian determinant via ViennaData on ViennaGrid objects */
   struct det_dF_dt_key {};
   
-  std::ostream & operator<<(std::ostream & stream, det_dF_dt_key const & dummy)
+  /** @brief Convenience overload for converting a det_dF_dt_key to a string and streaming it to an output-stream */
+  inline std::ostream & operator<<(std::ostream & stream, det_dF_dt_key const & dummy)
   {
     stream << "det_dF_dt_key";
     return stream;
   }
   
-  
+  /** @brief The main facility for computing transformations from the reference element to the physical element   */
   template <typename CellTag>
   struct dt_dx_handler;
   
 
-  // define a key and configure viennadata to use a type-based dispatch:
+  /** @brief A tag class used for storing and accessing boundary data via ViennaData from ViennaGrid objects */
   class boundary_key 
   {
     public:
@@ -261,7 +270,9 @@ namespace viennafem
     private:
       long id_;
   };
+
   
+  /** @brief A tag class used for storing and accessing unknown indices (global basisfunction numbers) via ViennaData from ViennaGrid objects */
   class mapping_key
   {
     public:
@@ -272,16 +283,25 @@ namespace viennafem
     private:
       long id_;
   };
-
   
+  /** @brief Contains implementation details of ViennaFEM not intended to be used by the library user directly. */
+  namespace detail {}
+  
+  /** @brief Provides input and output routines for Finite Element related quantities. Refer to viennagrid::io for details on entirely mesh-related input-output functionality */
+  namespace io {}
 
-}
+} // namespace viennafem
 
-/** @brief Contains the configuration of ViennaData for type-based dispatch on boundary_key, mapping_key, dt_dx and det_F: */
+
+
+
+/** @brief Contains the configuration of ViennaData  */
 namespace viennadata
 {
+  /** @brief Contains the configuration of ViennaData  */
   namespace config
   {
+    /** @brief Customizes ViennaData to access element transformation coefficients by a key-based dispatch. */
     template <unsigned long local_index,
               unsigned long global_index>
     struct key_dispatch<viennafem::dt_dx_key<local_index,
@@ -291,96 +311,126 @@ namespace viennadata
       typedef type_key_dispatch_tag    tag;
     };
     
+    /** @brief Customizes ViennaData to access the Jacobian of the element transformation by a key-based dispatch. */
     template <>
     struct key_dispatch<viennafem::det_dF_dt_key>
     {
       typedef type_key_dispatch_tag    tag;
     };
     
-    //
-    // tell ViennaData to use the get_id() member for vertices as identification mechanism
-    //
+    
+    ////////////// Object identification
+    
+    /** @brief Customizes ViennaData such that the id() member of vertices is used as identification mechanism */
     template <typename ConfigType>
     struct object_identifier<viennagrid::element_t<ConfigType, viennagrid::point_tag> >
     {
       typedef object_provided_id    tag;
-      typedef size_t                id_type;
+      typedef std::size_t           id_type;
 
-      static size_t get(viennagrid::element_t<ConfigType, viennagrid::point_tag> const & obj) { return obj.id(); }
+      static id_type get(viennagrid::element_t<ConfigType, viennagrid::point_tag> const & obj) { return obj.id(); }
     };
 
-    /*template <typename ConfigType>
-    struct object_identifier<viennagrid::element_t<ConfigType, viennagrid::quadrilateral_tag> >
+    /** @brief Customizes ViennaData such that the id() member of lines is used as identification mechanism */
+    template <typename ConfigType>
+    struct object_identifier<viennagrid::element_t<ConfigType, viennagrid::line_tag> >
     {
       typedef object_provided_id    tag;
-      typedef size_t                id_type;
+      typedef std::size_t           id_type;
 
-      static size_t get(viennagrid::element_t<ConfigType, viennagrid::quadrilateral_tag> const & obj) { return obj.id(); }
+      static id_type get(viennagrid::element_t<ConfigType, viennagrid::line_tag> const & obj) { return obj.id(); }
     };
+    
 
+    /** @brief Customizes ViennaData such that the id() member of triangles is used as identification mechanism */
     template <typename ConfigType>
     struct object_identifier<viennagrid::element_t<ConfigType, viennagrid::triangle_tag> >
     {
       typedef object_provided_id    tag;
-      typedef size_t                id_type;
+      typedef std::size_t           id_type;
 
-      static size_t get(viennagrid::element_t<ConfigType, viennagrid::triangle_tag> const & obj) { return obj.id(); }
-    }; */
+      static id_type get(viennagrid::element_t<ConfigType, viennagrid::triangle_tag> const & obj) { return obj.id(); }
+    };
+    
+    /** @brief Customizes ViennaData such that the id() member of quadrilaterals is used as identification mechanism */
+    template <typename ConfigType>
+    struct object_identifier<viennagrid::element_t<ConfigType, viennagrid::quadrilateral_tag> >
+    {
+      typedef object_provided_id    tag;
+      typedef std::size_t           id_type;
 
+      static id_type get(viennagrid::element_t<ConfigType, viennagrid::quadrilateral_tag> const & obj) { return obj.id(); }
+    };
+    
+
+    /** @brief Customizes ViennaData such that the id() member of hexahedra is used as identification mechanism */
     template <typename ConfigType>
     struct object_identifier<viennagrid::element_t<ConfigType, viennagrid::hexahedron_tag> >
     {
       typedef object_provided_id    tag;
-      typedef size_t                id_type;
+      typedef std::size_t           id_type;
 
-      static size_t get(viennagrid::element_t<ConfigType, viennagrid::hexahedron_tag> const & obj) { return obj.id(); }
+      static id_type get(viennagrid::element_t<ConfigType, viennagrid::hexahedron_tag> const & obj) { return obj.id(); }
     };
 
+    /** @brief Customizes ViennaData such that the id() member of tetrahedra is used as identification mechanism */
     template <typename ConfigType>
     struct object_identifier<viennagrid::element_t<ConfigType, viennagrid::tetrahedron_tag> >
     {
       typedef object_provided_id    tag;
-      typedef size_t                id_type;
+      typedef std::size_t           id_type;
 
-      static size_t get(viennagrid::element_t<ConfigType, viennagrid::tetrahedron_tag> const & obj) { return obj.id(); }
+      static id_type get(viennagrid::element_t<ConfigType, viennagrid::tetrahedron_tag> const & obj) { return obj.id(); }
     };
     
     
-    //
-    // store data densely, no matter which key type is used:
-    //
+    ///////// dense storage:
+    
+    
+    /** @brief Configures ViennaData such that data is stored densely on vertices, no matter which key type is used. */
     template <typename KeyType, typename ValueType, typename ConfigType>
     struct storage<KeyType, ValueType, viennagrid::element_t<ConfigType, viennagrid::point_tag> >
     {
       typedef dense_data_tag    tag;
     };
 
-    /*template <typename KeyType, typename ValueType, typename ConfigType>
+    /** @brief Configures ViennaData such that data is stored densely on lines, no matter which key type is used. */
+    template <typename KeyType, typename ValueType, typename ConfigType>
+    struct storage<KeyType, ValueType, viennagrid::element_t<ConfigType, viennagrid::line_tag> >
+    {
+      typedef dense_data_tag    tag;
+    };
+    
+    /** @brief Configures ViennaData such that data is stored densely on quadrilaterals, no matter which key type is used. */
+    template <typename KeyType, typename ValueType, typename ConfigType>
     struct storage<KeyType, ValueType, viennagrid::element_t<ConfigType, viennagrid::quadrilateral_tag> >
     {
       typedef dense_data_tag    tag;
     };
 
+    /** @brief Configures ViennaData such that data is stored densely on triangles, no matter which key type is used. */
     template <typename KeyType, typename ValueType, typename ConfigType>
     struct storage<KeyType, ValueType, viennagrid::element_t<ConfigType, viennagrid::triangle_tag> >
     {
       typedef dense_data_tag    tag;
-    };*/
+    };
 
+    /** @brief Configures ViennaData such that data is stored densely on hexahedra, no matter which key type is used. */
     template <typename KeyType, typename ValueType, typename ConfigType>
     struct storage<KeyType, ValueType, viennagrid::element_t<ConfigType, viennagrid::hexahedron_tag> >
     {
       typedef dense_data_tag    tag;
     };
 
+    /** @brief Configures ViennaData such that data is stored densely on tetrahedra, no matter which key type is used. */
     template <typename KeyType, typename ValueType, typename ConfigType>
     struct storage<KeyType, ValueType, viennagrid::element_t<ConfigType, viennagrid::tetrahedron_tag> >
     {
       typedef dense_data_tag    tag;
     };
     
-  }
-}
+  } //namespace config
+} //namespace viennadata
 
 
 #endif

@@ -16,7 +16,6 @@
 // ViennaFEM includes:
 //#include "viennafem/afftrans.hpp"
 //#include "viennafem/dtdx_tetrahedron.h"
-#include "viennafem/typelist.h"
 #include "viennafem/forwards.h"
 //#include "viennafem/assembling.hpp"
 //#include "viennafem/mapping.hpp"

@@ -17,12 +17,7 @@
 
 
 // ViennaFEM includes:
-//#include "viennafem/afftrans.hpp"
-//#include "viennafem/dtdx_tetrahedron.h"
-#include "viennafem/typelist.h"
 #include "viennafem/forwards.h"
-//#include "viennafem/assembling.hpp"
-//#include "viennafem/mapping.hpp"
 #include "viennafem/cell_quan.hpp"
 #include "viennafem/transform.hpp"
 #include "viennafem/unknown_config.hpp"

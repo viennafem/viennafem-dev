@@ -1,17 +1,18 @@
-/* ====================================================================================
-   Copyright (c) 2010, Institute for Microelectronics, Vienna University of Technology.
-   http://www.iue.tuwien.ac.at
-                                  -----------------
-               ViennaFEM - The Vienna Finite Element Method Library
-                                  -----------------
-                            
-   authors:    Karl Rupp                          rupp@iue.tuwien.ac.at
-
-   license:    MIT (X11), see file LICENSE in the ViennaFEM base directory
-======================================================================================= */
-
 #ifndef VIENNAFEM_LINEAR_PDE_SYSTEM_HPP
 #define VIENNAFEM_LINEAR_PDE_SYSTEM_HPP
+
+/* =========================================================================
+   Copyright (c) 2012, Institute for Microelectronics,
+                       Institute for Analysis and Scientific Computing,
+                       TU Wien.
+                             -----------------
+               ViennaFEM - The Vienna Finite Element Method Library
+                             -----------------
+
+   Author:     Karl Rupp                          rupp@iue.tuwien.ac.at
+
+   License:    MIT (X11), see file LICENSE in the ViennaFEM base directory
+============================================================================ */
 
 #include <vector>
 
@@ -36,8 +37,19 @@
 //ViennaGrid includes:
 #include "viennagrid/domain.hpp"
 
+
+/** @file   linear_pde_system.hpp
+    @brief  A class collecting properties of a linear PDE system.
+*/
+
 namespace viennafem
 {
+  /** @brief Representation of a linear system of partial differential equations.
+   * 
+   * @tparam InterfaceType    The ViennaMath runtime expression interface class
+   * @tparam MappingKeyType   Type of the ViennaData key used for storing mapping indices
+   * @tparam BoundaryKeyType  Type of the ViennaData key used for storing boundary values
+   */
   template <typename InterfaceType = viennamath::rt_expression_interface<viennamath::default_numeric_type>, 
             typename MappingKeyType  = viennafem::mapping_key, 
             typename BoundaryKeyType = viennafem::boundary_key >
@@ -75,7 +87,7 @@ namespace viennafem
       
       std::size_t size() const { return pdes_.size(); }
       
-      logger_type & logger() const { return logger_; }
+      logger_type & logger() const { return logger_; }  //TODO: Logger should move to some other place
       
     private:
       std::vector<viennamath::rt_equation<InterfaceType> >                       pdes_;
@@ -84,7 +96,7 @@ namespace viennafem
       mutable logger_type                                                        logger_;
   };
   
-  
+  /** @brief Convenience function for the generation of a linear PDE for a scalar-valued unknown. */
   template <typename InterfaceType>
   linear_pde_system<InterfaceType> make_linear_pde_system(viennamath::rt_equation<InterfaceType> equ_1,
                                                           viennamath::rt_function_symbol<InterfaceType> unknown_1,
@@ -97,6 +109,7 @@ namespace viennafem
     return ret;
   }
   
+  /** @brief Convenience function for the generation of a linear PDE for a vector-valued unknown. */
   template <typename InterfaceType>
   linear_pde_system<InterfaceType> make_linear_pde_system(viennamath::rt_equation<InterfaceType> equ_1,
                                                           std::vector<viennamath::rt_function_symbol<InterfaceType> > unknowns_1,

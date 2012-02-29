@@ -14,12 +14,7 @@
 #include <iostream>
 
 // ViennaFEM includes:
-//#include "viennafem/afftrans.hpp"
-//#include "viennafem/dtdx_tetrahedron.h"
-#include "viennafem/typelist.h"
 #include "viennafem/forwards.h"
-//#include "viennafem/assembling.hpp"
-//#include "viennafem/mapping.hpp"
 #include "viennafem/cell_quan.hpp"
 #include "viennafem/transform.hpp"
 #include "viennafem/unknown_config.hpp"
@@ -41,6 +36,7 @@
 #include "viennamath/expression.hpp"
 
 
+// A test key used later for storing a cell quantity
 struct testkey 
 {
   bool operator<(testkey const & other) const { return false; }

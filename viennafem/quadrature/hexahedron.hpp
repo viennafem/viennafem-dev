@@ -1,17 +1,18 @@
-/* ====================================================================================
-   Copyright (c) 2010, Institute for Microelectronics, Vienna University of Technology.
-   http://www.iue.tuwien.ac.at
-                                  -----------------
-               ViennaFEM - The Vienna Finite Element Method Library
-                                  -----------------
-                            
-   authors:    Karl Rupp                          rupp@iue.tuwien.ac.at
-
-   license:    MIT (X11), see file LICENSE in the ViennaFEM base directory
-======================================================================================= */
-
 #ifndef VIENNAFEM_QUADRATURE_HEXAHEDRON_HPP
 #define VIENNAFEM_QUADRATURE_HEXAHEDRON_HPP
+
+/* =========================================================================
+   Copyright (c) 2012, Institute for Microelectronics,
+                       Institute for Analysis and Scientific Computing,
+                       TU Wien.
+                             -----------------
+               ViennaFEM - The Vienna Finite Element Method Library
+                             -----------------
+
+   Author:     Karl Rupp                          rupp@iue.tuwien.ac.at
+
+   License:    MIT (X11), see file LICENSE in the ViennaFEM base directory
+============================================================================ */
 
 #include "viennafem/forwards.h"
 #include "viennafem/cell_quan.hpp"
@@ -26,6 +27,10 @@
 #include "viennagrid/topology/triangle.hpp"
 #include "viennagrid/topology/tetrahedron.hpp"
 
+/** @file   viennafem/quadrature/hexahedron.hpp
+    @brief  Provides quadrature rules for hexahedra
+*/
+
 namespace viennafem
 {
   
@@ -34,11 +39,12 @@ namespace viennafem
   // Exact for polynomials up to order 1
   //
   //
+  /** @brief Gaussian quadrature rule exact for polynomials up to order 1 */
   template <typename InterfaceType>
-  class rt_gauss_quad_element <viennafem::unit_hexahedron, 1, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
+  class rt_gauss_quad_element <viennafem::unit_cube, 1, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
-      typedef rt_gauss_quad_element <viennafem::unit_hexahedron, 1, InterfaceType>  self_type;
+      typedef rt_gauss_quad_element <viennafem::unit_cube, 1, InterfaceType>  self_type;
       typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
       explicit rt_gauss_quad_element() : p_(3)
@@ -78,11 +84,12 @@ namespace viennafem
   //
   //
   
+  /** @brief Gaussian quadrature rule exact for polynomials up to order 3 */
   template <typename InterfaceType>
-  class rt_gauss_quad_element <viennafem::unit_hexahedron, 3, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
+  class rt_gauss_quad_element <viennafem::unit_cube, 3, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
-      typedef rt_gauss_quad_element <viennafem::unit_hexahedron, 3, InterfaceType>  self_type;
+      typedef rt_gauss_quad_element <viennafem::unit_cube, 3, InterfaceType>  self_type;
       typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
       enum { num_points = 8 };
@@ -121,11 +128,12 @@ namespace viennafem
   // Exact for polynomials up to order 5
   //
   //
+  /** @brief Gaussian quadrature rule exact for polynomials up to order 5 */
   template <typename InterfaceType>
-  class rt_gauss_quad_element <viennafem::unit_hexahedron, 5, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
+  class rt_gauss_quad_element <viennafem::unit_cube, 5, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type         NumericT;
-      typedef rt_gauss_quad_element <viennafem::unit_hexahedron, 5, InterfaceType>  self_type;
+      typedef rt_gauss_quad_element <viennafem::unit_cube, 5, InterfaceType>  self_type;
       typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
       enum { num_points = 27 };
