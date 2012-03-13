@@ -371,13 +371,13 @@ namespace viennafem
       // off at the right page border ... 
       //
       //log << "\\begin{align}\n";
-      log << "\\newline$\n";
+      log << "\\newline\\newline$\n";
       for (typename EquationArray::const_iterator it = weak_form.begin();
                                                   it != weak_form.end();
                                                 ++it)
         log << log.translator()(*it) << " \\  . \n";
       //log << "\\end{align}\n";
-      log << "$\\newline\n";    
+      log << "$\\newline\\newline\n";    
     
       
       //
