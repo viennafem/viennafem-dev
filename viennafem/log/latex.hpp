@@ -367,12 +367,17 @@ namespace viennafem
       log.translator().customize(v1, "\\tilde{v}_1");
       log.translator().customize(v2, "\\tilde{v}_2");        
       
-      log << "\\begin{align}\n";
+      // [JW] switched to $ math expressions, otherwise the equation is cut 
+      // off at the right page border ... 
+      //
+      //log << "\\begin{align}\n";
+      log << "\\newline$\n";
       for (typename EquationArray::const_iterator it = weak_form.begin();
                                                   it != weak_form.end();
                                                 ++it)
         log << log.translator()(*it) << " \\  . \n";
-      log << "\\end{align}\n";
+      //log << "\\end{align}\n";
+      log << "$\\newline\n";    
     
       
       //
