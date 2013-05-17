@@ -90,14 +90,14 @@ namespace viennafem
         return "";
       }
        
-      bool customize(InterfaceType const * e, std::string const & str)
+      bool customize(InterfaceType const * /*e*/, std::string const & /*str*/)
       {
         return false;
       }
       
     private:
 
-      std::string process_impl(CellQuanType const & e, bool use_parenthesis, viennamath::rt_latex_translator<InterfaceType> const & translator) const 
+      std::string process_impl(CellQuanType const & e, bool /*use_parenthesis*/, viennamath::rt_latex_translator<InterfaceType> const & /*translator*/) const 
       {
         typedef viennamath::expr      ExpressionType;
         

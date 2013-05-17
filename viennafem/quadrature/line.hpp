@@ -51,9 +51,9 @@ namespace viennafem
       
       BaseType * clone() const { return new self_type(); }
       
-      NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
+      NumericT eval(viennamath::rt_interval<InterfaceType> const & /*interv*/,
                     viennamath::rt_expr<InterfaceType> const & e,
-                    viennamath::rt_variable<InterfaceType> const & var) const
+                    viennamath::rt_variable<InterfaceType> const & /*var*/) const
       {
         return viennamath::eval(e, 0.5);  //Note: reference line is [0,1] here.
       }
@@ -84,9 +84,9 @@ namespace viennafem
       
       BaseType * clone() const { return new self_type(); }
       
-      NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
+      NumericT eval(viennamath::rt_interval<InterfaceType> const & /*interv*/,
                     viennamath::rt_expr<InterfaceType> const & e,
-                    viennamath::rt_variable<InterfaceType> const & var) const
+                    viennamath::rt_variable<InterfaceType> const & /*var*/) const
       {
         return 0.5 * (  viennamath::eval(e, 0.7886751345948125) 
                       + viennamath::eval(e, 0.2113248654051875));  //Note: reference line is [0,1] here.
@@ -111,9 +111,9 @@ namespace viennafem
       
       BaseType * clone() const { return new self_type(); }
       
-      NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
+      NumericT eval(viennamath::rt_interval<InterfaceType> const & /*interv*/,
                     viennamath::rt_expr<InterfaceType> const & e,
-                    viennamath::rt_variable<InterfaceType> const & var) const
+                    viennamath::rt_variable<InterfaceType> const & /*var*/) const
       {
         return (  5.0 * viennamath::eval(e, 0.11270166537925829786) 
                 + 8.0 * viennamath::eval(e, 0.5)

@@ -248,7 +248,7 @@ namespace viennafem
   struct det_dF_dt_key {};
   
   /** @brief Convenience overload for converting a det_dF_dt_key to a string and streaming it to an output-stream */
-  inline std::ostream & operator<<(std::ostream & stream, det_dF_dt_key const & dummy)
+  inline std::ostream & operator<<(std::ostream & stream, det_dF_dt_key const & /*dummy*/)
   {
     stream << "det_dF_dt_key";
     return stream;

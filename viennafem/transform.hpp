@@ -164,7 +164,7 @@ namespace viennafem
     /** @brief Transforms a weak formulation given in physical space to the reference cell. Also transforms derivatives where appropriate. Implementation for the 1d-case.*/
     template <typename CellType, typename EquationType, typename PDESystemType, typename ReferenceCellTag>
     EquationType transform_to_reference_cell_1d(EquationType const & weak_form,
-                                                PDESystemType const & pde_system,
+                                                PDESystemType const & /*pde_system*/,
                                                 ReferenceCellTag)
     {
       typedef typename EquationType::interface_type             InterfaceType;
@@ -219,7 +219,7 @@ namespace viennafem
     /** @brief Transforms a weak formulation given in physical space to the reference cell. Also transforms derivatives where appropriate.  Implementation for the 2d-case.*/
     template <typename CellType, typename EquationType, typename PDESystemType, typename ReferenceCellTag>
     EquationType transform_to_reference_cell_2d(EquationType const & weak_form,
-                                                PDESystemType const & pde_system,
+                                                PDESystemType const & /*pde_system*/,
                                                 ReferenceCellTag)
     {
       typedef typename EquationType::interface_type             InterfaceType;

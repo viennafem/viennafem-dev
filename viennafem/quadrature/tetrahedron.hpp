@@ -60,9 +60,9 @@ namespace viennafem
       
       BaseType * clone() const { return new self_type(); }
       
-      NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
+      NumericT eval(viennamath::rt_interval<InterfaceType> const & /*interv*/,
                     viennamath::rt_expr<InterfaceType> const & e,
-                    viennamath::rt_variable<InterfaceType> const & var) const
+                    viennamath::rt_variable<InterfaceType> const & /*var*/) const
       {
         return viennamath::eval(e, p_) / 6.0;
       }
@@ -101,9 +101,9 @@ namespace viennafem
       
       BaseType * clone() const { return new self_type(); }
       
-      NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
+      NumericT eval(viennamath::rt_interval<InterfaceType> const & /*interv*/,
                     viennamath::rt_expr<InterfaceType> const & e,
-                    viennamath::rt_variable<InterfaceType> const & var) const
+                    viennamath::rt_variable<InterfaceType> const & /*var*/) const
       {
         NumericT result = 0;
         for (std::size_t i=0; i<num_points; ++i)
@@ -153,9 +153,9 @@ namespace viennafem
       
       BaseType * clone() const { return new self_type(); }
       
-      NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
+      NumericT eval(viennamath::rt_interval<InterfaceType> const & /*interv*/,
                     viennamath::rt_expr<InterfaceType> const & e,
-                    viennamath::rt_variable<InterfaceType> const & var) const
+                    viennamath::rt_variable<InterfaceType> const & /*var*/) const
       {
         NumericT result = 0;
         for (std::size_t i=0; i<num_points; ++i)
@@ -226,9 +226,9 @@ namespace viennafem
       
       BaseType * clone() const { return new self_type(); }
       
-      NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
+      NumericT eval(viennamath::rt_interval<InterfaceType> const & /*interv*/,
                     viennamath::rt_expr<InterfaceType> const & e,
-                    viennamath::rt_variable<InterfaceType> const & var) const
+                    viennamath::rt_variable<InterfaceType> const & /*var*/) const
       {
         NumericT result = 0;
         for (std::size_t i=0; i<num_points; ++i)
@@ -307,9 +307,9 @@ namespace viennafem
       
       BaseType * clone() const { return new self_type(); }
       
-      NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
+      NumericT eval(viennamath::rt_interval<InterfaceType> const & /*interv*/,
                     viennamath::rt_expr<InterfaceType> const & e,
-                    viennamath::rt_variable<InterfaceType> const & var) const
+                    viennamath::rt_variable<InterfaceType> const & /*var*/) const
       {
         NumericT result = 0;
         for (std::size_t i=0; i<num_points; ++i)
@@ -406,9 +406,9 @@ namespace viennafem
       
       BaseType * clone() const { return new self_type(); }
       
-      NumericT eval(viennamath::rt_interval<InterfaceType> const & interv,
+      NumericT eval(viennamath::rt_interval<InterfaceType> const & /*interv*/,
                     viennamath::rt_expr<InterfaceType> const & e,
-                    viennamath::rt_variable<InterfaceType> const & var) const
+                    viennamath::rt_variable<InterfaceType> const & /*var*/) const
       {
         NumericT result = 0;
         for (std::size_t i=0; i<num_points; ++i)

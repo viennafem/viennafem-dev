@@ -62,12 +62,12 @@ namespace viennafem
       public:
         cell_quan_constant(KeyType const & key) : key_(key) {}
         
-        numeric_type eval(CellType const & cell, numeric_type v) const
+        numeric_type eval(CellType const & cell, numeric_type /*v*/) const
         {
           return viennadata::access<KeyType, DataType>(key_)(cell);
         }
 
-        numeric_type eval(CellType const & cell, std::vector<numeric_type> const & v) const
+        numeric_type eval(CellType const & cell, std::vector<numeric_type> const & /*v*/) const
         {
           return viennadata::access<KeyType, DataType>(key_)(cell);
         }
@@ -221,7 +221,7 @@ namespace viennafem
         return dynamic_cast< const self_type *>(other) != NULL;
       }
       
-      InterfaceType * diff(const InterfaceType * diff_var) const
+      InterfaceType * diff(const InterfaceType * /*diff_var*/) const
       {
         throw "Cannot differentiate cell_quan!";
         return NULL;

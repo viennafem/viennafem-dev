@@ -39,7 +39,7 @@
 // A test key used later for storing a cell quantity
 struct testkey 
 {
-  bool operator<(testkey const & other) const { return false; }
+  bool operator<(testkey const & /*other*/) const { return false; }
 };
 
 int main()

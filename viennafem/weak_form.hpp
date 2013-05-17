@@ -184,7 +184,7 @@ namespace viennafem
           }
         }
 
-        bool modifies(InterfaceType const * e) const { return true; }
+        bool modifies(InterfaceType const * /*e*/) const { return true; }
         
       private:
         mutable viennamath::rt_expr<InterfaceType> integrated_expr;

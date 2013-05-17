@@ -145,7 +145,7 @@ namespace viennafem
   
   /** @brief Convenience function which returns a suitable quadrature rule for the given PDE(s) and the domain */
   template <typename PDESystemType, typename DomainType>
-  viennamath::numerical_quadrature make_quadrature_rule(PDESystemType const & pde_system, DomainType const & domain)
+  viennamath::numerical_quadrature make_quadrature_rule(PDESystemType const & pde_system, DomainType const & /*domain*/)
   {
     typedef typename DomainType::config_type              Config;
     typedef typename Config::cell_tag                     CellTag;
