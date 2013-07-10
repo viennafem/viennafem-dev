@@ -40,11 +40,10 @@ namespace viennafem
     typedef typename viennadata::result_of::accessor<StorageType, det_dF_dt_key,   viennafem::numeric_type, CellType>::type   det_dF_dt_AccessorType;
     typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<0, 0>, viennafem::numeric_type, CellType>::type   dt_dx_key_00_AccessorType;
     
-    
     dt_dx_handler(DomainType& domain, StorageType& storage) : pnt_acc(viennagrid::default_point_accessor(domain))
     {
       det_dF_dt_acc    = viennadata::accessor<det_dF_dt_key,   viennafem::numeric_type, CellType>(storage, det_dF_dt_key());
-//      dt_dx_key_00_acc = viennadata::accessor<dt_dx_key<0, 0>, viennafem::numeric_type, CellType>(storage, dt_dx_key<0, 0>());    
+      dt_dx_key_00_acc = viennadata::accessor<dt_dx_key<0, 0>, viennafem::numeric_type, CellType>(storage, dt_dx_key<0, 0>());    
     }
     
     template <typename CellType>
