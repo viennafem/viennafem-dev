@@ -19,9 +19,12 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    INCLUDE_DIRECTORIES("/opt/local/include") 
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
-
 #specify include and source directory
 INCLUDE_DIRECTORIES(".")
+INCLUDE_DIRECTORIES("../ViennaGrid/")
+INCLUDE_DIRECTORIES("../ViennaData/")
+INCLUDE_DIRECTORIES("../ViennaMath/")
+INCLUDE_DIRECTORIES("../ViennaCL/")
 INCLUDE_DIRECTORIES(${BOOSTPATH})
 
 #add definitions, compiler switches, etc.
