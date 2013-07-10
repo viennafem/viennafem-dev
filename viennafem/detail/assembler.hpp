@@ -26,7 +26,7 @@
 #include "viennafem/linear_pde_options.hpp"
 #include "viennafem/mapping.hpp"
 #include "viennafem/quadrature/quad.hpp"
-#include "viennafem/log/api.hpp"
+//#include "viennafem/log/api.hpp"
 
 //ViennaMath includes:
 #include "viennamath/manipulation/apply_coordinate_system.hpp"
@@ -116,9 +116,9 @@ namespace viennafem
       }
 
       // a bit of logging:
-      log_test_and_trial_space(scalar_test_functions,
-                              scalar_trial_functions,
-                              pde_system);
+//      log_test_and_trial_space(scalar_test_functions,
+//                              scalar_trial_functions,
+//                              pde_system);
 
       //plug functions into weak form to obtain local form:
       //local_size_i = 3;

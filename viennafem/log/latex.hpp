@@ -70,7 +70,7 @@ namespace viennafem
    * @tparam CellType
    * @tparam InterfaceType
    */
-  template <typename CellType, typename InterfaceType>
+  template <typename CellType, typename StorageType, typename InterfaceType>
   class rt_latex_dt_dx_processor : public viennamath::rt_latex_processor_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type              NumericType;

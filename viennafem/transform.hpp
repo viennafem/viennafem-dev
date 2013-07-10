@@ -34,42 +34,42 @@ namespace viennafem
   namespace detail
   {
     /** @brief Wraps the cell quantity for the Jacobian on each cell depending on the reference element used. This is the overload for the unit interval. */
-    template <typename CellType, typename InterfaceType>
-    void wrap_jacobian(viennafem::cell_quan<CellType, InterfaceType> & det_dF_dt, viennafem::unit_interval)
+    template <typename StorageType, typename CellType, typename InterfaceType>
+    void wrap_jacobian(viennafem::cell_quan<StorageType, CellType, InterfaceType> & det_dF_dt, viennafem::unit_interval)
     {
       det_dF_dt.wrap_constant( viennafem::det_dF_dt_key() );
     }
 
     /** @brief Wraps the cell quantity for the Jacobian on each cell depending on the reference element used. This is the overload for the unit triangle. */
-    template <typename CellType, typename InterfaceType>
-    void wrap_jacobian(viennafem::cell_quan<CellType, InterfaceType> & det_dF_dt, viennafem::unit_triangle)
+    template <typename StorageType, typename CellType, typename InterfaceType>
+    void wrap_jacobian(viennafem::cell_quan<StorageType, CellType, InterfaceType> & det_dF_dt, viennafem::unit_triangle)
     {
       det_dF_dt.wrap_constant( viennafem::det_dF_dt_key() );
     }
 
     /** @brief Wraps the cell quantity for the Jacobian on each cell depending on the reference element used. This is the overload for the unit tetrahedron. */
-    template <typename CellType, typename InterfaceType>
-    void wrap_jacobian(viennafem::cell_quan<CellType, InterfaceType> & det_dF_dt, viennafem::unit_tetrahedron)
+    template <typename StorageType, typename CellType, typename InterfaceType>
+    void wrap_jacobian(viennafem::cell_quan<StorageType, CellType, InterfaceType> & det_dF_dt, viennafem::unit_tetrahedron)
     {
       det_dF_dt.wrap_constant( viennafem::det_dF_dt_key() );
     }
 
     /** @brief Wraps the cell quantity for the Jacobian on each cell depending on the reference element used. This is the overload for the unit square. */
-    template <typename CellType, typename InterfaceType>
-    void wrap_jacobian(viennafem::cell_quan<CellType, InterfaceType> & det_dF_dt, viennafem::unit_square)
+    template <typename StorageType, typename CellType, typename InterfaceType>
+    void wrap_jacobian(viennafem::cell_quan<StorageType, CellType, InterfaceType> & det_dF_dt, viennafem::unit_square)
     {
       det_dF_dt.wrap_expr( viennafem::det_dF_dt_key() );
     }
 
     /** @brief Wraps the cell quantity for the Jacobian on each cell depending on the reference element used. This is the overload for the unit cube. */
-    template <typename CellType, typename InterfaceType>
-    void wrap_jacobian(viennafem::cell_quan<CellType, InterfaceType> & det_dF_dt, viennafem::unit_cube)
+    template <typename StorageType, typename CellType, typename InterfaceType>
+    void wrap_jacobian(viennafem::cell_quan<StorageType, CellType, InterfaceType> & det_dF_dt, viennafem::unit_cube)
     {
       det_dF_dt.wrap_expr( viennafem::det_dF_dt_key() );
     }
     
     /** @brief Multiplies a given expression with the Jacobian cell-quantity. If the expression is given by an integral, the integrand is multiplied with the Jacobian. */
-    template <typename CellType, typename InterfaceType, typename ReferenceCellTag>
+    template <typename StorageType, typename CellType, typename InterfaceType, typename ReferenceCellTag>
     struct jacobian_adder : public viennamath::rt_manipulation_interface<InterfaceType>
     {
       public:
@@ -85,7 +85,7 @@ namespace viennafem
 
             const SymbolicIntegrationOperation * op_symb_tmp = dynamic_cast<const SymbolicIntegrationOperation *>(integral_expression->op());
 
-            viennafem::cell_quan<CellType, InterfaceType> det_dF_dt;
+            viennafem::cell_quan<StorageType, CellType, InterfaceType> det_dF_dt;
             detail::wrap_jacobian(det_dF_dt, ReferenceCellTag());
             
             if (op_symb_tmp != NULL)
@@ -121,36 +121,36 @@ namespace viennafem
     
     
     /** @brief Wraps the cell quantity for the partial derivatives of the reference mapping on each cell depending on the reference element used. This is the overload for the unit interval. */
-    template <long i, long j, typename CellType, typename InterfaceType>
-    void wrap_dt_dx(viennafem::cell_quan<CellType, InterfaceType> & dt_dx, viennafem::unit_interval)
+    template <long i, long j, typename StorageType, typename CellType, typename InterfaceType>
+    void wrap_dt_dx(viennafem::cell_quan<StorageType, CellType, InterfaceType> & dt_dx, viennafem::unit_interval)
     {
       dt_dx.wrap_constant( viennafem::dt_dx_key<i,j>() );
     }
     
     /** @brief Wraps the cell quantity for the partial derivatives of the reference mapping on each cell depending on the reference element used. This is the overload for the unit triangle. */
-    template <long i, long j, typename CellType, typename InterfaceType>
-    void wrap_dt_dx(viennafem::cell_quan<CellType, InterfaceType> & dt_dx, viennafem::unit_triangle)
+    template <long i, long j, typename StorageType, typename CellType, typename InterfaceType>
+    void wrap_dt_dx(viennafem::cell_quan<StorageType, CellType, InterfaceType> & dt_dx, viennafem::unit_triangle)
     {
       dt_dx.wrap_constant( viennafem::dt_dx_key<i,j>() );
     }
 
     /** @brief Wraps the cell quantity for the partial derivatives of the reference mapping on each cell depending on the reference element used. This is the overload for the unit tetrahedron. */
-    template <long i, long j, typename CellType, typename InterfaceType>
-    void wrap_dt_dx(viennafem::cell_quan<CellType, InterfaceType> & dt_dx, viennafem::unit_tetrahedron)
+    template <long i, long j, typename StorageType, typename CellType, typename InterfaceType>
+    void wrap_dt_dx(viennafem::cell_quan<StorageType, CellType, InterfaceType> & dt_dx, viennafem::unit_tetrahedron)
     {
       dt_dx.wrap_constant( viennafem::dt_dx_key<i,j>() );
     }
 
     /** @brief Wraps the cell quantity for the partial derivatives of the reference mapping on each cell depending on the reference element used. This is the overload for the unit square. */
-    template <long i, long j, typename CellType, typename InterfaceType>
-    void wrap_dt_dx(viennafem::cell_quan<CellType, InterfaceType> & dt_dx, viennafem::unit_square)
+    template <long i, long j, typename StorageType, typename CellType, typename InterfaceType>
+    void wrap_dt_dx(viennafem::cell_quan<StorageType, CellType, InterfaceType> & dt_dx, viennafem::unit_square)
     {
       dt_dx.wrap_expr( viennafem::dt_dx_key<i,j>() );
     }
 
     /** @brief Wraps the cell quantity for the partial derivatives of the reference mapping on each cell depending on the reference element used. This is the overload for the unit cube. */
-    template <long i, long j, typename CellType, typename InterfaceType>
-    void wrap_dt_dx(viennafem::cell_quan<CellType, InterfaceType> & dt_dx, viennafem::unit_cube)
+    template <long i, long j, typename StorageType, typename CellType, typename InterfaceType>
+    void wrap_dt_dx(viennafem::cell_quan<StorageType, CellType, InterfaceType> & dt_dx, viennafem::unit_cube)
     {
       dt_dx.wrap_expr( viennafem::dt_dx_key<i,j>() );
     }
@@ -161,8 +161,9 @@ namespace viennafem
     // Line:
     //
     /** @brief Transforms a weak formulation given in physical space to the reference cell. Also transforms derivatives where appropriate. Implementation for the 1d-case.*/
-    template <typename CellType, typename EquationType, typename PDESystemType, typename ReferenceCellTag>
-    EquationType transform_to_reference_cell_1d(EquationType const & weak_form,
+    template <typename CellType, typename StorageType, typename EquationType, typename PDESystemType, typename ReferenceCellTag>
+    EquationType transform_to_reference_cell_1d(StorageType& storage, 
+                                                EquationType const & weak_form,
                                                 PDESystemType const & /*pde_system*/,
                                                 ReferenceCellTag)
     {
@@ -181,7 +182,7 @@ namespace viennafem
       Variable        r(0);
       
       //using local coordinates (r, s) and global coordinates (x, y)
-      viennafem::cell_quan<CellType, InterfaceType>  dr_dx; detail::wrap_dt_dx<0,0>(dr_dx, ReferenceCellTag());
+      viennafem::cell_quan<StorageType, CellType, InterfaceType>  dr_dx(storage); detail::wrap_dt_dx<0,0>(dr_dx, ReferenceCellTag());
       
       Expression new_lhs = weak_form.lhs();
       Expression new_rhs = weak_form.rhs();
@@ -201,7 +202,7 @@ namespace viennafem
       new_lhs = viennamath::substitute(search_types, replace_types, weak_form.lhs());
       new_rhs = viennamath::substitute(search_types, replace_types, weak_form.rhs());
       
-      viennamath::rt_manipulation_wrapper<InterfaceType> jacobian_manipulator( new detail::jacobian_adder<CellType, InterfaceType, ReferenceCellTag>() );
+      viennamath::rt_manipulation_wrapper<InterfaceType> jacobian_manipulator( new detail::jacobian_adder<StorageType, CellType, InterfaceType, ReferenceCellTag>() );
       Expression new_lhs_with_jacobian(new_lhs.get()->recursive_manipulation(jacobian_manipulator));
       Expression new_rhs_with_jacobian(new_rhs.get()->recursive_manipulation(jacobian_manipulator));
       
@@ -216,8 +217,9 @@ namespace viennafem
     // Triangles and Quadrilaterals:
     //
     /** @brief Transforms a weak formulation given in physical space to the reference cell. Also transforms derivatives where appropriate.  Implementation for the 2d-case.*/
-    template <typename CellType, typename EquationType, typename PDESystemType, typename ReferenceCellTag>
-    EquationType transform_to_reference_cell_2d(EquationType const & weak_form,
+    template <typename CellType, typename StorageType, typename EquationType, typename PDESystemType, typename ReferenceCellTag>
+    EquationType transform_to_reference_cell_2d(StorageType& storage, 
+                                                EquationType const & weak_form,
                                                 PDESystemType const & /*pde_system*/,
                                                 ReferenceCellTag)
     {
@@ -237,11 +239,11 @@ namespace viennafem
       Variable        s(1);
       
       //using local coordinates (r, s) and global coordinates (x, y)
-      viennafem::cell_quan<CellType, InterfaceType>  dr_dx; detail::wrap_dt_dx<0,0>(dr_dx, ReferenceCellTag());
-      viennafem::cell_quan<CellType, InterfaceType>  ds_dx; detail::wrap_dt_dx<1,0>(ds_dx, ReferenceCellTag());
+      viennafem::cell_quan<StorageType, CellType, InterfaceType>  dr_dx(storage); detail::wrap_dt_dx<0,0>(dr_dx, ReferenceCellTag());
+      viennafem::cell_quan<StorageType, CellType, InterfaceType>  ds_dx(storage); detail::wrap_dt_dx<1,0>(ds_dx, ReferenceCellTag());
       
-      viennafem::cell_quan<CellType, InterfaceType>  dr_dy; detail::wrap_dt_dx<0,1>(dr_dy, ReferenceCellTag());
-      viennafem::cell_quan<CellType, InterfaceType>  ds_dy; detail::wrap_dt_dx<1,1>(ds_dy, ReferenceCellTag());
+      viennafem::cell_quan<StorageType, CellType, InterfaceType>  dr_dy(storage); detail::wrap_dt_dx<0,1>(dr_dy, ReferenceCellTag());
+      viennafem::cell_quan<StorageType, CellType, InterfaceType>  ds_dy(storage); detail::wrap_dt_dx<1,1>(ds_dy, ReferenceCellTag());
       
       Expression new_lhs = weak_form.lhs();
       Expression new_rhs = weak_form.rhs();
@@ -266,7 +268,7 @@ namespace viennafem
       new_lhs = viennamath::substitute(search_types, replace_types, weak_form.lhs());
       new_rhs = viennamath::substitute(search_types, replace_types, weak_form.rhs());
       
-      viennamath::rt_manipulation_wrapper<InterfaceType> jacobian_manipulator( new detail::jacobian_adder<CellType, InterfaceType, ReferenceCellTag>() );
+      viennamath::rt_manipulation_wrapper<InterfaceType> jacobian_manipulator( new detail::jacobian_adder<StorageType, CellType, InterfaceType, ReferenceCellTag>() );
       Expression new_lhs_with_jacobian(new_lhs.get()->recursive_manipulation(jacobian_manipulator));
       Expression new_rhs_with_jacobian(new_rhs.get()->recursive_manipulation(jacobian_manipulator));
       
@@ -282,8 +284,9 @@ namespace viennafem
     // Tetrahedra and Hexahedra
     //
     /** @brief Transforms a weak formulation given in physical space to the reference cell. Also transforms derivatives where appropriate. Implementation for the 3d-case.*/
-    template <typename CellType, typename EquationType, typename PDESystemType, typename ReferenceCellTag>
-    EquationType transform_to_reference_cell_3d(EquationType const & weak_form,
+    template <typename CellType, typename StorageType, typename EquationType, typename PDESystemType, typename ReferenceCellTag>
+    EquationType transform_to_reference_cell_3d(StorageType& storage, 
+                                                EquationType const & weak_form,
                                                 PDESystemType const & pde_system,
                                                 ReferenceCellTag)
     {
@@ -313,17 +316,17 @@ namespace viennafem
       Variable      t(2);
       
       //using local coordinates (r, s) and global coordinates (x, y)
-      viennafem::cell_quan<CellType, InterfaceType>  dr_dx; detail::wrap_dt_dx<0,0>(dr_dx, ReferenceCellTag());
-      viennafem::cell_quan<CellType, InterfaceType>  ds_dx; detail::wrap_dt_dx<1,0>(ds_dx, ReferenceCellTag());
-      viennafem::cell_quan<CellType, InterfaceType>  dt_dx; detail::wrap_dt_dx<2,0>(dt_dx, ReferenceCellTag());
+      viennafem::cell_quan<StorageType, CellType, InterfaceType>  dr_dx(storage); detail::wrap_dt_dx<0,0>(dr_dx, ReferenceCellTag());
+      viennafem::cell_quan<StorageType, CellType, InterfaceType>  ds_dx(storage); detail::wrap_dt_dx<1,0>(ds_dx, ReferenceCellTag());
+      viennafem::cell_quan<StorageType, CellType, InterfaceType>  dt_dx(storage); detail::wrap_dt_dx<2,0>(dt_dx, ReferenceCellTag());
       
-      viennafem::cell_quan<CellType, InterfaceType>  dr_dy; detail::wrap_dt_dx<0,1>(dr_dy, ReferenceCellTag());
-      viennafem::cell_quan<CellType, InterfaceType>  ds_dy; detail::wrap_dt_dx<1,1>(ds_dy, ReferenceCellTag());
-      viennafem::cell_quan<CellType, InterfaceType>  dt_dy; detail::wrap_dt_dx<2,1>(dt_dy, ReferenceCellTag());
+      viennafem::cell_quan<StorageType, CellType, InterfaceType>  dr_dy(storage); detail::wrap_dt_dx<0,1>(dr_dy, ReferenceCellTag());
+      viennafem::cell_quan<StorageType, CellType, InterfaceType>  ds_dy(storage); detail::wrap_dt_dx<1,1>(ds_dy, ReferenceCellTag());
+      viennafem::cell_quan<StorageType, CellType, InterfaceType>  dt_dy(storage); detail::wrap_dt_dx<2,1>(dt_dy, ReferenceCellTag());
 
-      viennafem::cell_quan<CellType, InterfaceType>  dr_dz; detail::wrap_dt_dx<0,2>(dr_dz, ReferenceCellTag());
-      viennafem::cell_quan<CellType, InterfaceType>  ds_dz; detail::wrap_dt_dx<1,2>(ds_dz, ReferenceCellTag());
-      viennafem::cell_quan<CellType, InterfaceType>  dt_dz; detail::wrap_dt_dx<2,2>(dt_dz, ReferenceCellTag());
+      viennafem::cell_quan<StorageType, CellType, InterfaceType>  dr_dz(storage); detail::wrap_dt_dx<0,2>(dr_dz, ReferenceCellTag());
+      viennafem::cell_quan<StorageType, CellType, InterfaceType>  ds_dz(storage); detail::wrap_dt_dx<1,2>(ds_dz, ReferenceCellTag());
+      viennafem::cell_quan<StorageType, CellType, InterfaceType>  dt_dz(storage); detail::wrap_dt_dx<2,2>(dt_dz, ReferenceCellTag());
       
       Expression new_lhs = weak_form.lhs();
       Expression new_rhs = weak_form.rhs();
@@ -359,7 +362,8 @@ namespace viennafem
       new_lhs = viennamath::substitute(search_types, replace_types, weak_form.lhs());
       new_rhs = viennamath::substitute(search_types, replace_types, weak_form.rhs());
       
-      viennamath::rt_manipulation_wrapper<InterfaceType> jacobian_manipulator( new detail::jacobian_adder<CellType,
+      viennamath::rt_manipulation_wrapper<InterfaceType> jacobian_manipulator( new detail::jacobian_adder<StorageType, 
+                                                                                                          CellType,
                                                                                                           InterfaceType,
                                                                                                           ReferenceCellTag>() );
       Expression new_lhs_with_jacobian(new_lhs.get()->recursive_manipulation(jacobian_manipulator));
@@ -378,64 +382,71 @@ namespace viennafem
   // 1d
 
   /** @brief Transforms a general weak form on any line to an integration over the unit interval */
-  template <typename CellType, typename EquationType, typename PDESystemType>
-  EquationType transform_to_reference_cell(EquationType const & weak_form,
+  template <typename CellType, typename StorageType, typename EquationType, typename PDESystemType>
+  EquationType transform_to_reference_cell(StorageType& storage, 
+                                           EquationType const & weak_form,
                                            PDESystemType const & pde_system,
                                            viennafem::unit_interval)
   {
-    return  detail::transform_to_reference_cell_1d<CellType>(weak_form, pde_system, viennafem::unit_interval());
+    return  detail::transform_to_reference_cell_1d<CellType>(storage, weak_form, pde_system, viennafem::unit_interval());
   }
 
   // 2d
 
   /** @brief Transforms a general weak form on any quadrilateral to an integration over the unit square */
-  template <typename CellType, typename EquationType, typename PDESystemType>
-  EquationType transform_to_reference_cell(EquationType const & weak_form,
+  template <typename CellType, typename StorageType, typename EquationType, typename PDESystemType>
+  EquationType transform_to_reference_cell(StorageType& storage, 
+                                           EquationType const & weak_form,
                                            PDESystemType const & pde_system,
                                            viennafem::unit_square)
   {
-    return  detail::transform_to_reference_cell_2d<CellType>(weak_form, pde_system, viennafem::unit_square());
+    return  detail::transform_to_reference_cell_2d<CellType>(storage, weak_form, pde_system, viennafem::unit_square());
   }
 
   /** @brief Transforms a general weak form on any triangle to an integration over the unit triangle */
-  template <typename CellType, typename EquationType, typename PDESystemType>
-  EquationType transform_to_reference_cell(EquationType const & weak_form,
+  template <typename CellType, typename StorageType, typename EquationType, typename PDESystemType>
+  EquationType transform_to_reference_cell(StorageType& storage, 
+                                           EquationType const & weak_form,
                                            PDESystemType const & pde_system,
                                            viennafem::unit_triangle)
   {
-    return  detail::transform_to_reference_cell_2d<CellType>(weak_form, pde_system, viennafem::unit_triangle());
+    return  detail::transform_to_reference_cell_2d<CellType>(storage, weak_form, pde_system, viennafem::unit_triangle());
   }
 
   // 3d
 
   /** @brief Transforms a general weak form on any hexahedron to an integration over the unit cube */
-  template <typename CellType, typename EquationType, typename PDESystemType>
-  EquationType transform_to_reference_cell(EquationType const & weak_form,
+  template <typename CellType, typename StorageType, typename EquationType, typename PDESystemType>
+  EquationType transform_to_reference_cell(StorageType& storage, 
+                                           EquationType const & weak_form,
                                            PDESystemType const & pde_system,
                                            viennafem::unit_cube)
   {
-    return  detail::transform_to_reference_cell_3d<CellType>(weak_form, pde_system, viennafem::unit_cube());
+    return  detail::transform_to_reference_cell_3d<CellType>(storage, weak_form, pde_system, viennafem::unit_cube());
   }
 
   /** @brief Transforms a general weak form on any tetrahedron to an integration over the unit tetrahedron */
-  template <typename CellType, typename EquationType, typename PDESystemType>
-  EquationType transform_to_reference_cell(EquationType const & weak_form,
+  template <typename CellType, typename StorageType, typename EquationType, typename PDESystemType>
+  EquationType transform_to_reference_cell(StorageType& storage, 
+                                           EquationType const & weak_form,
                                            PDESystemType const & pde_system,
                                            viennafem::unit_tetrahedron)
   {
-    return  detail::transform_to_reference_cell_3d<CellType>(weak_form, pde_system, viennafem::unit_tetrahedron());
+    return  detail::transform_to_reference_cell_3d<CellType>(storage, weak_form, pde_system, viennafem::unit_tetrahedron());
   }
 
 
   // entry point:
   /** @brief Transforms a weak formulation given by an integration over an arbitrary cell to the reference element. */
-  template <typename CellType, typename EquationType, typename PDESystemType>
-  EquationType transform_to_reference_cell(EquationType const & weak_form,
+  template <typename CellType, typename StorageType, typename EquationType, typename PDESystemType>
+  EquationType transform_to_reference_cell(StorageType& storage, 
+                                           EquationType const & weak_form,
                                            PDESystemType const & pde_system)
   {
     typedef typename CellType::tag        CellTag;
     
-    return  transform_to_reference_cell<CellType>(weak_form, 
+    return  transform_to_reference_cell<CellType>(storage, 
+                                                  weak_form, 
                                                   pde_system,
                                                   typename reference_cell_for_basis<CellTag, viennafem::lagrange_tag<1> >::type());
   }
