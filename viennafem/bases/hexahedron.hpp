@@ -15,12 +15,10 @@
 ============================================================================ */
 
 #include <vector>
-#include "viennagrid/topology/triangle.hpp"
-#include "viennagrid/topology/tetrahedron.hpp"
-#include "viennagrid/forwards.h"
-#include "viennamath/expression.hpp"
 #include "viennafem/forwards.h"
 #include "viennafem/bases/quadrilateral.hpp"
+#include "viennagrid/topology/simplex.hpp"
+#include "viennamath/expression.hpp"
 
 /** @file   viennafem/bases/quadrilateral.hpp
     @brief  Defines the various basis functions for quadrilaterals.

@@ -36,7 +36,7 @@
 #include "viennadata/api.hpp"
 
 //ViennaGrid includes:
-#include "viennagrid/domain.hpp"
+#include "viennagrid/config/domain_config.hpp"
 
 
 /** @file   linear_pde_system.hpp

@@ -21,8 +21,7 @@
 #include "viennafem/forwards.h"
 
 // ViennaGrid includes:
-#include "viennagrid/domain.hpp"
-#include "viennagrid/iterators.hpp"
+#include "viennagrid/config/default_configs.hpp"
 #include "viennagrid/io/vtk_writer.hpp"
 
 // ViennaData includes:

@@ -24,8 +24,7 @@
 #include "viennamath/manipulation/eval.hpp"
 #include "viennamath/runtime/numerical_quadrature.hpp"
 
-#include "viennagrid/topology/triangle.hpp"
-#include "viennagrid/topology/tetrahedron.hpp"
+#include "viennagrid/topology/simplex.hpp"
 
 /** @file   viennafem/quadrature/tetrahedron.hpp
     @brief  Provides quadrature rules for tetrahedra

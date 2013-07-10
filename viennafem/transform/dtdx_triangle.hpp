@@ -15,10 +15,12 @@
 ============================================================================ */
 
 #include <iostream>
-#include "viennagrid/topology/triangle.hpp"
-#include "viennagrid/algorithm/spanned_volume.hpp"
-#include "viennagrid/domain.hpp"
 #include "viennafem/forwards.h"
+#include "viennagrid/topology/simplex.hpp"
+#include "viennagrid/algorithm/spanned_volume.hpp"
+#include "viennagrid/config/domain_config.hpp"
+#include "viennagrid/point.hpp"
+
 
 /** @file    dtdx_triangle.hpp
     @brief   Provides the transformation coefficients of an arbitrary triangle to the unit triangle
@@ -31,34 +33,30 @@ namespace viennafem
   template <>
   struct dt_dx_handler<viennafem::unit_triangle>
   {
-    public:
-      
-      template <typename CellType>
-      static void apply(CellType const & cell)
+      template <typename StorageType, typename CellType>
+      static void apply(StorageType& storage, CellType const & cell)
       {
-        typedef typename CellType::config_type       Config;
-        typedef typename viennagrid::result_of::point<Config>::type   PointType;
-        
-        PointType const & p0 = viennagrid::ncells<0>(cell)[0].point();
-        PointType const & p1 = viennagrid::ncells<0>(cell)[1].point();
-        PointType const & p2 = viennagrid::ncells<0>(cell)[2].point();
-        
+        typedef typename CellType::config_type                            Config;
+        typedef typename viennagrid::result_of::point<Config>::type  PointType;
+
+        PointType const& p0 = viennagrid::point(cell, 0);
+        PointType const& p1 = viennagrid::point(cell, 1);
+        PointType const& p2 = viennagrid::point(cell, 2);
+
         //Step 1: store determinant:
         double det_dF_dt = 2.0 * viennagrid::spanned_volume(p0, p1, p2);
         
         assert(det_dF_dt > 0);
         //std::cout << "dt_dx triangle!" << std::endl;
         
-        viennadata::access<det_dF_dt_key, numeric_type>()(cell) = det_dF_dt;
+        viennadata::access<det_dF_dt_key, numeric_type>(storage, cell) = det_dF_dt;
         
         //Step 2: store partial derivatives:
-        viennadata::access<dt_dx_key<0, 0>, numeric_type>()(cell) = ( p2[1] - p0[1]) / det_dF_dt;
-        viennadata::access<dt_dx_key<0, 1>, numeric_type>()(cell) = - (p2[0] - p0[0]) / det_dF_dt;
-        viennadata::access<dt_dx_key<1, 0>, numeric_type>()(cell) = - (p1[1] - p0[1]) / det_dF_dt;
-        viennadata::access<dt_dx_key<1, 1>, numeric_type>()(cell) = ( p1[0] - p0[0]) / det_dF_dt;
-        
+        viennadata::access<dt_dx_key<0, 0>, numeric_type>(storage, cell) =   (p2[1] - p0[1]) / det_dF_dt;
+        viennadata::access<dt_dx_key<0, 1>, numeric_type>(storage, cell) = - (p2[0] - p0[0]) / det_dF_dt;
+        viennadata::access<dt_dx_key<1, 0>, numeric_type>(storage, cell) = - (p1[1] - p0[1]) / det_dF_dt;
+        viennadata::access<dt_dx_key<1, 1>, numeric_type>(storage, cell) =   (p1[0] - p0[0]) / det_dF_dt;
       }
-
   };
 
   /*

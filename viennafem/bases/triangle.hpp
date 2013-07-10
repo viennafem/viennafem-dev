@@ -15,9 +15,7 @@
 ============================================================================ */
 
 #include <vector>
-#include "viennagrid/topology/triangle.hpp"
-#include "viennagrid/topology/tetrahedron.hpp"
-#include "viennagrid/forwards.h"
+#include "viennagrid/topology/simplex.hpp"
 #include "viennamath/expression.hpp"
 #include "viennafem/forwards.h"
 

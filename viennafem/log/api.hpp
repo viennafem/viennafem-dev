@@ -17,10 +17,7 @@
 
 #include <vector>
 #include "viennafem/forwards.h"
-#include "viennagrid/forwards.h"
-#include "viennagrid/domain.hpp"
-#include "viennagrid/segment.hpp"
-#include "viennagrid/iterators.hpp"
+#include "viennagrid/config/domain_config.hpp"
 
 #include "viennafem/log/latex.hpp"
 

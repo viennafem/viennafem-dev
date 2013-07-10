@@ -37,7 +37,7 @@
 #include "viennadata/api.hpp"
 
 //ViennaGrid includes:
-#include "viennagrid/domain.hpp"
+#include "viennagrid/config/default_configs.hpp"
 
 /** @file   assembler.hpp
     @brief  Provides an internal assembler class which performs the actual assembly of the system of linear equations.
@@ -173,8 +173,9 @@ namespace viennafem
     struct pde_assembler_internal
     {
       
-      template <typename EquationType, typename PDESystemType, typename DomainType, typename LinearSystemT>
-      void operator()(EquationType const & transformed_weak_form,
+      template <typename StorageType, typename EquationType, typename PDESystemType, typename DomainType, typename LinearSystemT>
+      void operator()(StorageType & storage, 
+                      EquationType const & transformed_weak_form,
                       PDESystemType const & pde_system,
                       DomainType & domain,
                       LinearSystemT & linear_system
@@ -183,17 +184,18 @@ namespace viennafem
         typedef typename DomainType::config_type              Config;
         typedef typename Config::cell_tag                     CellTag;
         
-        typedef typename viennagrid::result_of::point<Config>::type                            PointType;
-        typedef typename viennagrid::result_of::ncell<Config, CellTag::dim>::type              CellType;
+        typedef typename viennagrid::result_of::point<Config>::type                                       PointType;
+        typedef typename viennagrid::result_of::element<DomainType, viennagrid::vertex_tag>::type         VertexType;
+        typedef typename viennagrid::result_of::element<DomainType, CellTag>::type                        CellType;
 
-        typedef typename viennagrid::result_of::ncell_range<DomainType, 0>::type               VertexContainer;
-        typedef typename viennagrid::result_of::iterator<VertexContainer>::type                VertexIterator;
+        typedef typename viennagrid::result_of::element_range<DomainType, viennagrid::vertex_tag>::type   VertexContainer;
+        typedef typename viennagrid::result_of::iterator<VertexContainer>::type                           VertexIterator;
 
-        typedef typename viennagrid::result_of::ncell_range<DomainType, CellTag::dim>::type    CellContainer;
-        typedef typename viennagrid::result_of::iterator<CellContainer>::type                  CellIterator;
+        typedef typename viennagrid::result_of::element_range<DomainType, CellTag>::type                  CellContainer;
+        typedef typename viennagrid::result_of::iterator<CellContainer>::type                             CellIterator;
 
-        typedef typename viennagrid::result_of::ncell_range<CellType, 0>::type                 VertexOnCellContainer;
-        typedef typename viennagrid::result_of::iterator<VertexOnCellContainer>::type          VertexOnCellIterator;
+        typedef typename viennagrid::result_of::element_range<CellType, VertexType>::type                 VertexOnCellContainer;
+        typedef typename viennagrid::result_of::iterator<VertexOnCellContainer>::type                     VertexOnCellIterator;
 
         typedef typename PDESystemType::boundary_key_type  BoundaryKeyType;
         typedef std::vector<long>                          MappingContainer;
@@ -222,7 +224,7 @@ namespace viennafem
         viennamath::numerical_quadrature integrator = viennafem::make_quadrature_rule(pde_system, domain);
         //viennamath::numerical_quadrature integrator(new viennafem::rt_gauss_quad_element<ReferenceCell, 3, typename EquationType::interface_type>());
         
-        CellContainer cells = viennagrid::ncells<CellTag::dim>(domain);
+        CellContainer cells = viennagrid::elements<CellType>(domain);  
         for (CellIterator cell_iter = cells.begin();
             cell_iter != cells.end();
             ++cell_iter)
@@ -240,8 +242,8 @@ namespace viennafem
           long local_index_i = 0;
           long local_index_j = 0;
 
-          MappingContainer map_indices_i = mapping_indices(pde_system, *cell_iter, 0);
-          MappingContainer map_indices_j = mapping_indices(pde_system, *cell_iter, 0);
+          MappingContainer map_indices_i = mapping_indices(storage, pde_system, *cell_iter, 0);
+          MappingContainer map_indices_j = mapping_indices(storage, pde_system, *cell_iter, 0);
           
           for (typename MappingContainer::const_iterator map_iter_i = map_indices_i.begin();
               map_iter_i != map_indices_i.end();
@@ -253,7 +255,7 @@ namespace viennafem
             if (global_index_i == -1) // This is a Dirichlet node -> skip
               continue;
             
-            VertexOnCellContainer vertices_on_cell = viennagrid::ncells<0>(*cell_iter);
+            VertexOnCellContainer vertices_on_cell = viennagrid::elements<VertexType>(*cell_iter);  
             VertexOnCellIterator vocit = vertices_on_cell.begin();
             local_index_j = 0;
             for (typename MappingContainer::const_iterator map_iter_j = map_indices_j.begin();

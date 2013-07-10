@@ -39,7 +39,7 @@
 #include "viennadata/api.hpp"
 
 ////ViennaGrid includes:
-#include "viennagrid/domain.hpp"
+#include "viennagrid/config/default_configs.hpp"
 
 //#define VIENNAFEM_DEBUG
 
@@ -77,9 +77,12 @@ namespace viennafem
   } //namespace detail
 
   /** @brief The main ViennaFEM assembler class */
+  template<typename StorageType>
   class pde_assembler
   {
     public:
+      
+      pde_assembler(StorageType& storage) : storage(storage) {}
       
       /** @brief Functor interface for the assembly.
        * 
@@ -98,17 +101,18 @@ namespace viennafem
         typedef typename DomainType::config_type              Config;
         typedef typename Config::cell_tag                     CellTag;
         
-        typedef typename viennagrid::result_of::point<Config>::type                            PointType;
-        typedef typename viennagrid::result_of::ncell<Config, CellTag::dim>::type   CellType;
+        typedef typename viennagrid::result_of::point<Config>::type                                       PointType;
+        typedef typename viennagrid::result_of::element<DomainType, viennagrid::vertex_tag>::type         VertexType;
+        typedef typename viennagrid::result_of::element<DomainType, CellTag>::type                        CellType;
 
-        typedef typename viennagrid::result_of::ncell_range<DomainType, 0>::type                VertexContainer;
-        typedef typename viennagrid::result_of::iterator<VertexContainer>::type                     VertexIterator;
+        typedef typename viennagrid::result_of::element_range<DomainType, viennagrid::vertex_tag>::type   VertexContainer;
+        typedef typename viennagrid::result_of::iterator<VertexContainer>::type                           VertexIterator;
 
-        typedef typename viennagrid::result_of::ncell_range<DomainType, CellTag::dim>::type    CellContainer;
-        typedef typename viennagrid::result_of::iterator<CellContainer>::type                                 CellIterator;
+        typedef typename viennagrid::result_of::element_range<DomainType, CellTag>::type                  CellContainer;
+        typedef typename viennagrid::result_of::iterator<CellContainer>::type                             CellIterator;
 
-        typedef typename viennagrid::result_of::ncell_range<CellType, 0>::type                  VertexOnCellContainer;
-        typedef typename viennagrid::result_of::iterator<VertexOnCellContainer>::type               VertexOnCellIterator;
+        typedef typename viennagrid::result_of::element_range<CellType, VertexType>::type                 VertexOnCellContainer;
+        typedef typename viennagrid::result_of::iterator<VertexOnCellContainer>::type                     VertexOnCellIterator;
         
         typedef typename SystemType::equation_type                  EquationType;
         typedef typename SystemType::equation_type::value_type      Expression;
@@ -135,20 +139,20 @@ namespace viennafem
         typedef typename reference_cell_for_basis<CellTag, viennafem::lagrange_tag<1> >::type    ReferenceCell;
         
         //fill with cell quantities 
-        CellContainer cells = viennagrid::ncells<CellTag::dim>(domain);
+        CellContainer cells = viennagrid::elements<CellType>(domain);  
         for (CellIterator cell_iter = cells.begin();
             cell_iter != cells.end();
             ++cell_iter)
         {
           //cell_iter->print_short();
           //viennadata::access<example_key, double>()(*cell_iter) = i; 
-          viennafem::dt_dx_handler<ReferenceCell>::apply(*cell_iter);
+          viennafem::dt_dx_handler<ReferenceCell>::apply(storage, *cell_iter);
         }
 
      #ifdef VIENNAFEM_DEBUG        
         std::cout << "* pde_solver::operator(): Create Mapping:" << std::endl;
      #endif
-        std::size_t map_index = create_mapping(pde_system, domain);
+        std::size_t map_index = create_mapping(storage, pde_system, domain);
         
      #ifdef VIENNAFEM_DEBUG                
         std::cout << "* pde_solver::operator(): Assigned degrees of freedom in domain so far: " << map_index << std::endl;
@@ -203,11 +207,14 @@ namespace viennafem
         typedef detail::equation_wrapper<MatrixT, VectorT>    wrapper_type;
         wrapper_type wrapper(system_matrix, load_vector);
      
-        detail::pde_assembler_internal()(transformed_weak_form, pde_system, domain, wrapper);
+        detail::pde_assembler_internal()(storage, transformed_weak_form, pde_system, domain, wrapper);
 //        pde_assembler_internal()(transformed_weak_form, pde_system, domain, system_matrix, load_vector);
 
       }
       
+      // -----------------------------------------------------------------------
+      //
+      StorageType& storage;
   };
 
 }

@@ -16,9 +16,9 @@
 
 #include <iostream>
 #include <utility>
-#include "viennagrid/topology/triangle.hpp"
+#include "viennagrid/topology/simplex.hpp"
 #include "viennagrid/algorithm/spanned_volume.hpp"
-#include "viennagrid/domain.hpp"
+#include "viennagrid/config/default_configs.hpp"
 #include "viennafem/forwards.h"
 
 /** @file    dtdx_interval.hpp
@@ -33,20 +33,29 @@ namespace viennafem
   {
     public:
       
-      template <typename CellType>
-      static void apply(CellType const & cell)
+      template <typename StorageType, typename CellType>
+      static void apply(StorageType& storage, CellType const & cell)
       {
         typedef typename CellType::config_type       Config;
         typedef typename viennagrid::result_of::point<Config>::type   PointType;
         
-        PointType const & p0 = viennagrid::ncells<0>(cell)[0].point();
-        PointType const & p1 = viennagrid::ncells<0>(cell)[1].point();
+        PointType const & p0 = viennagrid::point(cell, 0);
+        PointType const & p1 = viennagrid::point(cell, 1);
         
         //Step 1: store determinant:
         numeric_type x1_x0 = p1[0] - p0[0];
         
-        viennadata::access<det_dF_dt_key, numeric_type>()(cell) = x1_x0;
-        viennadata::access<dt_dx_key<0, 0>, numeric_type>()(cell) = 1.0 / x1_x0;
+        viennadata::access<det_dF_dt_key, numeric_type>(storage, cell)   = x1_x0;
+        viennadata::access<dt_dx_key<0, 0>, numeric_type>(storage, cell) = 1.0 / x1_x0;
+        
+//        PointType const & p0 = viennagrid::ncells<0>(cell)[0].point();
+//        PointType const & p1 = viennagrid::ncells<0>(cell)[1].point();
+//        
+//        //Step 1: store determinant:
+//        numeric_type x1_x0 = p1[0] - p0[0];
+//        
+//        viennadata::access<det_dF_dt_key, numeric_type>()(cell) = x1_x0;
+//        viennadata::access<dt_dx_key<0, 0>, numeric_type>()(cell) = 1.0 / x1_x0;
       }
 
   };

@@ -21,8 +21,7 @@
 #include "viennamath/manipulation/substitute.hpp"
 #include "viennamath/manipulation/diff.hpp"
 
-#include "viennagrid/topology/triangle.hpp"
-#include "viennagrid/topology/tetrahedron.hpp"
+#include "viennagrid/topology/simplex.hpp"
 
 
 /** @file   transform.hpp
