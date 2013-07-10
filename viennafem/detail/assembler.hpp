@@ -19,8 +19,8 @@
 #include "viennafem/cell_quan.hpp"
 #include "viennafem/transform.hpp"
 #include "viennafem/bases/all.hpp"
-#include "viennafem/transform/dtdx_triangle.hpp"
-#include "viennafem/transform/dtdx_tetrahedron.hpp"
+//#include "viennafem/transform/dtdx_triangle.hpp"
+//#include "viennafem/transform/dtdx_tetrahedron.hpp"
 #include "viennafem/weak_form.hpp"
 #include "viennafem/linear_pde_system.hpp"
 #include "viennafem/linear_pde_options.hpp"
@@ -181,11 +181,9 @@ namespace viennafem
                       LinearSystemT & linear_system
                     ) const
       {
-        typedef typename DomainType::config_type              Config;
-        typedef typename Config::cell_tag                     CellTag;
-        
-        typedef typename viennagrid::result_of::point<Config>::type                                       PointType;
-        typedef typename viennagrid::result_of::element<DomainType, viennagrid::vertex_tag>::type         VertexType;
+        typedef typename viennagrid::result_of::point<DomainType>::type                                   PointType;
+        typedef typename viennagrid::result_of::element<DomainType, viennagrid::vertex_tag>::type         VertexType;    
+        typedef typename viennagrid::result_of::cell_tag<DomainType>::type                                CellTag;
         typedef typename viennagrid::result_of::element<DomainType, CellTag>::type                        CellType;
 
         typedef typename viennagrid::result_of::element_range<DomainType, viennagrid::vertex_tag>::type   VertexContainer;
@@ -224,6 +222,12 @@ namespace viennafem
         viennamath::numerical_quadrature integrator = viennafem::make_quadrature_rule(pde_system, domain);
         //viennamath::numerical_quadrature integrator(new viennafem::rt_gauss_quad_element<ReferenceCell, 3, typename EquationType::interface_type>());
         
+        typedef typename viennadata::result_of::accessor<StorageType, BoundaryKeyType, viennafem::numeric_type, VertexType>::type  BoundaryScalarAccessorType;
+        BoundaryScalarAccessorType  bnd_scalar_acc = viennadata::accessor<BoundaryKeyType, viennafem::numeric_type, VertexType>(storage, bnd_key);
+        
+        typedef typename viennadata::result_of::accessor<StorageType, BoundaryKeyType, std::vector<viennafem::numeric_type>, VertexType>::type  BoundaryVectorAccessorType;
+        BoundaryVectorAccessorType  bnd_vector_acc = viennadata::accessor<BoundaryKeyType, std::vector<viennafem::numeric_type>, VertexType>(storage, bnd_key);
+        
         CellContainer cells = viennagrid::elements<CellType>(domain);  
         for (CellIterator cell_iter = cells.begin();
             cell_iter != cells.end();
@@ -242,8 +246,8 @@ namespace viennafem
           long local_index_i = 0;
           long local_index_j = 0;
 
-          MappingContainer map_indices_i = mapping_indices(storage, pde_system, *cell_iter, 0);
-          MappingContainer map_indices_j = mapping_indices(storage, pde_system, *cell_iter, 0);
+          MappingContainer map_indices_i = mapping_indices<DomainType>(storage, pde_system, *cell_iter, 0);
+          MappingContainer map_indices_j = mapping_indices<DomainType>(storage, pde_system, *cell_iter, 0);
           
           for (typename MappingContainer::const_iterator map_iter_i = map_indices_i.begin();
               map_iter_i != map_indices_i.end();
@@ -274,13 +278,13 @@ namespace viennafem
                 if (pde_system.unknown(0).size() == 1) //scalar valued unknowns
                 {
                   linear_system(global_index_i) -=
-                    viennadata::access<BoundaryKeyType, double>(bnd_key)(*vocit) //TODO: Better encapsulate boundary value access
+                    bnd_scalar_acc(*vocit) //TODO: Better encapsulate boundary value access
                     * integrator(local_weak_form[local_index_i][local_index_j].lhs());
                 }
                 else //vector valued unknowns
                 {
                   //TODO: Better encapsulate boundary value access
-                  std::vector<double> const & bnd_values = viennadata::access<BoundaryKeyType, std::vector<double> >(bnd_key)(*vocit);
+                  std::vector<double> const & bnd_values = bnd_vector_acc(*vocit);
                   
                   if (bnd_values.size() > 1) //allow homogeneous case without having the data vector initialized
                   {

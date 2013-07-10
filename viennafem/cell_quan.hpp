@@ -59,23 +59,29 @@ namespace viennafem
         typedef cell_quan_constant<CellType, KeyType, DataType>         self_type;
         typedef typename cell_quan_interface<CellType>::numeric_type    numeric_type;
       
+        typedef typename viennadata::result_of::accessor<StorageType, KeyType, DataType, CellType>::type   QuanAccessorType;
+      
       public:
-        cell_quan_constant(KeyType const & key) : key_(key) {}
+        cell_quan_constant(KeyType const & key) : key_(key), 
+          quan_acc(viennadata::accessor<KeyType, DataType, CellType>(storage, key)) {}
         
         numeric_type eval(CellType const & cell, numeric_type /*v*/) const
         {
-          return viennadata::access<KeyType, DataType>(key_)(cell);
+          return quan_acc(cell);
+          //return viennadata::access<KeyType, DataType>(key_)(cell);
         }
 
         numeric_type eval(CellType const & cell, std::vector<numeric_type> const & /*v*/) const
         {
-          return viennadata::access<KeyType, DataType>(key_)(cell);
+          return quan_acc(cell);        
+          //return viennadata::access<KeyType, DataType>(key_)(cell);
         }
 
         cell_quan_interface<CellType> * clone() const { return new self_type(key_); }
         
       private:
-        KeyType key_;
+        KeyType           key_;
+        QuanAccessorType  quan_acc;
     };
     
     /** @brief Implementation of a function which is specified as an expression given in local coordinates on each cell. Expressions are retrieved from ViennaData.
@@ -90,23 +96,29 @@ namespace viennafem
         typedef cell_quan_expr<CellType, KeyType, DataType>             self_type;
         typedef typename cell_quan_interface<CellType>::numeric_type    numeric_type;
       
+        typedef typename viennadata::result_of::accessor<StorageType, KeyType, DataType, CellType>::type   QuanAccessorType;
+      
       public:
-        cell_quan_expr(KeyType const & key) : key_(key) {}
+        cell_quan_expr(KeyType const & key) : key_(key),
+          quan_acc(viennadata::accessor<KeyType, DataType, CellType>(storage, key)) {}
         
         numeric_type eval(CellType const & cell, numeric_type v) const
         {
-          return viennadata::access<KeyType, DataType>(key_)(cell)(v);
+          return quan_acc(cell);        
+          //return viennadata::access<KeyType, DataType>(key_)(cell)(v);
         }
 
         numeric_type eval(CellType const & cell, std::vector<numeric_type> const & v) const
         {
-          return viennadata::access<KeyType, DataType>(key_)(cell)(v);
+          return quan_acc(cell);        
+//          return viennadata::access<KeyType, DataType>(key_)(cell)(v);
         }
 
         cell_quan_interface<CellType> * clone() const { return new self_type(key_); }
         
       private:
         KeyType key_;
+        QuanAccessorType  quan_acc;
     };
     
 

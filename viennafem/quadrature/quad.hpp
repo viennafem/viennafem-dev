@@ -147,8 +147,7 @@ namespace viennafem
   template <typename PDESystemType, typename DomainType>
   viennamath::numerical_quadrature make_quadrature_rule(PDESystemType const & pde_system, DomainType const & /*domain*/)
   {
-    typedef typename DomainType::config_type              Config;
-    typedef typename Config::cell_tag                     CellTag;
+    typedef typename viennagrid::result_of::cell_tag<DomainType>::type    CellTag;
     
     // runtime switcher:
     switch (pde_system.option(0).trial_space_id())

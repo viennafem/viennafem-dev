@@ -11,8 +11,6 @@
    License:    MIT (X11), see file LICENSE in the ViennaMath base directory
 ======================================================================= */
 
-#define VIENNAGRID_WITH_VIENNADATA
-
 // include necessary system headers
 #include <iostream>
 
@@ -23,7 +21,7 @@
 // ViennaGrid includes:
 #include "viennagrid/forwards.hpp"
 #include "viennagrid/config/default_configs.hpp"
-
+#include "viennagrid/io/netgen_reader.hpp"
 
 // ViennaData includes:
 #include "viennadata/api.hpp"
@@ -39,90 +37,124 @@
 #include <boost/numeric/ublas/operation_sparse.hpp>
 
 
-////ViennaCL includes:
-//#ifndef VIENNACL_HAVE_UBLAS
-// #define VIENNACL_HAVE_UBLAS
-//#endif
-//    
-//#include "viennacl/linalg/cg.hpp"
-//#include "viennacl/linalg/norm_2.hpp"
-//#include "viennacl/linalg/prod.hpp"
+//ViennaCL includes:
+#ifndef VIENNACL_HAVE_UBLAS
+ #define VIENNACL_HAVE_UBLAS
+#endif
+    
+#include "viennacl/linalg/cg.hpp"
+#include "viennacl/linalg/norm_2.hpp"
+#include "viennacl/linalg/prod.hpp"
 
 int main()
 {
-  typedef viennagrid::domain_t< viennagrid::config::line_1d >    DomainType;
-
-  typedef viennagrid::result_of::element_range<DomainType, viennagrid::vertex_tag>::type  VertexRange;
-  typedef viennagrid::result_of::iterator<VertexRange>::type                              VertexIterator;
+  typedef viennagrid::domain_t< viennagrid::config::line_1d >                             DomainType;
+  typedef viennagrid::result_of::segmentation<DomainType>::type                           SegmentationType;
+  typedef SegmentationType::iterator                                                      SegmentationIterator;
+  typedef viennagrid::result_of::element<DomainType, viennagrid::vertex_tag>::type        VertexType;  
+  typedef viennagrid::result_of::element_range<DomainType, viennagrid::vertex_tag>::type  VertexContainer;
+  typedef viennagrid::result_of::iterator<VertexContainer>::type                          VertexIterator;
   
-//  typedef boost::numeric::ublas::compressed_matrix<viennafem::numeric_type>  MatrixType;
-//  typedef boost::numeric::ublas::vector<viennafem::numeric_type>             VectorType;
+  typedef boost::numeric::ublas::compressed_matrix<viennafem::numeric_type>  MatrixType;
+  typedef boost::numeric::ublas::vector<viennafem::numeric_type>             VectorType;
 
   typedef viennamath::function_symbol   FunctionSymbol;
   typedef viennamath::equation          Equation;
   
-//  typedef viennafem::boundary_key      BoundaryKey;
-//  
-//  //
-//  // Create a domain from file
-//  //
-//  DomainType my_domain;
-
-//  //my_domain.create_segments(2);
-//  
-//  try
-//  {
-//    viennagrid::io::netgen_reader my_reader;
-//    my_reader(my_domain, "../examples/data/line8.mesh");
-//  }
-//  catch (...)
-//  {
-//    std::cerr << "File-Reader failed. Aborting program..." << std::endl;
-//    return EXIT_FAILURE;
-//  }
-//  
-//  
-//  //
-//  // Specify two PDEs:
-//  //
-//  FunctionSymbol u(0, viennamath::unknown_tag<>());   //an unknown function used for PDE specification
-//  Equation poisson_equ_1 = viennamath::make_equation( viennamath::laplace(u), -1);
-//  Equation poisson_equ_2 = viennamath::make_equation( viennamath::laplace(u), 0);
-
-//  MatrixType system_matrix_1, system_matrix_2;
-//  VectorType load_vector_1, load_vector_2;
+  typedef viennafem::boundary_key      BoundaryKey;
   
-//  //
-//  // Setting boundary information on domain (this should come from device specification)
-//  //
-//  //setting some boundary flags:
-//  VertexContainer vertices = viennagrid::ncells<0>(my_domain);
-//  for (VertexIterator vit = vertices.begin();
-//      vit != vertices.end();
-//      ++vit)
-//  {
-//    //boundary for first equation: Homogeneous Dirichlet everywhere
-//    if ( (*vit)[0] == 0.0 || (*vit)[0] == 1.0 )
-//      viennafem::set_dirichlet_boundary(*vit, 0.0, 0);  //simulation with ID 0 uses homogeneous boundary data
-//    
-//    //boundary for second equation (ID 1): 0 at left boundary, 1 at right boundary
-//    if ( (*vit)[0] == 0.0)
-//      viennafem::set_dirichlet_boundary(*vit, 0.0, 1);
-//    else if ( (*vit)[0] == 1.0)
-//      viennafem::set_dirichlet_boundary(*vit, 1.0, 1);
-//  }
-//  
-//  
-//  //
-//  // Create PDE solver functors: (discussion about proper interface required)
-//  //
-//  viennafem::pde_assembler fem_assembler;
+  //
+  // Create a domain from file
+  //
+  DomainType my_domain;
+  SegmentationType segments(my_domain);
+  
+  //
+  // Create a storage object
+  //
+  typedef viennadata::storage<> StorageType;
+  StorageType   storage;
+  
+  try
+  {
+    viennagrid::io::netgen_reader my_reader;
+    my_reader(my_domain, segments, "../examples/data/line8.mesh");
+  }
+  catch (...)
+  {
+    std::cerr << "File-Reader failed. Aborting program..." << std::endl;
+    return EXIT_FAILURE;
+  }
+  
+  
+  //
+  // Specify two PDEs:
+  //
+  FunctionSymbol u(0, viennamath::unknown_tag<>());   //an unknown function used for PDE specification
+  Equation poisson_equ_1 = viennamath::make_equation( viennamath::laplace(u), -1);
+  Equation poisson_equ_2 = viennamath::make_equation( viennamath::laplace(u), 0);
 
-//  
-//  //
-//  // Solve system and write solution vector to pde_result:
-//  // (discussion about proper interface required. Introduce a pde_result class?)
-//  //
+  MatrixType system_matrix_1, system_matrix_2;
+  VectorType load_vector_1, load_vector_2;
+  
+  //
+  // Setting boundary information on domain (this should come from device specification)
+  //
+  //setting some boundary flags:
+  VertexContainer vertices = viennagrid::elements<VertexType>(my_domain);  
+  for (VertexIterator vit = vertices.begin();
+      vit != vertices.end();
+      ++vit)
+  {
+    //boundary for first equation: Homogeneous Dirichlet everywhere
+    if ( (viennagrid::point(my_domain, *vit)[0] == 0.0) || (viennagrid::point(my_domain, *vit)[0] == 1.0) )
+      viennafem::set_dirichlet_boundary(storage, *vit, 0.0, 0);  //simulation with ID 0 uses homogeneous boundary data
+    
+    //boundary for second equation (ID 1): 0 at left boundary, 1 at right boundary
+    if ( viennagrid::point(my_domain, *vit)[0] == 0.0)
+      viennafem::set_dirichlet_boundary(storage, *vit, 0.0, 1);
+    else if ( viennagrid::point(my_domain, *vit)[0] == 1.0)
+      viennafem::set_dirichlet_boundary(storage, *vit, 1.0, 1);
+  }
+  
+  
+  //
+  // Create PDE solver functors: (discussion about proper interface required)
+  //
+  viennafem::pde_assembler<StorageType> fem_assembler(storage);
+
+  
+  //
+  // Solve system and write solution vector to pde_result:
+  // (discussion about proper interface required. Introduce a pde_result class?)
+  //
+  for(SegmentationIterator sit = segments.begin(); sit != segments.end(); sit++)
+  {
+    fem_assembler(viennafem::make_linear_pde_system(poisson_equ_1, 
+                                                    u,
+                                                    viennafem::make_linear_pde_options(0, 
+                                                                                       viennafem::lagrange_tag<1>(),
+                                                                                       viennafem::lagrange_tag<1>())
+                                                  ),
+                  *sit,
+                  system_matrix_1,
+                  load_vector_1
+                );
+//    
+//    fem_assembler(viennafem::make_linear_pde_system(poisson_equ_2, 
+//                                                    u,
+//                                                    viennafem::make_linear_pde_options(1, 
+//                                                                                       viennafem::lagrange_tag<1>(),
+//                                                                                       viennafem::lagrange_tag<1>())
+//                                                  ),
+//                  *sit,
+//                  system_matrix_2,
+//                  load_vector_2
+//                );  
+  }
+  
+  
+  
 //  for (size_t i=0; i<my_domain.segments().size(); ++i)
 //  {
 //    fem_assembler(viennafem::make_linear_pde_system(poisson_equ_1, 
@@ -147,7 +179,7 @@ int main()
 //                  load_vector_2
 //                );
 //  }
-//  
+  
 //  VectorType pde_result_1 = viennacl::linalg::solve(system_matrix_1, load_vector_1, viennacl::linalg::cg_tag());
 //  std::cout << "* solve(): Residual: " << norm_2(prod(system_matrix_1, pde_result_1) - load_vector_1) << std::endl;
 

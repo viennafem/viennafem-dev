@@ -56,11 +56,9 @@ namespace viennafem
                       SystemType & pde_system,
                       DomainType & domain)
   {
-    typedef typename DomainType::config_type              Config;
-    typedef typename Config::cell_tag                     CellTag;
-    
-    typedef typename viennagrid::result_of::point<Config>::type                                       PointType;
+    typedef typename viennagrid::result_of::point<DomainType>::type                                   PointType;
     typedef typename viennagrid::result_of::element<DomainType, viennagrid::vertex_tag>::type         VertexType;    
+    typedef typename viennagrid::result_of::cell_tag<DomainType>::type                                CellTag;
     typedef typename viennagrid::result_of::element<DomainType, CellTag>::type                        CellType;
 
     typedef typename viennagrid::result_of::element_range<DomainType, viennagrid::vertex_tag>::type   VertexRange;
@@ -79,9 +77,9 @@ namespace viennafem
     //eventually, map indices need to be set to invalid first:
     if (!init_done)
     {
-      typedef typename detail::extract_domain<DomainType>::type                                         TrueDomainType;
-      typedef typename viennagrid::result_of::element_range<DomainType, viennagrid::vertex_tag>::type   DomainVertexContainer;
-      typedef typename viennagrid::result_of::iterator<DomainVertexContainer>::type                     DomainVertexIterator;
+      typedef typename detail::extract_domain<DomainType>::type                                             TrueDomainType;
+      typedef typename viennagrid::result_of::element_range<TrueDomainType, viennagrid::vertex_tag>::type   DomainVertexContainer;
+      typedef typename viennagrid::result_of::iterator<DomainVertexContainer>::type                         DomainVertexIterator;
       
       DomainVertexContainer vertices = viennagrid::elements<VertexType>(detail::extract_domain<DomainType>::apply(domain));  
       for (DomainVertexIterator vit = vertices.begin();
@@ -126,26 +124,24 @@ namespace viennafem
 
   /** @brief Returns an array of mapping indices for the provided cell.
    */
-  template <typename StorageType, typename SystemType, typename CellType>
+  template <typename DomainType, typename StorageType, typename SystemType, typename CellType>
   std::vector<long> mapping_indices(StorageType& storage, SystemType & pde_system, CellType const & cell, std::size_t pde_id = 0)
   {
-    typedef typename CellType::config_type              Config;
-    typedef typename Config::cell_tag                     CellTag;
-
-    typedef typename viennagrid::result_of::element<Config, viennagrid::vertex_tag>::type            VertexType;
-    typedef typename viennagrid::result_of::element_range<CellType, viennagrid::vertex_tag>::type    VertexOnCellContainer;
-    typedef typename viennagrid::result_of::iterator<VertexOnCellContainer>::type                    VertexOnCellIterator;
+    typedef typename viennagrid::result_of::cell_tag<DomainType>::type                                CellTag;
+    typedef typename viennagrid::result_of::element<DomainType, viennagrid::vertex_tag>::type         VertexType;
+    typedef typename viennagrid::result_of::const_element_range<CellType, VertexType>::type           VertexOnCellContainer;
+    typedef typename viennagrid::result_of::const_iterator<VertexOnCellContainer>::type               VertexOnCellIterator;
     
 //    typedef typename viennagrid::result_of::const_ncell_range<CellType, 0>::type                 VertexOnCellContainer;
 //    typedef typename viennagrid::result_of::iterator<VertexOnCellContainer>::type               VertexOnCellIterator;
 
     typedef typename SystemType::mapping_key_type   MappingKeyType;
-    typedef std::vector<long>                                   MappingContainer;
+    typedef std::vector<long>                       MappingContainer;
     
    
     MappingKeyType map_key(pde_system.option(pde_id).data_id());
 
-    VertexOnCellContainer vertices_on_cell = viennagrid::elements<VertexType>(cell);  
+    VertexOnCellContainer const& vertices_on_cell = viennagrid::elements<VertexType>(cell);  
     
     std::size_t unknown_components = pde_system.unknown(pde_id).size();
     //std::cout << "* mapping_indices() with space_id = " << space_id << " and unknown_components = " << unknown_components << std::endl;

@@ -234,7 +234,7 @@ namespace viennafem
   struct dt_dx_key 
   {
     // When using a trivial key operator< MUST return false
-    bool operator<(dt_dx_key const &)
+    bool operator<(dt_dx_key<0,0> const &)
     {
         return false;
     }
@@ -258,7 +258,6 @@ namespace viennafem
     {
         return false;
     }  
-  
   };
   
   /** @brief Convenience overload for converting a det_dF_dt_key to a string and streaming it to an output-stream */
@@ -269,7 +268,7 @@ namespace viennafem
   }
   
   /** @brief The main facility for computing transformations from the reference element to the physical element   */
-  template <typename CellTag>
+  template <typename DomainType, typename StorageType, typename CellTag>
   struct dt_dx_handler;
   
 

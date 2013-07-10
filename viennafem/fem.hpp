@@ -27,8 +27,6 @@
 #include "viennafem/linear_pde_system.hpp"
 #include "viennafem/linear_pde_options.hpp"
 #include "viennafem/pde_assembler.hpp"
-#include "viennafem/transform.hpp"
-#include "viennafem/unknown_config.hpp"
 #include "viennafem/weak_form.hpp"
 
 

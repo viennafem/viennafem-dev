@@ -22,8 +22,8 @@
 #include "viennafem/bases/triangle.hpp"
 #include "viennafem/transform/dtdx_interval.hpp"
 #include "viennafem/transform/dtdx_triangle.hpp"
-#include "viennafem/transform/dtdx_tetrahedron.hpp"
 #include "viennafem/transform/dtdx_quadrilateral.hpp"
+#include "viennafem/transform/dtdx_tetrahedron.hpp"
 #include "viennafem/transform/dtdx_hexahedron.hpp"
 #include "viennafem/weak_form.hpp"
 #include "viennafem/linear_pde_system.hpp"
@@ -98,10 +98,9 @@ namespace viennafem
                       VectorT    & load_vector
                      ) const
       {
-        typedef typename DomainType::config_type              Config;
-        typedef typename Config::cell_tag                     CellTag;
-        
-        typedef typename viennagrid::result_of::point<Config>::type                                       PointType;
+        typedef typename viennagrid::result_of::cell_tag<DomainType>::type CellTag;
+      
+        typedef typename viennagrid::result_of::point<DomainType>::type                                   PointType;
         typedef typename viennagrid::result_of::element<DomainType, viennagrid::vertex_tag>::type         VertexType;
         typedef typename viennagrid::result_of::element<DomainType, CellTag>::type                        CellType;
 
@@ -127,7 +126,8 @@ namespace viennafem
      #endif
         std::vector<EquationType> temp(1); temp[0] = weak_form_general;
         log_weak_form(temp, pde_system);
-        EquationType weak_form = viennamath::apply_coordinate_system(viennamath::cartesian<Config::coordinate_system_tag::dim>(), weak_form_general);
+        EquationType weak_form = viennamath::apply_coordinate_system(viennamath::cartesian< PointType::dim >(), weak_form_general);
+        //EquationType weak_form = viennamath::apply_coordinate_system(viennamath::cartesian<Config::coordinate_system_tag::dim>(), weak_form_general);
         temp[0] = weak_form;
         log_coordinated_weak_form(temp, pde_system);
 
@@ -138,6 +138,14 @@ namespace viennafem
      
         typedef typename reference_cell_for_basis<CellTag, viennafem::lagrange_tag<1> >::type    ReferenceCell;
         
+        //
+        // Create accessors for performance in the subsequent dt_dx_handler step
+        //
+        
+        //viennafem::dtdx_assigner<DomainType, StorageType, ReferenceCell>::apply(domain, storage);
+        
+        viennafem::dt_dx_handler<DomainType, StorageType, ReferenceCell>  dt_dx_handler(domain, storage);
+        
         //fill with cell quantities 
         CellContainer cells = viennagrid::elements<CellType>(domain);  
         for (CellIterator cell_iter = cells.begin();
@@ -146,7 +154,8 @@ namespace viennafem
         {
           //cell_iter->print_short();
           //viennadata::access<example_key, double>()(*cell_iter) = i; 
-          viennafem::dt_dx_handler<ReferenceCell>::apply(storage, *cell_iter);
+          //viennafem::dt_dx_handler<ReferenceCell>::apply(storage, *cell_iter);
+          dt_dx_handler(*cell_iter);
         }
 
      #ifdef VIENNAFEM_DEBUG        
