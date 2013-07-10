@@ -27,7 +27,7 @@
 //#include "viennafem/transform/dtdx_tetrahedron.hpp"
 #include "viennafem/weak_form.hpp"
 #include "viennafem/linear_pde_options.hpp"
-//#include "viennafem/log/latex.hpp"
+#include "viennafem/log/latex.hpp"
 
 //ViennaMath includes:
 #include "viennamath/manipulation/apply_coordinate_system.hpp"
@@ -67,7 +67,7 @@ namespace viennafem
       typedef viennamath::rt_equation<InterfaceType>           equation_type;
       typedef viennamath::rt_function_symbol<InterfaceType>    unknown_type;
       typedef viennafem::linear_pde_options                 option_type;
-      //typedef viennafem::latex_logger<InterfaceType>        logger_type;
+      typedef viennafem::latex_logger<InterfaceType>        logger_type;
       
       linear_pde_system(std::string const & filename) {} //: logger_(filename) {}
       
@@ -88,13 +88,13 @@ namespace viennafem
       
       std::size_t size() const { return pdes_.size(); }
       
-      //logger_type & logger() const { return logger_; }  //TODO: Logger should move to some other place
+      logger_type & logger() const { return logger_; }  //TODO: Logger should move to some other place
       
     private:
       std::vector<viennamath::rt_equation<InterfaceType> >                       pdes_;
       std::vector<std::vector<viennamath::rt_function_symbol<InterfaceType> > >  unknowns_;
       std::vector<viennafem::linear_pde_options>                                 options_;
-      //mutable logger_type                                                        logger_;
+      mutable logger_type                                                        logger_;
   };
   
   /** @brief Convenience function for the generation of a linear PDE for a scalar-valued unknown. */

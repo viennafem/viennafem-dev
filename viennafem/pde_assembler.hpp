@@ -29,7 +29,7 @@
 #include "viennafem/linear_pde_system.hpp"
 #include "viennafem/linear_pde_options.hpp"
 #include "viennafem/detail/assembler.hpp"
-//#include "viennafem/log/api.hpp"
+#include "viennafem/log/api.hpp"
 
 
 ////ViennaMath includes:
@@ -119,17 +119,17 @@ namespace viennafem
      #ifdef VIENNAFEM_DEBUG
         std::cout << "Strong form: " << pde_system.pde(0) << std::endl;
      #endif
-        //log_strong_form(pde_system);
+        log_strong_form(pde_system);
         EquationType weak_form_general = viennafem::make_weak_form(pde_system.pde(0));  
      #ifdef VIENNAFEM_DEBUG        
         std::cout << "* pde_solver::operator(): Using weak form general: " << weak_form_general << std::endl;
      #endif
         std::vector<EquationType> temp(1); temp[0] = weak_form_general;
-        //log_weak_form(temp, pde_system);
+        log_weak_form(temp, pde_system);
         EquationType weak_form = viennamath::apply_coordinate_system(viennamath::cartesian< PointType::dim >(), weak_form_general);
         //EquationType weak_form = viennamath::apply_coordinate_system(viennamath::cartesian<Config::coordinate_system_tag::dim>(), weak_form_general);
         temp[0] = weak_form;
-        //log_coordinated_weak_form(temp, pde_system);
+        log_coordinated_weak_form(temp, pde_system);
 
      #ifdef VIENNAFEM_DEBUG        
         std::cout << "* pde_solver::operator(): Using weak form " << weak_form << std::endl;
@@ -203,7 +203,7 @@ namespace viennafem
      #endif
         EquationType transformed_weak_form = viennafem::transform_to_reference_cell<CellType>(storage, weak_form, pde_system);
         temp[0] = transformed_weak_form;
-        //log_transformed_weak_form<CellType>(storage, temp, pde_system);
+        log_transformed_weak_form<CellType>(storage, temp, pde_system);
         
         std::cout << "* pde_solver::operator(): Transformed weak form:" << std::endl;
         std::cout << transformed_weak_form << std::endl;
