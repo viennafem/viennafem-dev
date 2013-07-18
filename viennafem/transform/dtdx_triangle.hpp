@@ -66,7 +66,7 @@ namespace viennafem
       assert(det_dF_dt > 0);
       //std::cout << "dt_dx triangle!" << std::endl;
 
-       det_dF_dt_acc(cell) = det_dF_dt;
+      det_dF_dt_acc(cell) = det_dF_dt;
 
       //Step 2: store partial derivatives:
       dt_dx_key_00_acc(cell) =   (p2[1] - p0[1]) / det_dF_dt;

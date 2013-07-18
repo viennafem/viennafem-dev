@@ -80,8 +80,9 @@ int main()
     viennagrid::io::netgen_reader my_reader;
     my_reader(my_domain, segments, "../examples/data/square512.mesh");
   }
-  catch (...)
+  catch (std::exception const & e)
   {
+    std::cout << "what() : " << e.what() << std::endl;
     std::cerr << "File-Reader failed. Aborting program..." << std::endl;
     return EXIT_FAILURE;
   }
