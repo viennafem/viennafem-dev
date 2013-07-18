@@ -277,48 +277,48 @@ namespace viennafem
 
   //TODO: Check whether cell_quan can be injected directly into existing ViennaMath overloads
 
-//  /** @brief Operator overload for the multiplication of a cell quantity with a ViennaMath variable */
-//  template <typename CellType, typename InterfaceType>
-//  viennamath::rt_expr<InterfaceType> operator*(viennamath::rt_variable<InterfaceType> const & lhs,
-//                               cell_quan<CellType, InterfaceType> const & rhs)
-//  {
-//    return viennamath::rt_expr<InterfaceType>(new viennamath::rt_binary_expr<InterfaceType>(lhs.clone(),
-//                                                            new viennamath::op_binary<viennamath::op_mult<viennamath::default_numeric_type>, InterfaceType >(),
-//                                                            rhs.clone()));
-//  }
-//
-//
-//  /** @brief Operator overload for the multiplication of a cell quantity with a ViennaMath expression wrapper */
-//  template <typename CellType, typename InterfaceType>
-//  viennamath::rt_expr<InterfaceType> operator*(viennamath::rt_expr<InterfaceType> const & lhs,
-//                                               cell_quan<CellType, InterfaceType> const & rhs)
-//  {
-//    return viennamath::rt_expr<InterfaceType>(new viennamath::rt_binary_expr<InterfaceType>(lhs.get()->clone(),
-//                                                            new viennamath::op_binary<viennamath::op_mult<viennamath::default_numeric_type>, InterfaceType >(),
-//                                                            rhs.clone()));
-//  }
-//
-//  /** @brief Operator overload for the multiplication of a cell quantity with a ViennaMath unary expression */
-//  template <typename CellType, typename InterfaceType>
-//  viennamath::rt_expr<InterfaceType> operator*(cell_quan<CellType, InterfaceType> const & lhs,
-//                                               viennamath::rt_unary_expr<InterfaceType> const & rhs
-//                               )
-//  {
-//    return viennamath::rt_expr<InterfaceType>(new viennamath::rt_binary_expr<InterfaceType>(lhs.clone(),
-//                                                            new viennamath::op_binary<viennamath::op_mult<viennamath::default_numeric_type>, InterfaceType >(),
-//                                                            rhs.clone()));
-//  }
+  /** @brief Operator overload for the multiplication of a cell quantity with a ViennaMath variable */
+  template <typename CellType, typename InterfaceType>
+  viennamath::rt_expr<InterfaceType> operator*(viennamath::rt_variable<InterfaceType> const & lhs,
+                                               cell_quan<CellType, InterfaceType> const & rhs)
+  {
+    return viennamath::rt_expr<InterfaceType>(new viennamath::rt_binary_expr<InterfaceType>(lhs.clone(),
+                                              new viennamath::op_binary<viennamath::op_mult<viennamath::default_numeric_type>, InterfaceType >(),
+                                              rhs.clone()));
+  }
 
-//  /** @brief Operator overload for the multiplication of a cell quantity with a ViennaMath binary expression */
-//  template <typename CellType, typename InterfaceType>
-//  viennamath::rt_expr<InterfaceType> operator*(cell_quan<CellType, InterfaceType> const & lhs,
-//                                               viennamath::rt_binary_expr<InterfaceType> const & rhs
-//                               )
-//  {
-//    return viennamath::rt_expr<InterfaceType>(new viennamath::rt_binary_expr<InterfaceType>(lhs.clone(),
-//                                                            new viennamath::op_binary<viennamath::op_mult<viennamath::default_numeric_type>, InterfaceType >(),
-//                                                            rhs.clone()));
-//  }
+
+  /** @brief Operator overload for the multiplication of a cell quantity with a ViennaMath expression wrapper */
+  template <typename CellType, typename InterfaceType>
+  viennamath::rt_expr<InterfaceType> operator*(viennamath::rt_expr<InterfaceType> const & lhs,
+                                               cell_quan<CellType, InterfaceType> const & rhs)
+  {
+    return viennamath::rt_expr<InterfaceType>(new viennamath::rt_binary_expr<InterfaceType>(lhs.get()->clone(),
+                                              new viennamath::op_binary<viennamath::op_mult<viennamath::default_numeric_type>, InterfaceType >(),
+                                              rhs.clone()));
+  }
+
+  /** @brief Operator overload for the multiplication of a cell quantity with a ViennaMath unary expression */
+  template <typename CellType, typename InterfaceType>
+  viennamath::rt_expr<InterfaceType> operator*(cell_quan<CellType, InterfaceType> const & lhs,
+                                               viennamath::rt_unary_expr<InterfaceType> const & rhs
+                               )
+  {
+    return viennamath::rt_expr<InterfaceType>(new viennamath::rt_binary_expr<InterfaceType>(lhs.clone(),
+                                              new viennamath::op_binary<viennamath::op_mult<viennamath::default_numeric_type>, InterfaceType >(),
+                                              rhs.clone()));
+  }
+
+  /** @brief Operator overload for the multiplication of a cell quantity with a ViennaMath binary expression */
+  template <typename CellType, typename InterfaceType>
+  viennamath::rt_expr<InterfaceType> operator*(cell_quan<CellType, InterfaceType> const & lhs,
+                                               viennamath::rt_binary_expr<InterfaceType> const & rhs
+                               )
+  {
+    return viennamath::rt_expr<InterfaceType>(new viennamath::rt_binary_expr<InterfaceType>(lhs.clone(),
+                                              new viennamath::op_binary<viennamath::op_mult<viennamath::default_numeric_type>, InterfaceType >(),
+                                              rhs.clone()));
+  }
 
 }
 #endif
