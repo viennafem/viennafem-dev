@@ -244,7 +244,7 @@ namespace viennafem
       {
         detail::cell_quan_wrapper<CellType, numeric_type> temp(
           new detail::cell_quan_constant<CellType, typename viennadata::result_of::accessor<StorageType, KeyType, numeric_type, CellType>::type >(
-            viennadata::accessor<KeyType, numeric_type, CellType>(storage, k)
+            viennadata::make_accessor<KeyType, numeric_type, CellType>(storage, k)
           )
         );
         accessor = temp;
@@ -262,7 +262,7 @@ namespace viennafem
       {
         detail::cell_quan_wrapper<CellType, numeric_type> temp(
           new detail::cell_quan_expr<CellType, typename viennadata::result_of::accessor<StorageType, KeyType, numeric_type, CellType>::type >(
-            viennadata::accessor<KeyType, numeric_type, CellType>(storage, k)
+            viennadata::make_accessor<KeyType, numeric_type, CellType>(storage, k)
           )
         );
         accessor = temp;

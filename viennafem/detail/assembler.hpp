@@ -223,10 +223,10 @@ namespace viennafem
         //viennamath::numerical_quadrature integrator(new viennafem::rt_gauss_quad_element<ReferenceCell, 3, typename EquationType::interface_type>());
         
         typedef typename viennadata::result_of::accessor<StorageType, BoundaryKeyType, viennafem::numeric_type, VertexType>::type  BoundaryScalarAccessorType;
-        BoundaryScalarAccessorType  bnd_scalar_acc = viennadata::accessor<BoundaryKeyType, viennafem::numeric_type, VertexType>(storage, bnd_key);
+        BoundaryScalarAccessorType  bnd_scalar_acc = viennadata::make_accessor<BoundaryKeyType, viennafem::numeric_type, VertexType>(storage, bnd_key);
         
         typedef typename viennadata::result_of::accessor<StorageType, BoundaryKeyType, std::vector<viennafem::numeric_type>, VertexType>::type  BoundaryVectorAccessorType;
-        BoundaryVectorAccessorType  bnd_vector_acc = viennadata::accessor<BoundaryKeyType, std::vector<viennafem::numeric_type>, VertexType>(storage, bnd_key);
+        BoundaryVectorAccessorType  bnd_vector_acc = viennadata::make_accessor<BoundaryKeyType, std::vector<viennafem::numeric_type>, VertexType>(storage, bnd_key);
         
         CellContainer cells = viennagrid::elements<CellType>(domain);  
         for (CellIterator cell_iter = cells.begin();

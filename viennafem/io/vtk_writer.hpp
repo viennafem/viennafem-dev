@@ -69,10 +69,10 @@ namespace viennafem
         BoundaryKeyType bnd_key(id);
 
         typename viennadata::result_of::accessor<const StorageType, viennafem::mapping_key, long, CellType>::type cell_mapping_accessor =
-          viennadata::accessor<viennafem::mapping_key, long, CellType>(storage, map_key);
+          viennadata::make_accessor<viennafem::mapping_key, long, CellType>(storage, map_key);
         
         typename viennadata::result_of::accessor<const StorageType, BoundaryKeyType, double, CellType>::type boundary_accessor =
-          viennadata::accessor<BoundaryKeyType, double, CellType>(storage, bnd_key);
+          viennadata::make_accessor<BoundaryKeyType, double, CellType>(storage, bnd_key);
 
         std::stringstream ss;
         ss << "fvm_result" << id;
