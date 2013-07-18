@@ -42,15 +42,9 @@ namespace viennafem
                                     StorageType const & storage,
                                     std::vector<long> id_vector)
     {
-//       typedef typename DomainType::config_type                                              ConfigType;
-//       typedef typename ConfigType::cell_tag                                                 CellTag;
-
-      typedef typename viennagrid::result_of::cell_tag<DomainType>::type CellTag;
-
-      typedef typename viennagrid::result_of::element<DomainType, CellTag>::type         CellType;
-
-      typedef typename viennagrid::result_of::const_element_range<DomainType, CellTag>::type   CellContainer;
-      typedef typename viennagrid::result_of::iterator<CellContainer>::type                       CellIterator;
+      typedef typename viennagrid::result_of::element<DomainType, viennagrid::vertex_tag>::type               VertexType;
+      typedef typename viennagrid::result_of::const_element_range<DomainType, viennagrid::vertex_tag>::type   VertexContainer;
+      typedef typename viennagrid::result_of::iterator<VertexContainer>::type                                 VertexIterator;
 
       typedef viennafem::mapping_key          MappingKeyType;
       typedef viennafem::boundary_key         BoundaryKeyType;
@@ -58,48 +52,46 @@ namespace viennafem
       std::cout << "* write_solution_to_VTK_file(): Writing result on mesh for later export" << std::endl;
       viennagrid::io::vtk_writer<DomainType> my_vtk_writer;
 
-
-
       std::map< std::string, std::deque<double> > output_values;
-
       for (std::size_t i=0; i<id_vector.size(); ++i)
       {
         long id = id_vector[i];
-        MappingKeyType map_key(id);
+
+        MappingKeyType  map_key(id);
         BoundaryKeyType bnd_key(id);
 
-        typename viennadata::result_of::accessor<const StorageType, viennafem::mapping_key, long, CellType>::type cell_mapping_accessor =
-          viennadata::make_accessor<viennafem::mapping_key, long, CellType>(storage, map_key);
+        typename viennadata::result_of::accessor<const StorageType, viennafem::mapping_key, long, VertexType>::type   mapping_accessor =
+          viennadata::make_accessor<viennafem::mapping_key, long, VertexType>(storage, map_key);
 
-        typename viennadata::result_of::accessor<const StorageType, BoundaryKeyType, double, CellType>::type boundary_accessor =
-          viennadata::make_accessor<BoundaryKeyType, double, CellType>(storage, bnd_key);
+        typename viennadata::result_of::accessor<const StorageType, BoundaryKeyType, double, VertexType>::type        boundary_accessor =
+          viennadata::make_accessor<BoundaryKeyType, double, VertexType>(storage, bnd_key);
 
         std::stringstream ss;
-        ss << "fvm_result" << id;
+        ss << "fem_result" << id;
         std::string result_string = ss.str(); // also used for passing staff over to VTK
 
-        typename viennagrid::result_of::accessor< std::deque<double>, CellType >::type output_value_accessor( output_values[result_string] );
+        typename viennagrid::result_of::accessor< std::deque<double>, VertexType >::type output_value_accessor( output_values[result_string] );
 
-        CellContainer cells = viennagrid::elements(domain);
-        for (CellIterator cit = cells.begin();
-                          cit != cells.end();
-                        ++cit)
+        VertexContainer vertices = viennagrid::elements<VertexType>(domain);
+        for (VertexIterator vit = vertices.begin();
+                            vit != vertices.end();
+                          ++vit)
         {
-          long cur_index = cell_mapping_accessor(*cit);
+          long cur_index = mapping_accessor(*vit);
           if (cur_index > -1)
-            output_value_accessor(*cit) = result[cur_index];
+            output_value_accessor(*vit) = result[cur_index];
           else //use Dirichlet boundary data:
           {
             // TODO if Accessor concept takes care of that -> change!
-            if (boundary_accessor.find(*cit))
-              output_value_accessor(*cit) = boundary_accessor(*cit);
+            if (boundary_accessor.find(*vit))
+              output_value_accessor(*vit) = boundary_accessor(*vit);
             else
-              output_value_accessor(*cit) = false;
+              output_value_accessor(*vit) = false;
           }
-//             output_value_accessor(*cit) = boundary_accessor(*cit);
+          //output_value_accessor(*vit) = boundary_accessor(*vit);
         }
 
-        my_vtk_writer.add_scalar_data_on_cells( output_value_accessor, result_string );
+        my_vtk_writer.add_scalar_data_on_vertices( output_value_accessor, result_string );
       }
 
       std::cout << "* write_solution_to_VTK_file(): Writing data to '"
