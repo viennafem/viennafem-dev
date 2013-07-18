@@ -142,13 +142,13 @@ namespace viennafem
   //
   // Public interface:
   //
-  
+
   /** @brief Convenience function which returns a suitable quadrature rule for the given PDE(s) and the domain */
   template <typename PDESystemType, typename DomainType>
   viennamath::numerical_quadrature make_quadrature_rule(PDESystemType const & pde_system, DomainType const & /*domain*/)
   {
     typedef typename viennagrid::result_of::cell_tag<DomainType>::type    CellTag;
-    
+
     // runtime switcher:
     switch (pde_system.option(0).trial_space_id())
     {
@@ -159,14 +159,14 @@ namespace viennafem
       case space_to_id< lagrange_tag<3> >::value:
           return detail::make_quadrature_rule_impl<typename reference_cell_for_basis<CellTag, viennafem::lagrange_tag<3> >::type>(lagrange_tag<3>());
     }
-    
+
     std::cerr << "make_quadrature_rule(): Cannot derive quadrature rule!" << std::endl;
     throw "Cannot derive quadrature rule!";
-    
+
     return viennamath::numerical_quadrature(NULL);
   }
-  
-  
+
+
 }
 
 

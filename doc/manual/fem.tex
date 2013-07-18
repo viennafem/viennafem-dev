@@ -2,13 +2,13 @@
 \chapter{The Finite Element Solver}  \label{chap:fem}
 
 In this chapter all steps required for solving a PDE using the finite element method in {\ViennaFEM} are discussed.
-Basically, the discussion follows the tutorials in \lstinline|examples/tutorial/|. 
+Basically, the discussion follows the tutorials in \lstinline|examples/tutorial/|.
 Familiarity with the very basics of the finite element method is expected. However, since {\ViennaFEM} aims at hiding unimportant low-level details from the
 user, no detailed knowledge is required.
 
 \section{Grid Setup}
 The first step is to set up the discrete grid using {\ViennaGrid},
-which is accomplished by reading the mesh from a file. 
+which is accomplished by reading the mesh from a file.
 File readers for the VTK format \cite{VTK,VTKfileformat} and the Netgen legacy format \cite{netgen} are provided by {\ViennaGrid}.
 The domain type is instantiated by first retrieving the domain type, and then by instantiating the domain as usual:
 \begin{lstlisting}
@@ -34,9 +34,9 @@ Boundary conditions are imposed by interpolation at boundary vertices. Using {\V
 calling the function \lstinline|set_dirichlet_boundary()| from {\ViennaFEM} for the respective vertices. For example, to specify inhomogeneous Dirichlet
 boundary conditions $ = 1$ for all vertices with $x$-coordinate equal to zero, the required code is:
 \begin{lstlisting}
- typedef viennagrid::result_of::ncell_range<DomainType, 0>::type  
+ typedef viennagrid::result_of::ncell_range<DomainType, 0>::type
                                                            VertexContainer;
- typedef viennagrid::result_of::iterator<VertexContainer>::type 
+ typedef viennagrid::result_of::iterator<VertexContainer>::type
                                                            VertexIterator;
 
  VertexContainer vertices = viennagrid::ncells<0>(my_domain);
@@ -59,7 +59,7 @@ functionality from {\ViennaGrid} can be used.
 
 
 \section{PDE Specification}
-The actual PDE to be solved is specified using the symbolic math library {\ViennaMath}. 
+The actual PDE to be solved is specified using the symbolic math library {\ViennaMath}.
 Either the strong form or the weak form can be specified. For the case of the Poisson equation
 \begin{align}
  \Delta u = -1 \ ,
@@ -77,7 +77,7 @@ The values of $f$ are accessed via objects of type \lstinline|cell_quan<T>|, whe
 domain:
 \begin{lstlisting}
   viennafem::cell_quan<CellType>  f;
-  f.wrap_constant( data_key );  
+  f.wrap_constant( data_key );
 \end{lstlisting}
 Here, \lstinline|data_key| denotes the key to be used in order to access the values of $f$ of type \lstinline|double| from the respective cell.
 
@@ -135,7 +135,7 @@ For a visualization of results, a VTK exporter is included in {\ViennaFEM} in th
 \begin{lstlisting}
  write_solution_to_VTK_file(pde_result, "filename", my_domain, 0);
 \end{lstlisting}
-The first argument is the computed solution vector, the second is the filename, the third is the domain object, and the forth parameter is the simulation ID (optional, defaults to $0$). 
+The first argument is the computed solution vector, the second is the filename, the third is the domain object, and the forth parameter is the simulation ID (optional, defaults to $0$).
 
 
 \section{{\LaTeX} Simulation Protocol}

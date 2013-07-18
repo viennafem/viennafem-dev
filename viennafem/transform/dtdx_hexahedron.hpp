@@ -34,12 +34,12 @@ namespace viennafem
   struct dt_dx_handler <DomainType, StorageType, viennafem::unit_cube>
   {
     public:
-      
+
     typedef typename viennagrid::result_of::cell_tag<DomainType>::type                    CellTag;
-    typedef typename viennagrid::result_of::element<DomainType, CellTag>::type            CellType;  
+    typedef typename viennagrid::result_of::element<DomainType, CellTag>::type            CellType;
     typedef typename viennagrid::result_of::point<DomainType>::type                       PointType;
     typedef typename viennagrid::result_of::default_point_accessor<DomainType>::type      PointAccessorType;
-    
+
     typedef typename viennadata::result_of::accessor<StorageType, det_dF_dt_key,   viennafem::numeric_type, CellType>::type   det_dF_dt_AccessorType;
     typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<0, 0>, viennafem::numeric_type, CellType>::type   dt_dx_key_00_AccessorType;
     typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<0, 1>, viennafem::numeric_type, CellType>::type   dt_dx_key_01_AccessorType;
@@ -50,10 +50,10 @@ namespace viennafem
     typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<2, 0>, viennafem::numeric_type, CellType>::type   dt_dx_key_20_AccessorType;
     typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<2, 1>, viennafem::numeric_type, CellType>::type   dt_dx_key_21_AccessorType;
     typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<2, 2>, viennafem::numeric_type, CellType>::type   dt_dx_key_22_AccessorType;
-      
+
     dt_dx_handler(DomainType& domain, StorageType& storage) : pnt_acc(viennagrid::default_point_accessor(domain))
     {
-    
+
       det_dF_dt_acc    = viennadata::make_accessor<det_dF_dt_key,   viennafem::numeric_type, CellType>(storage, det_dF_dt_key());
       dt_dx_key_00_acc = viennadata::make_accessor<dt_dx_key<0, 0>, viennafem::numeric_type, CellType>(storage, dt_dx_key<0, 0>());
       dt_dx_key_01_acc = viennadata::make_accessor<dt_dx_key<0, 1>, viennafem::numeric_type, CellType>(storage, dt_dx_key<0, 1>());
@@ -65,7 +65,7 @@ namespace viennafem
       dt_dx_key_21_acc = viennadata::make_accessor<dt_dx_key<2, 1>, viennafem::numeric_type, CellType>(storage, dt_dx_key<2, 1>());
       dt_dx_key_22_acc = viennadata::make_accessor<dt_dx_key<2, 2>, viennafem::numeric_type, CellType>(storage, dt_dx_key<2, 2>());
     }
-      
+
     template <typename CellType>
     void operator()(CellType const & cell)
     {
@@ -77,7 +77,7 @@ namespace viennafem
       PointType const& p5 = pnt_acc( viennagrid::vertices(cell)[5] );
       PointType const& p6 = pnt_acc( viennagrid::vertices(cell)[6] );
       PointType const& p7 = pnt_acc( viennagrid::vertices(cell)[7] );
-      
+
       // Write mapping from local coordinates (xi, eta, nu) to global coordinates (x,y,z) in the form
       //
       // ( x )
@@ -92,11 +92,11 @@ namespace viennafem
       PointType a_02  = p0 - p1 - p4 + p5;
       PointType a_12  = p0 - p2 - p4 + p6;
       PointType a_012 = p1 - p0 + p2 - p3 + p4 - p5 - p6 + p7;
-      
+
       viennamath::variable  xi(0);
       viennamath::variable eta(1);
       viennamath::variable  nu(2);
-      
+
       viennamath::expr J_00 = a_0[0] + a_01[0] * eta + a_02[0] *  nu + a_012[0] * eta *  nu; viennamath::inplace_simplify(J_00);
       viennamath::expr J_10 = a_0[1] + a_01[1] * eta + a_02[1] *  nu + a_012[1] * eta *  nu; viennamath::inplace_simplify(J_10);
       viennamath::expr J_20 = a_0[2] + a_01[2] * eta + a_02[2] *  nu + a_012[2] * eta *  nu; viennamath::inplace_simplify(J_20);
@@ -108,26 +108,26 @@ namespace viennafem
       viennamath::expr J_02 = a_2[0] + a_02[0] *  xi + a_12[0] * eta + a_012[0] *  xi * eta; viennamath::inplace_simplify(J_02);
       viennamath::expr J_12 = a_2[1] + a_02[1] *  xi + a_12[1] * eta + a_012[1] *  xi * eta; viennamath::inplace_simplify(J_12);
       viennamath::expr J_22 = a_2[2] + a_02[2] *  xi + a_12[2] * eta + a_012[2] *  xi * eta; viennamath::inplace_simplify(J_22);
-      
+
       // determinant:
       viennamath::expr det_J =   J_00 * J_11 * J_22 + J_01 * J_12 * J_20 + J_02 * J_10 * J_21
                                - J_20 * J_11 * J_02 - J_21 * J_12 * J_00 - J_22 * J_10 * J_01;
 
       viennamath::inplace_simplify(det_J);
-                               
+
       det_dF_dt_acc(cell) = det_J;
-      
+
       //Step 2: store partial derivatives:
       typedef viennamath::expr   ValueType;
-      
+
       dt_dx_key_00_acc(cell) = viennamath::simplify(J_11*J_22 - J_21*J_12) / det_J;
       dt_dx_key_01_acc(cell) = viennamath::simplify(J_21*J_02 - J_01*J_22) / det_J;
       dt_dx_key_02_acc(cell) = viennamath::simplify(J_01*J_12 - J_11*J_02) / det_J;
-      
+
       dt_dx_key_10_acc(cell) = viennamath::simplify(J_20*J_12 - J_10*J_22) / det_J;
       dt_dx_key_11_acc(cell) = viennamath::simplify(J_00*J_22 - J_20*J_02) / det_J;
       dt_dx_key_12_acc(cell) = viennamath::simplify(J_10*J_02 - J_00*J_12) / det_J;
-      
+
       dt_dx_key_20_acc(cell) = viennamath::simplify(J_10*J_21 - J_20*J_11) / det_J;
       dt_dx_key_21_acc(cell) = viennamath::simplify(J_20*J_01 - J_00*J_21) / det_J;
       dt_dx_key_22_acc(cell) = viennamath::simplify(J_00*J_11 - J_10*J_01) / det_J;
@@ -146,7 +146,7 @@ namespace viennafem
     dt_dx_key_22_AccessorType   dt_dx_key_22_acc;
   };
 
-  
+
 } //namespace
 
 #endif

@@ -45,13 +45,13 @@
 
 namespace viennafem
 {
-  
+
   namespace detail
   {
     /** @brief Generates a vector-valued basis function out of a scalar valued basis function.
-     * 
+     *
      * A basis function phi is mapped to e.g. (0, phi, 0). Note that scalar-valued basis functions are vector-valued basis functions with only one vector entry.
-     * 
+     *
      * @param func    The scalar-valued basis function
      * @param length  Length of the resulting basis function vector
      * @param index   Index of the nonzero entry of the vector.
@@ -62,12 +62,12 @@ namespace viennafem
       std::vector<ExpressionType> result(length);
       for (std::size_t i=0; i<length; ++i)
         result[i] = 0.0;
-      
+
       result[index] = func;
-      
+
       return result;
     }
-    
+
     /** @brief Generates the local weak form by transforming the global weak form accordingly */
     template <typename CellTag, typename EquationType, typename PDESystemType>
     std::vector< std::vector<EquationType> > make_local_weak_form(EquationType const & transformed_weak_form, PDESystemType const & pde_system)
@@ -75,13 +75,13 @@ namespace viennafem
       typedef typename EquationType::value_type      Expression;
       typedef typename Expression::interface_type    InterfaceType;
       typedef typename reference_cell_for_basis<CellTag, viennafem::lagrange_tag<1> >::type    ReferenceCell;
-      
+
 
       //test functions:
       std::vector<Expression> scalar_test_functions = viennafem::basis_factory<InterfaceType>::get(pde_system.option(0).test_space_id(), ReferenceCell());
       for (std::size_t i = 0; i<scalar_test_functions.size(); ++i)
         std::cout << "Test function " << i << ": " << scalar_test_functions[i] << std::endl;
-      
+
       std::size_t local_size_i = pde_system.unknown(0).size() * scalar_test_functions.size();
 
       //std::cout << "Test functions: " << std::endl;
@@ -90,7 +90,7 @@ namespace viennafem
       for (std::size_t i=0; i<scalar_test_functions.size(); ++i)
       {
         for (std::size_t j=0; j<pde_system.unknown(0).size(); ++j)
-        {  
+        {
           //std::cout << "No. " << current_index << ": ";
           full_test_functions[current_index++] = make_full_function(scalar_test_functions[i], pde_system.unknown(0).size(), j);
         }
@@ -100,7 +100,7 @@ namespace viennafem
       //trial functions:
       std::vector<Expression> scalar_trial_functions = viennafem::basis_factory<InterfaceType>::get(pde_system.option(0).trial_space_id(), ReferenceCell());
       std::size_t local_size_j = pde_system.unknown(0).size() * scalar_trial_functions.size();
-        
+
       //std::cout << "Trial functions: " << std::endl;
       std::vector< std::vector<Expression> > full_trial_functions(local_size_i);
       current_index = 0;
@@ -108,7 +108,7 @@ namespace viennafem
       {
         //std::cout << "No. i: ";
         for (std::size_t j=0; j<pde_system.unknown(0).size(); ++j)
-        {  
+        {
           //std::cout << "No. " << current_index << ": ";
           full_trial_functions[current_index++] = make_full_function(scalar_trial_functions[i], pde_system.unknown(0).size(), j);
         }
@@ -123,11 +123,11 @@ namespace viennafem
       //plug functions into weak form to obtain local form:
       //local_size_i = 3;
       //local_size_j = 3;
-      
+
       std::vector<std::vector< EquationType > >  local_weak_form(local_size_i);
       for (std::size_t i=0; i<local_size_i; ++i)
         local_weak_form[i].resize(local_size_j);
-      
+
       for (std::size_t i = 0; i<local_size_i; ++i)
       {
         for (std::size_t j = 0; j<local_size_j; ++j)
@@ -138,29 +138,29 @@ namespace viennafem
                                                                               full_trial_functions[j]);
         }
       }
-      
-      return local_weak_form;    
+
+      return local_weak_form;
     }
-    
+
     /** @brief A helper functor for updating the cell_quan tokens in a ViennaMath expression */
     template <typename CellType, typename InterfaceType>
     struct cell_updater : public viennamath::rt_traversal_interface<>
     {
       public:
         cell_updater(CellType const & cell) : cell_(cell) {}
-        
-        void operator()(InterfaceType const * e) const 
+
+        void operator()(InterfaceType const * e) const
         {
           if (viennamath::callback_if_castable< viennafem::cell_quan<CellType, InterfaceType> >::apply(e, *this))
             return;
         }
-        
+
         void operator()(viennafem::cell_quan<CellType, InterfaceType> const & cq) const
         {
           cq.update(cell_);
           //std::cout << "cell_quan updated!" << std::endl;
         }
-        
+
       private:
         CellType const & cell_;
     };
@@ -168,13 +168,13 @@ namespace viennafem
     /** @brief Helper function which returns whether a basis is uniform over the whole domain */
     template <typename T>
     bool is_uniform_basis(T const &) { return true; }   //TODO: Extend
-    
+
     /** @brief The worker class which assembles the system of linear equations ('FEM assembly core'). */
     struct pde_assembler_internal
     {
-      
+
       template <typename StorageType, typename EquationType, typename PDESystemType, typename DomainType, typename LinearSystemT>
-      void operator()(StorageType & storage, 
+      void operator()(StorageType & storage,
                       EquationType const & transformed_weak_form,
                       PDESystemType const & pde_system,
                       DomainType & domain,
@@ -182,7 +182,7 @@ namespace viennafem
                     ) const
       {
         typedef typename viennagrid::result_of::point<DomainType>::type                                   PointType;
-        typedef typename viennagrid::result_of::element<DomainType, viennagrid::vertex_tag>::type         VertexType;    
+        typedef typename viennagrid::result_of::element<DomainType, viennagrid::vertex_tag>::type         VertexType;
         typedef typename viennagrid::result_of::cell_tag<DomainType>::type                                CellTag;
         typedef typename viennagrid::result_of::element<DomainType, CellTag>::type                        CellType;
 
@@ -197,49 +197,49 @@ namespace viennafem
 
         typedef typename PDESystemType::boundary_key_type  BoundaryKeyType;
         typedef std::vector<long>                          MappingContainer;
-        
+
         typedef typename EquationType::value_type          Expression;
-        
+
         BoundaryKeyType bnd_key(pde_system.option(0).data_id());
-        
+
       #ifdef VIENNAFEM_DEBUG
         std::cout << "ViennaFEM: pde_assembler_internal(): Number of components: " << pde_system.unknown(0).size() << std::endl;
       #endif
 
-        
+
         //Set up element representations:
         std::vector<std::vector< EquationType > > local_weak_form;
         bool basis_is_uniform = is_uniform_basis(pde_system);
-        
+
         if (basis_is_uniform)
         {
           //std::cout << "Using globally uniform basis";
           local_weak_form = make_local_weak_form<CellTag>(transformed_weak_form, pde_system);
         }
-            
+
         //Integrator setup:
-        
+
         viennamath::numerical_quadrature integrator = viennafem::make_quadrature_rule(pde_system, domain);
         //viennamath::numerical_quadrature integrator(new viennafem::rt_gauss_quad_element<ReferenceCell, 3, typename EquationType::interface_type>());
-        
+
         typedef typename viennadata::result_of::accessor<StorageType, BoundaryKeyType, viennafem::numeric_type, VertexType>::type  BoundaryScalarAccessorType;
         BoundaryScalarAccessorType  bnd_scalar_acc = viennadata::make_accessor<BoundaryKeyType, viennafem::numeric_type, VertexType>(storage, bnd_key);
-        
+
         typedef typename viennadata::result_of::accessor<StorageType, BoundaryKeyType, std::vector<viennafem::numeric_type>, VertexType>::type  BoundaryVectorAccessorType;
         BoundaryVectorAccessorType  bnd_vector_acc = viennadata::make_accessor<BoundaryKeyType, std::vector<viennafem::numeric_type>, VertexType>(storage, bnd_key);
-        
-        CellContainer cells = viennagrid::elements<CellType>(domain);  
+
+        CellContainer cells = viennagrid::elements<CellType>(domain);
         for (CellIterator cell_iter = cells.begin();
             cell_iter != cells.end();
             ++cell_iter)
         {
           //if (!basis_is_uniform)
           //  local_weak_form = make_local_weak_form(transformed_weak_form, pde_system, *cell_iter);
-          
+
           //update cell_quantities:
           //std::cout << "Updating cell quantities..." << std::endl;
           viennamath::rt_traversal_wrapper<> updater( new cell_updater<CellType, typename EquationType::interface_type>(*cell_iter) );
-          
+
           //write back to global matrix:
           long global_index_i = 0;
           long global_index_j = 0;
@@ -248,18 +248,18 @@ namespace viennafem
 
           MappingContainer map_indices_i = mapping_indices<DomainType>(storage, pde_system, *cell_iter, 0);
           MappingContainer map_indices_j = mapping_indices<DomainType>(storage, pde_system, *cell_iter, 0);
-          
+
           for (typename MappingContainer::const_iterator map_iter_i = map_indices_i.begin();
               map_iter_i != map_indices_i.end();
               ++map_iter_i, ++local_index_i)
-          {                  
+          {
             global_index_i = *map_iter_i;
             //std::cout << "glob_i: " << global_index_i << std::endl;
-            
+
             if (global_index_i == -1) // This is a Dirichlet node -> skip
               continue;
-            
-            VertexOnCellContainer vertices_on_cell = viennagrid::elements<VertexType>(*cell_iter);  
+
+            VertexOnCellContainer vertices_on_cell = viennagrid::elements<VertexType>(*cell_iter);
             VertexOnCellIterator vocit = vertices_on_cell.begin();
             local_index_j = 0;
             for (typename MappingContainer::const_iterator map_iter_j = map_indices_j.begin();
@@ -268,10 +268,10 @@ namespace viennafem
             {
               if ( (local_index_j % pde_system.unknown(0).size()) == 0 && (local_index_j > 0) )
                   ++vocit;
-              
+
               local_weak_form[local_index_i][local_index_j].lhs().get()->recursive_traversal(updater);
               global_index_j = *map_iter_j;
-              
+
 
               if (global_index_j == -1) // Dirichlet boundary
               {
@@ -285,11 +285,11 @@ namespace viennafem
                 {
                   //TODO: Better encapsulate boundary value access
                   std::vector<double> const & bnd_values = bnd_vector_acc(*vocit);
-                  
+
                   if (bnd_values.size() > 1) //allow homogeneous case without having the data vector initialized
                   {
                     linear_system(global_index_i) -=
-                      bnd_values[local_index_j % pde_system.unknown(0).size()] 
+                      bnd_values[local_index_j % pde_system.unknown(0).size()]
                       * integrator(local_weak_form[local_index_i][local_index_j].lhs());
                   }
                 }
@@ -299,25 +299,25 @@ namespace viennafem
                 //std::cout << " Evaluating LHS: " << local_weak_form[local_index_i][local_index_j].lhs() << std::endl;
                 //std::cout << "Adding to (" << global_index_i << ", " << global_index_j << "): " << integrator(local_weak_form[local_index_i][local_index_j].lhs()) << std::endl;
                 linear_system.add(
-                    global_index_i, 
-                    global_index_j, 
+                    global_index_i,
+                    global_index_j,
                     integrator(local_weak_form[local_index_i][local_index_j].lhs())
                 );
               }
             }
-            
+
             local_weak_form[local_index_i][0].rhs().get()->recursive_traversal(updater);
-            
+
             //std::cout << "Evaluating RHS: " << local_weak_form[local_index_i][0].rhs() << std::endl;
-            
+
             linear_system(global_index_i) += integrator(local_weak_form[local_index_i][0].rhs());
           }
         }
-        
+
       } //operator()
-      
+
     };
-  
+
   } //namespace detail
 }
 #endif

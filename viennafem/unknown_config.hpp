@@ -22,9 +22,9 @@
 
 namespace viennafem
 {
-  
+
   /** @brief A configuration class for a particular PDE. [SUBJECT TO CHANGE!]
-   * 
+   *
    * @tparam MatrixType         System matrix type
    * @tparam VectorType         Type of the load vector
    * @tparam BoundaryKeyType    The key type to use with ViennaData to query a Dirichlet boundary flag
@@ -41,19 +41,19 @@ namespace viennafem
       typedef VectorType         vector_type;
       typedef BoundaryKeyType    boundary_key_type;
       typedef MappingKeyType     mapping_key_type;
-    
+
       unknown_config(MatrixType & matrix, VectorType & vector) : m(matrix),v(vector) {}
-      
-      BoundaryKeyType boundary_key() const { return BoundaryKeyType(0); } 
-      MappingKeyType mapping_key() const { return MappingKeyType(0); } 
-    
+
+      BoundaryKeyType boundary_key() const { return BoundaryKeyType(0); }
+      MappingKeyType mapping_key() const { return MappingKeyType(0); }
+
       MatrixType & system_matrix() { return m; }
       VectorType & load_vector() { return v; }
-    
+
     private:
       MatrixType & m;
       VectorType & v;
-  };  
+  };
 
 }
 #endif

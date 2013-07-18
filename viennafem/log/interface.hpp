@@ -25,7 +25,7 @@
 
 namespace viennafem
 {
-  /** @brief The common interface for all loggers 
+  /** @brief The common interface for all loggers
    *
    * @tparam InterfaceType   The ViennaMath runtime expression interface
    */
@@ -34,7 +34,7 @@ namespace viennafem
   {
     protected:
       typedef viennamath::rt_equation<InterfaceType>  EquationType;
-    
+
     public:
       virtual void write_strong_form(std::vector<EquationType> const & pdes) = 0;
       virtual void write_weak_form(std::vector<EquationType> const & pdes) = 0;

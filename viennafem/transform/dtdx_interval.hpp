@@ -33,37 +33,37 @@ namespace viennafem
   {
   public:
     typedef typename viennagrid::result_of::cell_tag<DomainType>::type                    CellTag;
-    typedef typename viennagrid::result_of::element<DomainType, CellTag>::type            CellType;  
+    typedef typename viennagrid::result_of::element<DomainType, CellTag>::type            CellType;
     typedef typename viennagrid::result_of::point<DomainType>::type                       PointType;
     typedef typename viennagrid::result_of::default_point_accessor<DomainType>::type      PointAccessorType;
-    
+
     typedef typename viennadata::result_of::accessor<StorageType, det_dF_dt_key,   viennafem::numeric_type, CellType>::type   det_dF_dt_AccessorType;
     typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<0, 0>, viennafem::numeric_type, CellType>::type   dt_dx_key_00_AccessorType;
-    
+
     dt_dx_handler(DomainType& domain, StorageType& storage) : pnt_acc(viennagrid::default_point_accessor(domain))
     {
       det_dF_dt_acc    = viennadata::make_accessor<det_dF_dt_key,   viennafem::numeric_type, CellType>(storage, det_dF_dt_key());
-      dt_dx_key_00_acc = viennadata::make_accessor<dt_dx_key<0, 0>, viennafem::numeric_type, CellType>(storage, dt_dx_key<0, 0>());    
+      dt_dx_key_00_acc = viennadata::make_accessor<dt_dx_key<0, 0>, viennafem::numeric_type, CellType>(storage, dt_dx_key<0, 0>());
     }
-    
+
     template <typename CellType>
     void operator()(CellType const & cell)
     {
       PointType const & p0 = pnt_acc( viennagrid::vertices(cell)[0] );
       PointType const & p1 = pnt_acc( viennagrid::vertices(cell)[1] );
-      
+
       //Step 1: store determinant:
       numeric_type x1_x0 = p1[0] - p0[0];
-      
+
       det_dF_dt_acc(cell)    = x1_x0;
       dt_dx_key_00_acc(cell) = 1.0 / x1_x0;
     }
-    
+
     PointAccessorType           pnt_acc;
     det_dF_dt_AccessorType      det_dF_dt_acc;
     dt_dx_key_00_AccessorType   dt_dx_key_00_acc;
   };
-  
+
 } //namespace
 
 #endif

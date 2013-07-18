@@ -34,13 +34,13 @@ namespace viennafem
                               std::size_t id = 0)
   {
     typedef viennafem::boundary_key      BoundaryKey;;
-    
+
     //set flag:
-    //viennadata::access<BoundaryKey, bool >(BoundaryKey(id))(v) = true; 
+    //viennadata::access<BoundaryKey, bool >(BoundaryKey(id))(v) = true;
     viennadata::access<BoundaryKey, bool>(storage, BoundaryKey(id), v) = true;
-    
+
     //set data:
-    //viennadata::access<BoundaryKey, numeric_type >(BoundaryKey(id))(v) = value; 
+    //viennadata::access<BoundaryKey, numeric_type >(BoundaryKey(id))(v) = value;
     viennadata::access<BoundaryKey, numeric_type>(storage, BoundaryKey(id), v) = value;
   }
 
@@ -51,14 +51,14 @@ namespace viennafem
                               std::size_t id = 0)
   {
     typedef viennafem::boundary_key      BoundaryKey;;
-    
+
     //set flag:
-    //viennadata::access<BoundaryKey, bool >(BoundaryKey(id))(v) = true; 
-    viennadata::access<BoundaryKey, bool>(storage, BoundaryKey(id), v) = true;    
-    
+    //viennadata::access<BoundaryKey, bool >(BoundaryKey(id))(v) = true;
+    viennadata::access<BoundaryKey, bool>(storage, BoundaryKey(id), v) = true;
+
     //set data:
-    //viennadata::access<BoundaryKey, std::vector<NumericT> >(BoundaryKey(id))(v) = value; 
-    viennadata::access<BoundaryKey, std::vector<NumericT> >(storage, BoundaryKey(id), v) = value;    
+    //viennadata::access<BoundaryKey, std::vector<NumericT> >(BoundaryKey(id))(v) = value;
+    viennadata::access<BoundaryKey, std::vector<NumericT> >(storage, BoundaryKey(id), v) = value;
   }
 
 }

@@ -19,7 +19,7 @@ build-latex:
 	latex ${FILE}.tex		
 	
 build-dvi:
-	dvips -Ppdf -G0 -ta4 $(FILE).dvi 
+	dvips -Ppdf -G0 -ta4 $(FILE).dvi
 	
 build-pdf:
 	ps2pdf -dPDFSETTINGS=/prepress -dCompatibilityLevel=1.3 \

@@ -55,7 +55,7 @@ namespace viennafem
     // make cell type known to logger
     // TODO: Better encapsulation
     pde_system.logger().translator().add_processor(new rt_latex_dt_dx_processor<CellType, viennamath::default_interface_type>());
-    
+
     pde_system.logger().write_transformed_weak_form(weak_form);
   }
 
@@ -67,11 +67,11 @@ namespace viennafem
   {
     pde_system.logger().write_test_and_trial_space(test_space, trial_space);
   }
-  
-  
+
+
   /*void write_linear_solver_stats(latex_logger & log)
   {
-    
+
   }*/
 
 }

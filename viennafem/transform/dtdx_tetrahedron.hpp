@@ -26,18 +26,18 @@
 
 namespace viennafem
 {
-  
+
   //memory-intensive: Compute them once and store the computed values until next update
   template <typename DomainType, typename StorageType>
   struct dt_dx_handler <DomainType, StorageType, viennafem::unit_tetrahedron>
   {
     public:
-      
+
     typedef typename viennagrid::result_of::cell_tag<DomainType>::type                    CellTag;
-    typedef typename viennagrid::result_of::element<DomainType, CellTag>::type            CellType;  
+    typedef typename viennagrid::result_of::element<DomainType, CellTag>::type            CellType;
     typedef typename viennagrid::result_of::point<DomainType>::type                       PointType;
     typedef typename viennagrid::result_of::default_point_accessor<DomainType>::type      PointAccessorType;
-    
+
     typedef typename viennadata::result_of::accessor<StorageType, det_dF_dt_key,   viennafem::numeric_type, CellType>::type   det_dF_dt_AccessorType;
     typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<0, 0>, viennafem::numeric_type, CellType>::type   dt_dx_key_00_AccessorType;
     typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<0, 1>, viennafem::numeric_type, CellType>::type   dt_dx_key_01_AccessorType;
@@ -48,10 +48,10 @@ namespace viennafem
     typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<2, 0>, viennafem::numeric_type, CellType>::type   dt_dx_key_20_AccessorType;
     typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<2, 1>, viennafem::numeric_type, CellType>::type   dt_dx_key_21_AccessorType;
     typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<2, 2>, viennafem::numeric_type, CellType>::type   dt_dx_key_22_AccessorType;
-      
+
     dt_dx_handler(DomainType& domain, StorageType& storage) : pnt_acc(viennagrid::default_point_accessor(domain))
     {
-    
+
       det_dF_dt_acc    = viennadata::make_accessor<det_dF_dt_key,   viennafem::numeric_type, CellType>(storage, det_dF_dt_key());
       dt_dx_key_00_acc = viennadata::make_accessor<dt_dx_key<0, 0>, viennafem::numeric_type, CellType>(storage, dt_dx_key<0, 0>());
       dt_dx_key_01_acc = viennadata::make_accessor<dt_dx_key<0, 1>, viennafem::numeric_type, CellType>(storage, dt_dx_key<0, 1>());
@@ -63,7 +63,7 @@ namespace viennafem
       dt_dx_key_21_acc = viennadata::make_accessor<dt_dx_key<2, 1>, viennafem::numeric_type, CellType>(storage, dt_dx_key<2, 1>());
       dt_dx_key_22_acc = viennadata::make_accessor<dt_dx_key<2, 2>, viennafem::numeric_type, CellType>(storage, dt_dx_key<2, 2>());
     }
-      
+
     template <typename CellType>
     void operator()(CellType const & cell)
     {
@@ -71,24 +71,24 @@ namespace viennafem
       PointType & p1 = pnt_acc( viennagrid::vertices(cell)[1] ) - p0;
       PointType & p2 = pnt_acc( viennagrid::vertices(cell)[2] ) - p0;
       PointType & p3 = pnt_acc( viennagrid::vertices(cell)[3] ) - p0;
-      
+
       //Step 1: store determinant:
       numeric_type det_dF_dt = 6.0 * viennagrid::spanned_volume(pnt_acc( viennagrid::vertices(cell)[0] ),
                                                                 pnt_acc( viennagrid::vertices(cell)[1] ),
                                                                 pnt_acc( viennagrid::vertices(cell)[2] ),
                                                                 pnt_acc( viennagrid::vertices(cell)[3] ));
-      
+
       det_dF_dt_acc(cell) = det_dF_dt;
-      
+
       //Step 2: store partial derivatives:
       dt_dx_key_00_acc(cell) = (  + p2[1] * p3[2] - p2[2] * p3[1] ) / det_dF_dt;
       dt_dx_key_01_acc(cell) = (  - p2[0] * p3[2] + p2[2] * p3[0] ) / det_dF_dt;
       dt_dx_key_02_acc(cell) = (  + p2[0] * p3[1] - p2[1] * p3[0] ) / det_dF_dt;
-      
+
       dt_dx_key_10_acc(cell) = (  - p1[1] * p3[2] + p1[2] * p3[1] ) / det_dF_dt;
       dt_dx_key_11_acc(cell) = (  + p1[0] * p3[2] - p1[2] * p3[0] ) / det_dF_dt;
       dt_dx_key_12_acc(cell) = (  - p1[0] * p3[1] + p1[1] * p3[0] ) / det_dF_dt;
-      
+
       dt_dx_key_20_acc(cell) = (  + p1[1] * p2[2] - p1[2] * p2[1] ) / det_dF_dt;
       dt_dx_key_21_acc(cell) = (  - p1[0] * p2[2] + p1[2] * p2[0] ) / det_dF_dt;
       dt_dx_key_22_acc(cell) = (  + p1[0] * p2[1] - p1[1] * p2[0] ) / det_dF_dt;
@@ -106,11 +106,11 @@ namespace viennafem
     dt_dx_key_21_AccessorType   dt_dx_key_21_acc;
     dt_dx_key_22_AccessorType   dt_dx_key_22_acc;
   };
-  
-  
-  
+
+
+
 /*  Old code to follow...
- 
+
 
   //memory-intensive: Compute them once and store the computed values until next update
   template <typename T_Configuration>
@@ -375,7 +375,7 @@ namespace viennafem
         return ret;
       }
 
-      template <typename CellType> 
+      template <typename CellType>
       ScalarType get_det_dF_dt(CellType const & cell) const
       {
         PointType p0 = cell.getPoint(0);
@@ -528,7 +528,7 @@ namespace viennafem
                                    0, 0, 0,
                                    0, 0, 0};
 
-                                   
+
                                    */
 }
 #endif

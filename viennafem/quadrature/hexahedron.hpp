@@ -32,7 +32,7 @@
 
 namespace viennafem
 {
-  
+
   //
   //
   // Exact for polynomials up to order 1
@@ -52,37 +52,37 @@ namespace viennafem
         p_[1] = 1.0/2.0;
         p_[2] = 1.0/2.0;
       }
-      
+
       BaseType * clone() const { return new self_type(); }
-      
+
       NumericT eval(viennamath::rt_interval<InterfaceType> const & /*interv*/,
                     viennamath::rt_expr<InterfaceType> const & e,
                     viennamath::rt_variable<InterfaceType> const & /*var*/) const
       {
         return viennamath::eval(e, p_);
       }
-      
+
     private:
       std::vector<NumericT> p_;
   };
 
-  
-  
-  
-  
+
+
+
+
   //
   //
   // Exact for polynomials up to degree 2
   //
   //
-  
 
-  //  
+
+  //
   //
   // Exact for polynomials up to degree 3:
   //
   //
-  
+
   /** @brief Gaussian quadrature rule exact for polynomials up to order 3 */
   template <typename InterfaceType>
   class rt_gauss_quad_element <viennafem::unit_cube, 3, InterfaceType> : public viennamath::numerical_quadrature_interface<InterfaceType>
@@ -92,7 +92,7 @@ namespace viennafem
       typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
       enum { num_points = 8 };
-      
+
       explicit rt_gauss_quad_element() : abscissas_(num_points, std::vector<numeric_type>(3))
       {
         abscissas_[0][0] = 0.7886751345948125; abscissas_[0][1] = 0.7886751345948125; abscissas_[0][2] = 0.7886751345948125;
@@ -104,9 +104,9 @@ namespace viennafem
         abscissas_[6][0] = 0.2113248654051875; abscissas_[6][1] = 0.2113248654051875; abscissas_[6][2] = 0.7886751345948125;
         abscissas_[7][0] = 0.2113248654051875; abscissas_[7][1] = 0.2113248654051875; abscissas_[7][2] = 0.2113248654051875;
       }
-      
+
       BaseType * clone() const { return new self_type(); }
-      
+
       NumericT eval(viennamath::rt_interval<InterfaceType> const & /*interv*/,
                     viennamath::rt_expr<InterfaceType> const & e,
                     viennamath::rt_variable<InterfaceType> const & /*var*/) const
@@ -116,12 +116,12 @@ namespace viennafem
           result += viennamath::eval(e, abscissas_[i]);
         return result / 8.0;
       }
-      
+
     private:
       std::vector<std::vector<NumericT> > abscissas_;
   };
-  
-  
+
+
   //
   //
   // Exact for polynomials up to order 5
@@ -136,7 +136,7 @@ namespace viennafem
       typedef viennamath::numerical_quadrature_interface<InterfaceType>    BaseType;
     public:
       enum { num_points = 27 };
-      
+
       explicit rt_gauss_quad_element() : abscissas_(num_points, std::vector<numeric_type>(3)), weights_(num_points)
       {
         abscissas_[0][0] = 0.11270166537925829786; abscissas_[0][1] = 0.11270166537925829786; abscissas_[0][2] = 0.11270166537925829786;
@@ -168,7 +168,7 @@ namespace viennafem
         abscissas_[24][0] = 0.88729833462074170214; abscissas_[24][1] = 0.88729833462074170214; abscissas_[24][2] = 0.11270166537925829786;
         abscissas_[25][0] = 0.88729833462074170214; abscissas_[25][1] = 0.88729833462074170214; abscissas_[25][2] = 0.5;
         abscissas_[26][0] = 0.88729833462074170214; abscissas_[26][1] = 0.88729833462074170214; abscissas_[26][2] = 0.88729833462074170214;
-        
+
         // weights:
         double denominator = 18.0 * 18.0 * 18.0;
         weights_[0] = (5.0 * 5.0 * 5.0) / denominator;
@@ -180,7 +180,7 @@ namespace viennafem
         weights_[6] = (5.0 * 5.0 * 5.0) / denominator;
         weights_[7] = (5.0 * 5.0 * 8.0) / denominator;
         weights_[8] = (5.0 * 5.0 * 5.0) / denominator;
-        
+
         weights_[ 9] = (8.0 * 5.0 * 5.0) / denominator;
         weights_[10] = (8.0 * 5.0 * 8.0) / denominator;
         weights_[11] = (8.0 * 5.0 * 5.0) / denominator;
@@ -199,11 +199,11 @@ namespace viennafem
         weights_[23] = (5.0 * 8.0 * 5.0) / denominator;
         weights_[24] = (5.0 * 5.0 * 5.0) / denominator;
         weights_[25] = (5.0 * 5.0 * 8.0) / denominator;
-        weights_[26] = (5.0 * 5.0 * 5.0) / denominator;        
+        weights_[26] = (5.0 * 5.0 * 5.0) / denominator;
       }
-      
+
       BaseType * clone() const { return new self_type(); }
-      
+
       NumericT eval(viennamath::rt_interval<InterfaceType> const & /*interv*/,
                     viennamath::rt_expr<InterfaceType> const & e,
                     viennamath::rt_variable<InterfaceType> const & /*var*/) const
@@ -213,12 +213,12 @@ namespace viennafem
           result += weights_[i] * viennamath::eval(e, abscissas_[i]);
         return result;
       }
-      
+
     private:
       std::vector<std::vector<NumericT> > abscissas_;
       std::vector<NumericT> weights_;
   };
-  
+
 
 }
 #endif

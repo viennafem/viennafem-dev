@@ -31,22 +31,22 @@ namespace viennafem
 {
   template <typename InterfaceType>
   class latex_logger;
-  
+
   namespace detail
   {
-  
+
     template <typename EquationArray, typename InterfaceType>
     void write_strong_form(EquationArray const & pde_system,
                           latex_logger<InterfaceType> & log);
-    
+
     template <typename EquationArray, typename InterfaceType>
     void write_weak_form(EquationArray const & weak_form,
                         latex_logger<InterfaceType> & log);
-    
+
     template <typename EquationArray, typename InterfaceType>
     void write_coordinated_weak_form(EquationArray const & weak_form,
                                     latex_logger<InterfaceType> & log);
-    
+
     template <typename EquationArray, typename InterfaceType>
     void write_transformed_weak_form(EquationArray const & weak_form,
                                     latex_logger<InterfaceType> & log);
@@ -55,18 +55,18 @@ namespace viennafem
     void write_test_and_trial_space(EquationArray const & test_space,
                                     EquationArray const & trial_space,
                                     latex_logger<InterfaceType> & log);
-    
+
     template <typename InterfaceType>
     void write_linear_solver_stats(latex_logger<InterfaceType> & log);
 
   }
-  
+
 
   //
   // cell_quan_handler
   //
   /** @brief Defines a custom LaTeX processor for cell_quan expressions
-   * 
+   *
    * @tparam CellType
    * @tparam InterfaceType
    */
@@ -75,40 +75,40 @@ namespace viennafem
   {
       typedef typename InterfaceType::numeric_type              NumericType;
       typedef viennafem::cell_quan<CellType, InterfaceType>     CellQuanType;
-    
+
     public:
       viennamath::rt_latex_processor_interface<InterfaceType> * clone() const { return new rt_latex_dt_dx_processor(); }
-      
-      std::string process(InterfaceType const * ptr, bool use_parenthesis, viennamath::rt_latex_translator<InterfaceType> const & translator) const 
+
+      std::string process(InterfaceType const * ptr, bool use_parenthesis, viennamath::rt_latex_translator<InterfaceType> const & translator) const
       {
         if (dynamic_cast< const CellQuanType * >(ptr) != NULL)
         {
           const CellQuanType * temp = dynamic_cast< const CellQuanType * >(ptr);
           return process_impl(*temp, use_parenthesis, translator);
         }
-        
+
         return "";
       }
-       
+
       bool customize(InterfaceType const * /*e*/, std::string const & /*str*/)
       {
         return false;
       }
-      
+
     private:
 
-      std::string process_impl(CellQuanType const & e, bool /*use_parenthesis*/, viennamath::rt_latex_translator<InterfaceType> const & /*translator*/) const 
+      std::string process_impl(CellQuanType const & e, bool /*use_parenthesis*/, viennamath::rt_latex_translator<InterfaceType> const & /*translator*/) const
       {
         typedef viennamath::expr      ExpressionType;
-        
+
         std::stringstream ss;
-        
+
         viennamath::variable x(0);
         viennamath::variable y(1);
         viennamath::variable z(2);
-        
+
 //        std::auto_ptr< detail::cell_quan_interface<CellType> > temp(e.wrapper().clone());  //create a clone in order to dispatch with respect to the type
-//        
+//
 //        if (dynamic_cast< detail::cell_quan_expr<CellType, viennafem::dt_dx_key<0,0>, ExpressionType> * >(temp.get()) != NULL
 //            || dynamic_cast< detail::cell_quan_constant<CellType, viennafem::dt_dx_key<0,0>, NumericType> * >(temp.get()) != NULL)
 //        {
@@ -162,60 +162,60 @@ namespace viennafem
 //        {
 //          ss << " \\mathrm{det} F ";
 //        }
-//        else       
+//        else
 //          std::cerr << "Warning: could not find string for cell_quan!" << std::endl;
 
-        return ss.str();        
+        return ss.str();
       }
-      
+
   };
- 
-    
-  
+
+
+
   /** @brief The LaTeX logger class.
-   * 
-   * @tparam InterfaceType    The ViennaMath runtime interface 
+   *
+   * @tparam InterfaceType    The ViennaMath runtime interface
    */
   template <typename InterfaceType>
   class latex_logger : public logger_interface<InterfaceType>
   {
       typedef logger_interface<InterfaceType>    BaseType;
       typedef typename BaseType::EquationType             EquationType;
-    
+
     public:
       latex_logger(std::string const & filename) : stream_(filename.c_str()), filename_(filename), something_written(false)
       {
         viennamath::function_symbol u0(0, viennamath::unknown_tag<>());
         viennamath::function_symbol u1(1, viennamath::unknown_tag<>());
         viennamath::function_symbol u2(2, viennamath::unknown_tag<>());
-        
+
         viennamath::function_symbol v0(0, viennamath::test_tag<>());
         viennamath::function_symbol v1(1, viennamath::test_tag<>());
         viennamath::function_symbol v2(2, viennamath::test_tag<>());
-        
+
         translator_.customize(u0, "u_0");
         translator_.customize(u1, "u_1");
         translator_.customize(u2, "u_2");
-        
+
         translator_.customize(v0, "v_0");
         translator_.customize(v1, "v_1");
-        translator_.customize(v2, "v_2");        
+        translator_.customize(v2, "v_2");
       }
-      
+
       latex_logger(const latex_logger & other) : stream_(other.filename_.c_str()),
                                                  filename_(other.filename_),
                                                  something_written(false),
                                                  translator_(other.translator_) {}
-      
+
       ~latex_logger()
-      { 
+      {
         //write footer:
         if (something_written)
           stream_ << "\\end{document}" << std::endl;
-        
+
         stream_.close();
       }
-      
+
       void write_strong_form(std::vector<EquationType> const & pdes) { viennafem::detail::write_strong_form(pdes, *this); }
       void write_weak_form(std::vector<EquationType> const & pdes) { viennafem::detail::write_weak_form(pdes, *this); }
       void write_coordinated_weak_form(std::vector<EquationType> const & pdes) { viennafem::detail::write_coordinated_weak_form(pdes, *this); }
@@ -239,7 +239,7 @@ namespace viennafem
         stream_ << "\\LARGE ViennaFEM Protocol\n";
         stream_ << "\\end{center}\n";
         stream_ << "\n";
-        
+
       }
 
       template <typename T>
@@ -255,16 +255,16 @@ namespace viennafem
       void flush() {  }
 
       viennamath::latex_translator & translator() { return translator_; }
-      
+
     private:
       latex_logger & operator=(latex_logger const & other);
-      
+
       std::ofstream stream_;
       const std::string filename_;
       bool something_written;
       viennamath::latex_translator translator_;
   };
-  
+
   /** @brief Convenience overload for streaming text to a LaTeX logger */
   template <typename InterfaceType, typename T>
   latex_logger<InterfaceType> & operator<<(latex_logger<InterfaceType> & logger, T const & t)
@@ -273,8 +273,8 @@ namespace viennafem
      return logger;
   }
 
-  
-  
+
+
   namespace detail
   {
 
@@ -341,7 +341,7 @@ namespace viennafem
       log << "\\end{align}\n";
       log << "Due to integral transformations, it is sufficient to define the trial and test functions on the reference cell.\n";
       log << "After transformation to the reference cell, the weak form on a cell reads\n";
-      
+
       // give new name to local variables:
       viennamath::variable xi(0);
       viennamath::variable eta(1);
@@ -350,25 +350,25 @@ namespace viennafem
       log.translator().customize(xi, "\\xi");
       log.translator().customize(eta, "\\eta");
       log.translator().customize(nu, "\\nu");
-      
+
       viennamath::function_symbol u0(0, viennamath::unknown_tag<>());
       viennamath::function_symbol u1(1, viennamath::unknown_tag<>());
       viennamath::function_symbol u2(2, viennamath::unknown_tag<>());
-      
+
       viennamath::function_symbol v0(0, viennamath::test_tag<>());
       viennamath::function_symbol v1(1, viennamath::test_tag<>());
       viennamath::function_symbol v2(2, viennamath::test_tag<>());
-      
+
       log.translator().customize(u0, "\\tilde{u}_0");
       log.translator().customize(u1, "\\tilde{u}_1");
       log.translator().customize(u2, "\\tilde{u}_2");
-      
+
       log.translator().customize(v0, "\\tilde{v}_0");
       log.translator().customize(v1, "\\tilde{v}_1");
-      log.translator().customize(v2, "\\tilde{v}_2");        
-      
-      // [JW] switched to $ math expressions, otherwise the equation is cut 
-      // off at the right page border ... 
+      log.translator().customize(v2, "\\tilde{v}_2");
+
+      // [JW] switched to $ math expressions, otherwise the equation is cut
+      // off at the right page border ...
       //
       //log << "\\begin{align}\n";
       log << "\\newline\\newline$\n";
@@ -377,9 +377,9 @@ namespace viennafem
                                                 ++it)
         log << log.translator()(*it) << " \\  . \n";
       //log << "\\end{align}\n";
-      log << "$\\newline\\newline\n";    
-    
-      
+      log << "$\\newline\\newline\n";
+
+
       //
       //log << "write transformed weak form\n";
     }
@@ -399,7 +399,7 @@ namespace viennafem
       {
         if (func_index > 0) //finish previous line
           log << " \\ , \\\\ \n";
-        
+
         log << "\\varphi_{" << func_index << "} &= " << log.translator()(*it);
         ++func_index;
       }
@@ -413,14 +413,14 @@ namespace viennafem
       {
         if (func_index > 0) //finish previous line
           log << " \\ , \\\\ \n";
-        
+
         log << "\\psi_{" << func_index << "} &= " << log.translator()(*it);
         ++func_index;
       }
       log << " \\ . \n \\end{align*}\n";
       log << "\n";
     }
-    
+
     /** @brief Implementation for writing linear solver statistics to LaTeX */
     template <typename InterfaceType>
     void write_linear_solver_stats(latex_logger<InterfaceType> & log)
