@@ -16,7 +16,7 @@
 
 // ViennaFEM includes:
 #include "viennafem/fem.hpp"
-//#include "viennafem/io/vtk_writer.hpp"
+#include "viennafem/io/vtk_writer.hpp"
 
 // ViennaGrid includes:
 #include "viennagrid/forwards.hpp"
@@ -140,61 +140,61 @@ int main()
                   system_matrix_1,
                   load_vector_1
                 );
-//    
-//    fem_assembler(viennafem::make_linear_pde_system(poisson_equ_2, 
-//                                                    u,
-//                                                    viennafem::make_linear_pde_options(1, 
-//                                                                                       viennafem::lagrange_tag<1>(),
-//                                                                                       viennafem::lagrange_tag<1>())
-//                                                  ),
-//                  *sit,
-//                  system_matrix_2,
-//                  load_vector_2
-//                );  
+    
+    fem_assembler(viennafem::make_linear_pde_system(poisson_equ_2, 
+                                                    u,
+                                                    viennafem::make_linear_pde_options(1, 
+                                                                                       viennafem::lagrange_tag<1>(),
+                                                                                       viennafem::lagrange_tag<1>())
+                                                  ),
+                  *sit,
+                  system_matrix_2,
+                  load_vector_2
+                );  
   }
   
   
   
-//  for (size_t i=0; i<my_domain.segments().size(); ++i)
-//  {
-//    fem_assembler(viennafem::make_linear_pde_system(poisson_equ_1, 
-//                                                    u,
-//                                                    viennafem::make_linear_pde_options(0, 
-//                                                                                       viennafem::lagrange_tag<1>(),
-//                                                                                       viennafem::lagrange_tag<1>())
-//                                                  ),
-//                  my_domain.segments()[i],
-//                  system_matrix_1,
-//                  load_vector_1
-//                );
-//    
-//    fem_assembler(viennafem::make_linear_pde_system(poisson_equ_2, 
-//                                                    u,
-//                                                    viennafem::make_linear_pde_options(1, 
-//                                                                                       viennafem::lagrange_tag<1>(),
-//                                                                                       viennafem::lagrange_tag<1>())
-//                                                  ),
-//                  my_domain.segments()[i],
-//                  system_matrix_2,
-//                  load_vector_2
-//                );
-//  }
+  for(SegmentationIterator sit = segments.begin(); sit != segments.end(); sit++)
+  {
+    fem_assembler(viennafem::make_linear_pde_system(poisson_equ_1, 
+                                                    u,
+                                                    viennafem::make_linear_pde_options(0, 
+                                                                                       viennafem::lagrange_tag<1>(),
+                                                                                       viennafem::lagrange_tag<1>())
+                                                  ),
+                  *sit,
+                  system_matrix_1,
+                  load_vector_1
+                );
+    
+    fem_assembler(viennafem::make_linear_pde_system(poisson_equ_2, 
+                                                    u,
+                                                    viennafem::make_linear_pde_options(1, 
+                                                                                       viennafem::lagrange_tag<1>(),
+                                                                                       viennafem::lagrange_tag<1>())
+                                                  ),
+                  *sit,
+                  system_matrix_2,
+                  load_vector_2
+                );
+  }
   
-//  VectorType pde_result_1 = viennacl::linalg::solve(system_matrix_1, load_vector_1, viennacl::linalg::cg_tag());
-//  std::cout << "* solve(): Residual: " << norm_2(prod(system_matrix_1, pde_result_1) - load_vector_1) << std::endl;
+  VectorType pde_result_1 = viennacl::linalg::solve(system_matrix_1, load_vector_1, viennacl::linalg::cg_tag());
+  std::cout << "* solve(): Residual: " << norm_2(prod(system_matrix_1, pde_result_1) - load_vector_1) << std::endl;
 
-//  VectorType pde_result_2 = viennacl::linalg::solve(system_matrix_2, load_vector_2, viennacl::linalg::cg_tag());
-//  std::cout << "* solve(): Residual: " << norm_2(prod(system_matrix_2, pde_result_2) - load_vector_2) << std::endl;
-//  
-//  
-//  //
-//  // Writing solution back to domain (discussion about proper way of returning a solution required...)
-//  //
-//  viennafem::io::write_solution_to_VTK_file(pde_result_1, "poisson_1d_1", my_domain, 0);
-//  viennafem::io::write_solution_to_VTK_file(pde_result_2, "poisson_1d_2", my_domain, 1);
-//  
-//  std::cout << "*****************************************" << std::endl;
-//  std::cout << "* Poisson solver finished successfully! *" << std::endl;
-//  std::cout << "*****************************************" << std::endl;
+  VectorType pde_result_2 = viennacl::linalg::solve(system_matrix_2, load_vector_2, viennacl::linalg::cg_tag());
+  std::cout << "* solve(): Residual: " << norm_2(prod(system_matrix_2, pde_result_2) - load_vector_2) << std::endl;
+  
+  
+  //
+  // Writing solution back to domain (discussion about proper way of returning a solution required...)
+  //
+  viennafem::io::write_solution_to_VTK_file(pde_result_1, "poisson_1d_1", my_domain, segments, storage, 0);
+  viennafem::io::write_solution_to_VTK_file(pde_result_2, "poisson_1d_2", my_domain, segments, storage, 1);
+  
+  std::cout << "*****************************************" << std::endl;
+  std::cout << "* Poisson solver finished successfully! *" << std::endl;
+  std::cout << "*****************************************" << std::endl;
   return EXIT_SUCCESS;
 }

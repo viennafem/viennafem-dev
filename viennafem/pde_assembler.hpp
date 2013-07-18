@@ -203,7 +203,7 @@ namespace viennafem
      #endif
         EquationType transformed_weak_form = viennafem::transform_to_reference_cell<CellType>(storage, weak_form, pde_system);
         temp[0] = transformed_weak_form;
-        log_transformed_weak_form<CellType>(storage, temp, pde_system);
+        log_transformed_weak_form<CellType>(temp, pde_system);
         
         std::cout << "* pde_solver::operator(): Transformed weak form:" << std::endl;
         std::cout << transformed_weak_form << std::endl;

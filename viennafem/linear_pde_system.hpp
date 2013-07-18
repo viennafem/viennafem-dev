@@ -69,7 +69,7 @@ namespace viennafem
       typedef viennafem::linear_pde_options                 option_type;
       typedef viennafem::latex_logger<InterfaceType>        logger_type;
       
-      linear_pde_system(std::string const & filename) {} //: logger_(filename) {}
+      linear_pde_system(std::string const & filename) : logger_(filename) {}
       
       void add_pde(viennamath::rt_equation<InterfaceType> const & pde,
                    std::vector< viennamath::rt_function_symbol<InterfaceType> > const & unknowns,

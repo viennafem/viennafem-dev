@@ -70,7 +70,7 @@ namespace viennafem
    * @tparam CellType
    * @tparam InterfaceType
    */
-  template <typename CellType, typename StorageType, typename InterfaceType>
+  template <typename CellType, typename InterfaceType>
   class rt_latex_dt_dx_processor : public viennamath::rt_latex_processor_interface<InterfaceType>
   {
       typedef typename InterfaceType::numeric_type              NumericType;
@@ -107,63 +107,63 @@ namespace viennafem
         viennamath::variable y(1);
         viennamath::variable z(2);
         
-        std::auto_ptr< detail::cell_quan_interface<CellType> > temp(e.wrapper().clone());  //create a clone in order to dispatch with respect to the type
-        
-        if (dynamic_cast< detail::cell_quan_expr<CellType, viennafem::dt_dx_key<0,0>, ExpressionType> * >(temp.get()) != NULL
-            || dynamic_cast< detail::cell_quan_constant<CellType, viennafem::dt_dx_key<0,0>, NumericType> * >(temp.get()) != NULL)
-        {
-          ss << " \\frac{\\partial \\xi}{\\partial x} ";
-        }
-        else if (dynamic_cast< detail::cell_quan_expr<CellType, viennafem::dt_dx_key<1,0>, ExpressionType> * >(temp.get()) != NULL
-                 || dynamic_cast< detail::cell_quan_constant<CellType, viennafem::dt_dx_key<1,0>, NumericType> * >(temp.get()) != NULL)
-        {
-          ss << " \\frac{\\partial \\eta}{\\partial x} ";
-        }
-        else if (dynamic_cast< detail::cell_quan_expr<CellType, viennafem::dt_dx_key<2,0>, ExpressionType> * >(temp.get()) != NULL
-                 || dynamic_cast< detail::cell_quan_constant<CellType, viennafem::dt_dx_key<2,0>, NumericType> * >(temp.get()) != NULL)
-        {
-          ss << " \\frac{\\partial \\nu}{\\partial x} ";
-        }
+//        std::auto_ptr< detail::cell_quan_interface<CellType> > temp(e.wrapper().clone());  //create a clone in order to dispatch with respect to the type
+//        
+//        if (dynamic_cast< detail::cell_quan_expr<CellType, viennafem::dt_dx_key<0,0>, ExpressionType> * >(temp.get()) != NULL
+//            || dynamic_cast< detail::cell_quan_constant<CellType, viennafem::dt_dx_key<0,0>, NumericType> * >(temp.get()) != NULL)
+//        {
+//          ss << " \\frac{\\partial \\xi}{\\partial x} ";
+//        }
+//        else if (dynamic_cast< detail::cell_quan_expr<CellType, viennafem::dt_dx_key<1,0>, ExpressionType> * >(temp.get()) != NULL
+//                 || dynamic_cast< detail::cell_quan_constant<CellType, viennafem::dt_dx_key<1,0>, NumericType> * >(temp.get()) != NULL)
+//        {
+//          ss << " \\frac{\\partial \\eta}{\\partial x} ";
+//        }
+//        else if (dynamic_cast< detail::cell_quan_expr<CellType, viennafem::dt_dx_key<2,0>, ExpressionType> * >(temp.get()) != NULL
+//                 || dynamic_cast< detail::cell_quan_constant<CellType, viennafem::dt_dx_key<2,0>, NumericType> * >(temp.get()) != NULL)
+//        {
+//          ss << " \\frac{\\partial \\nu}{\\partial x} ";
+//        }
 
-        else if (dynamic_cast< detail::cell_quan_expr<CellType, viennafem::dt_dx_key<0,1>, ExpressionType> * >(temp.get()) != NULL
-                 || dynamic_cast< detail::cell_quan_constant<CellType, viennafem::dt_dx_key<0,1>, NumericType> * >(temp.get()) != NULL)
-        {
-          ss << " \\frac{\\partial \\xi}{\\partial y} ";
-        }
-        else if (dynamic_cast< detail::cell_quan_expr<CellType, viennafem::dt_dx_key<1,1>, ExpressionType> * >(temp.get()) != NULL
-                 || dynamic_cast< detail::cell_quan_constant<CellType, viennafem::dt_dx_key<1,1>, NumericType> * >(temp.get()) != NULL)
-        {
-          ss << " \\frac{\\partial \\eta}{\\partial y} ";
-        }
-        else if (dynamic_cast< detail::cell_quan_expr<CellType, viennafem::dt_dx_key<2,1>, ExpressionType> * >(temp.get()) != NULL
-                 || dynamic_cast< detail::cell_quan_constant<CellType, viennafem::dt_dx_key<2,1>, NumericType> * >(temp.get()) != NULL)
-        {
-          ss << " \\frac{\\partial \\nu}{\\partial y} ";
-        }
+//        else if (dynamic_cast< detail::cell_quan_expr<CellType, viennafem::dt_dx_key<0,1>, ExpressionType> * >(temp.get()) != NULL
+//                 || dynamic_cast< detail::cell_quan_constant<CellType, viennafem::dt_dx_key<0,1>, NumericType> * >(temp.get()) != NULL)
+//        {
+//          ss << " \\frac{\\partial \\xi}{\\partial y} ";
+//        }
+//        else if (dynamic_cast< detail::cell_quan_expr<CellType, viennafem::dt_dx_key<1,1>, ExpressionType> * >(temp.get()) != NULL
+//                 || dynamic_cast< detail::cell_quan_constant<CellType, viennafem::dt_dx_key<1,1>, NumericType> * >(temp.get()) != NULL)
+//        {
+//          ss << " \\frac{\\partial \\eta}{\\partial y} ";
+//        }
+//        else if (dynamic_cast< detail::cell_quan_expr<CellType, viennafem::dt_dx_key<2,1>, ExpressionType> * >(temp.get()) != NULL
+//                 || dynamic_cast< detail::cell_quan_constant<CellType, viennafem::dt_dx_key<2,1>, NumericType> * >(temp.get()) != NULL)
+//        {
+//          ss << " \\frac{\\partial \\nu}{\\partial y} ";
+//        }
 
-        else if (dynamic_cast< detail::cell_quan_expr<CellType, viennafem::dt_dx_key<0,2>, ExpressionType> * >(temp.get()) != NULL
-                 || dynamic_cast< detail::cell_quan_constant<CellType, viennafem::dt_dx_key<0,2>, NumericType> * >(temp.get()) != NULL)
-        {
-          ss << " \\frac{\\partial \\xi}{\\partial z} ";
-        }
-        else if (dynamic_cast< detail::cell_quan_expr<CellType, viennafem::dt_dx_key<1,2>, ExpressionType> * >(temp.get()) != NULL
-                 || dynamic_cast< detail::cell_quan_constant<CellType, viennafem::dt_dx_key<1,2>, NumericType> * >(temp.get()) != NULL)
-        {
-          ss << " \\frac{\\partial \\eta}{\\partial z} ";
-        }
-        else if (dynamic_cast< detail::cell_quan_expr<CellType, viennafem::dt_dx_key<2,2>, ExpressionType> * >(temp.get()) != NULL
-                 || dynamic_cast< detail::cell_quan_constant<CellType, viennafem::dt_dx_key<2,2>, NumericType> * >(temp.get()) != NULL)
-        {
-          ss << " \\frac{\\partial \\nu}{\\partial z} ";
-        }
+//        else if (dynamic_cast< detail::cell_quan_expr<CellType, viennafem::dt_dx_key<0,2>, ExpressionType> * >(temp.get()) != NULL
+//                 || dynamic_cast< detail::cell_quan_constant<CellType, viennafem::dt_dx_key<0,2>, NumericType> * >(temp.get()) != NULL)
+//        {
+//          ss << " \\frac{\\partial \\xi}{\\partial z} ";
+//        }
+//        else if (dynamic_cast< detail::cell_quan_expr<CellType, viennafem::dt_dx_key<1,2>, ExpressionType> * >(temp.get()) != NULL
+//                 || dynamic_cast< detail::cell_quan_constant<CellType, viennafem::dt_dx_key<1,2>, NumericType> * >(temp.get()) != NULL)
+//        {
+//          ss << " \\frac{\\partial \\eta}{\\partial z} ";
+//        }
+//        else if (dynamic_cast< detail::cell_quan_expr<CellType, viennafem::dt_dx_key<2,2>, ExpressionType> * >(temp.get()) != NULL
+//                 || dynamic_cast< detail::cell_quan_constant<CellType, viennafem::dt_dx_key<2,2>, NumericType> * >(temp.get()) != NULL)
+//        {
+//          ss << " \\frac{\\partial \\nu}{\\partial z} ";
+//        }
 
-        else if (dynamic_cast< detail::cell_quan_expr<CellType, viennafem::det_dF_dt_key, ExpressionType> * >(temp.get()) != NULL
-                 || dynamic_cast< detail::cell_quan_constant<CellType, viennafem::det_dF_dt_key, NumericType> * >(temp.get()) != NULL)
-        {
-          ss << " \\mathrm{det} F ";
-        }
-        else       
-          std::cerr << "Warning: could not find string for cell_quan!" << std::endl;
+//        else if (dynamic_cast< detail::cell_quan_expr<CellType, viennafem::det_dF_dt_key, ExpressionType> * >(temp.get()) != NULL
+//                 || dynamic_cast< detail::cell_quan_constant<CellType, viennafem::det_dF_dt_key, NumericType> * >(temp.get()) != NULL)
+//        {
+//          ss << " \\mathrm{det} F ";
+//        }
+//        else       
+//          std::cerr << "Warning: could not find string for cell_quan!" << std::endl;
 
         return ss.str();        
       }

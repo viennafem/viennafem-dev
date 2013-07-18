@@ -21,71 +21,110 @@
 #include "viennafem/forwards.h"
 
 // ViennaGrid includes:
-#include "viennagrid/config/default_configs.hpp"
 #include "viennagrid/io/vtk_writer.hpp"
 
 // ViennaData includes:
 #include "viennadata/api.hpp"
-
-/** @file   vtk_writer.hpp
-    @brief  Defines a routine for writing a FEM solution to a VTK file (can be processed with e.g. ParaView)
-*/
 
 namespace viennafem
 {
   namespace io
   {
 
-    /** @brief Writes a FEM solution to a VTK file.
-     * 
-     * @param result    The FEM result vector
-     * @param filename  The VTK filename
-     * @param domain    The ViennaGrid domain used for the simulation
-     * @param id        The simulation ID used for computing the solution
-     */
     template <typename VectorType,
-              typename DomainType>
+              typename DomainType,
+              typename SegmentationType,
+              typename StorageType>
     void write_solution_to_VTK_file(VectorType const & result,
                                     std::string filename,
                                     DomainType const & domain,
-                                    long id)
+                                    SegmentationType const & segmentation,
+                                    StorageType const & storage,
+                                    std::vector<long> id_vector)
     {
-      typedef typename DomainType::config_type                                              ConfigType;
-      typedef typename viennagrid::result_of::ncell<ConfigType, 0>::type               VertexType;
-      typedef typename viennagrid::result_of::const_ncell_range<DomainType, 0>::type    VertexContainer;
-      typedef typename viennagrid::result_of::iterator<VertexContainer>::type               VertexIterator;
-      
+//       typedef typename DomainType::config_type                                              ConfigType;
+//       typedef typename ConfigType::cell_tag                                                 CellTag;
+
+      typedef typename viennagrid::result_of::cell_tag<DomainType>::type CellTag;
+
+      typedef typename viennagrid::result_of::element<DomainType, CellTag>::type         CellType;
+
+      typedef typename viennagrid::result_of::const_element_range<DomainType, CellTag>::type   CellContainer;
+      typedef typename viennagrid::result_of::iterator<CellContainer>::type                       CellIterator;
+
       typedef viennafem::mapping_key          MappingKeyType;
       typedef viennafem::boundary_key         BoundaryKeyType;
-      
-      MappingKeyType map_key(id);
-      BoundaryKeyType bnd_key(id);
-      
-      
+
       std::cout << "* write_solution_to_VTK_file(): Writing result on mesh for later export" << std::endl;
-      VertexContainer vertices = viennagrid::ncells<0>(domain);
-      for (VertexIterator vit = vertices.begin();
-          vit != vertices.end();
-          ++vit)
+      viennagrid::io::vtk_writer<DomainType> my_vtk_writer;
+
+
+
+      std::map< std::string, std::deque<double> > output_values;
+
+      for (std::size_t i=0; i<id_vector.size(); ++i)
       {
-        long cur_index = viennadata::access<MappingKeyType, long>(map_key)(*vit);
-        if (cur_index > -1)
-          viennadata::access<std::string, double>("vtk_data")(*vit) = result[cur_index];
-        else //use Dirichlet boundary data:
-          viennadata::access<std::string, double>("vtk_data")(*vit) = 
-            viennadata::access<BoundaryKeyType, double>(bnd_key)(*vit);
+        long id = id_vector[i];
+        MappingKeyType map_key(id);
+        BoundaryKeyType bnd_key(id);
+
+        typename viennadata::result_of::accessor<const StorageType, viennafem::mapping_key, long, CellType>::type cell_mapping_accessor =
+          viennadata::accessor<viennafem::mapping_key, long, CellType>(storage, map_key);
+        
+        typename viennadata::result_of::accessor<const StorageType, BoundaryKeyType, double, CellType>::type boundary_accessor =
+          viennadata::accessor<BoundaryKeyType, double, CellType>(storage, bnd_key);
+
+        std::stringstream ss;
+        ss << "fvm_result" << id;
+        std::string result_string = ss.str(); // also used for passing staff over to VTK
+
+        typename viennagrid::result_of::accessor< std::deque<double>, CellType >::type output_value_accessor( output_values[result_string] );
+
+        CellContainer cells = viennagrid::elements(domain);
+        for (CellIterator cit = cells.begin();
+                          cit != cells.end();
+                        ++cit)
+        {
+          long cur_index = cell_mapping_accessor(*cit);
+          if (cur_index > -1)
+            output_value_accessor(*cit) = result[cur_index];
+          else //use Dirichlet boundary data:
+          {
+            // TODO if Accessor concept takes care of that -> change!
+            if (boundary_accessor.find(*cit))
+              output_value_accessor(*cit) = boundary_accessor(*cit);
+            else
+              output_value_accessor(*cit) = false;
+          }
+//             output_value_accessor(*cit) = boundary_accessor(*cit);
+        }
+
+        my_vtk_writer.add_scalar_data_on_cells( output_value_accessor, result_string );
       }
 
       std::cout << "* write_solution_to_VTK_file(): Writing data to '"
                 << filename
                 << "' (can be viewed with e.g. Paraview)" << std::endl;
 
-      viennagrid::io::vtk_writer<DomainType> my_vtk_writer;
-      viennagrid::io::add_scalar_data_on_vertices<std::string, double>(my_vtk_writer, "vtk_data", "fem_result");
-      my_vtk_writer(domain, filename);  
+      my_vtk_writer(domain, segmentation, filename);
     }
 
+    template <typename VectorType,
+              typename DomainType,
+              typename SegmentationType,
+              typename StorageType>
+    void write_solution_to_VTK_file(VectorType const & result,
+                                    std::string filename,
+                                    DomainType const & domain,
+                                    SegmentationType const & segmentation,
+                                    StorageType const & storage,
+                                    long id)
+    {
+      std::vector<long> id_vector(1);
+      id_vector[0] = id;
 
+      write_solution_to_VTK_file(result, filename, domain, segmentation, storage, id_vector);
+    }
   }
 }
 #endif
