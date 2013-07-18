@@ -56,9 +56,6 @@ namespace viennafem
     template <typename CellType>
     void operator()(CellType const & cell)
     {
-      typedef typename CellType::config_type                            Config;
-      typedef typename viennagrid::result_of::point<Config>::type  PointType;
-
       PointType const& p0 = pnt_acc( viennagrid::vertices(cell)[0] );
       PointType const& p1 = pnt_acc( viennagrid::vertices(cell)[1] );
       PointType const& p2 = pnt_acc( viennagrid::vertices(cell)[2] );
