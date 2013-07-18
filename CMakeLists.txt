@@ -16,7 +16,7 @@ SET(CMAKE_VERBOSE_MAKEFILE ON)
 
 # alternate boost path for macs
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-   INCLUDE_DIRECTORIES("/opt/local/include") 
+   INCLUDE_DIRECTORIES("/opt/local/include")
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 #specify include and source directory
@@ -52,6 +52,14 @@ ADD_EXECUTABLE(poisson_1d examples/tutorial/poisson_1d.cpp)
 #ADD_EXECUTABLE(sshape_2d examples/tutorial/sshape_2d.cpp)
 #ADD_EXECUTABLE(sshape_3d examples/tutorial/sshape_3d.cpp)
 #ADD_EXECUTABLE(weak_forms examples/tutorial/weak_forms.cpp)
+
+
+# Add visibility of headers
+# Necessary for Qt-Creator usage.
+################
+file( GLOB_RECURSE MAKE_HEADERS_VISIBLE_SRC
+    *.hpp *.h)
+add_custom_target( MAKE_HEADERS_VISIBLE SOURCES ${MAKE_HEADERS_VISIBLE_SRC} )
 
 # packaging:
 option(ENABLE_DIST "Enable the the distribution tarball target" OFF)
