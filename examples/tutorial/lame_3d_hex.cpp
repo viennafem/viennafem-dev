@@ -194,7 +194,6 @@ int main()
 {
   typedef viennagrid::domain_t< viennagrid::config::hexahedral_3d >                       DomainType;
   typedef viennagrid::result_of::segmentation<DomainType>::type                           SegmentationType;
-  typedef SegmentationType::iterator                                                      SegmentationIterator;
   typedef viennagrid::result_of::element<DomainType, viennagrid::vertex_tag>::type        VertexType;    
   typedef viennagrid::result_of::element_range<DomainType, viennagrid::vertex_tag>::type  VertexContainer;
   typedef viennagrid::result_of::iterator<VertexContainer>::type                          VertexIterator;

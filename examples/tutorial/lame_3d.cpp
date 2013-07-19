@@ -27,10 +27,9 @@
 #include "viennafem/io/vtk_writer.hpp"
 
 // ViennaGrid includes:
-#include "viennagrid/domain.hpp"
-#include <viennagrid/config/simplex.hpp>
+#include "viennagrid/forwards.hpp"
+#include "viennagrid/config/default_configs.hpp"
 #include "viennagrid/io/netgen_reader.hpp"
-#include "viennagrid/io/vtk_writer.hpp"
 
 // ViennaData includes:
 #include "viennadata/api.hpp"
@@ -152,13 +151,12 @@ rt_expr<InterfaceType> tensor_reduce(std::vector< rt_expr<InterfaceType> > lhs, 
 //
 // Writes displacements to domain
 //
-template <typename DomainType, typename VectorType>
-void apply_displacements(DomainType & domain, VectorType const & result)
+template <typename DomainT, typename StorageT, typename VectorT>
+void apply_displacements(DomainT& domain, StorageT& storage, VectorT const & result)
 {
-  typedef typename DomainType::config_type                                              ConfigType;
-  typedef typename viennagrid::result_of::ncell<ConfigType, 0>::type               VertexType;
-  typedef typename viennagrid::result_of::ncell_range<DomainType, 0>::type          VertexContainer;
-  typedef typename viennagrid::result_of::iterator<VertexContainer>::type               VertexIterator;
+  typedef typename viennagrid::result_of::element<DomainT, viennagrid::vertex_tag>::type           VertexType;  
+  typedef typename viennagrid::result_of::element_range<DomainT, viennagrid::vertex_tag>::type     VertexContainer;
+  typedef typename viennagrid::result_of::iterator<VertexContainer>::type                          VertexIterator;
 
   typedef viennafem::mapping_key          MappingKeyType;
   typedef viennafem::boundary_key         BoundaryKeyType;
@@ -167,25 +165,25 @@ void apply_displacements(DomainType & domain, VectorType const & result)
   BoundaryKeyType bnd_key(0);
   
   std::cout << "* apply_displacements(): Writing computed displacements onto domain" << std::endl;
-  VertexContainer vertices = viennagrid::ncells<0>(domain);
+  VertexContainer vertices = viennagrid::elements<VertexType>(domain);  
   for (VertexIterator vit = vertices.begin();
       vit != vertices.end();
       ++vit)
   {
-    long cur_index = viennadata::access<MappingKeyType, long>(map_key)(*vit);
+    long cur_index = viennadata::access<MappingKeyType, long>(storage, map_key, *vit);
     if (cur_index > -1)
     {
-      vit->point()[0] = vit->point()[0] + result[cur_index+0];
-      vit->point()[1] = vit->point()[1] + result[cur_index+1];
-      vit->point()[2] = vit->point()[2] + result[cur_index+2];
+      viennagrid::point(domain, *vit)[0] += result[cur_index+0];
+      viennagrid::point(domain, *vit)[1] += result[cur_index+1];
+      viennagrid::point(domain, *vit)[2] += result[cur_index+2];
     }
     else
     {
-      if (viennadata::access<BoundaryKeyType, std::vector<double> >(bnd_key)(*vit).size() > 0)
+      if (viennadata::access<BoundaryKeyType, std::vector<double> >(storage, bnd_key, *vit).size() > 0)
       {
-        vit->point()[0] += viennadata::access<BoundaryKeyType, std::vector<double> >(bnd_key)(*vit)[0];
-        vit->point()[1] += viennadata::access<BoundaryKeyType, std::vector<double> >(bnd_key)(*vit)[1];
-        vit->point()[2] += viennadata::access<BoundaryKeyType, std::vector<double> >(bnd_key)(*vit)[2];
+        viennagrid::point(domain, *vit)[0] += viennadata::access<BoundaryKeyType, std::vector<double> >(storage, bnd_key, *vit)[0];
+        viennagrid::point(domain, *vit)[1] += viennadata::access<BoundaryKeyType, std::vector<double> >(storage, bnd_key, *vit)[1];
+        viennagrid::point(domain, *vit)[2] += viennadata::access<BoundaryKeyType, std::vector<double> >(storage, bnd_key, *vit)[2];
       }
     }
   }
@@ -193,12 +191,11 @@ void apply_displacements(DomainType & domain, VectorType const & result)
 
 int main()
 {
-  typedef viennagrid::config::tetrahedral_3d                             ConfigType;
-  typedef viennagrid::result_of::domain<viennagrid::config::tetrahedral_3d>::type         DomainType;
-
-  typedef viennagrid::result_of::ncell_range<DomainType, 0>::type    VertexContainer;
-  typedef viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
-  typedef viennagrid::result_of::ncell<ConfigType, 3>::type              CellType;
+  typedef viennagrid::domain_t< viennagrid::config::tetrahedral_3d >                      DomainType;
+  typedef viennagrid::result_of::segmentation<DomainType>::type                           SegmentationType;
+  typedef viennagrid::result_of::element<DomainType, viennagrid::vertex_tag>::type        VertexType;    
+  typedef viennagrid::result_of::element_range<DomainType, viennagrid::vertex_tag>::type  VertexContainer;
+  typedef viennagrid::result_of::iterator<VertexContainer>::type                          VertexIterator;
   
   typedef boost::numeric::ublas::compressed_matrix<viennafem::numeric_type>  MatrixType;
   typedef boost::numeric::ublas::vector<viennafem::numeric_type>             VectorType;
@@ -214,12 +211,22 @@ int main()
   std::cout << "*****     Demo for LAME equation with ViennaFEM     *****" << std::endl;
   std::cout << "*********************************************************" << std::endl;
 
+  //
+  // Create a domain from file
+  //
   DomainType my_domain;
+  SegmentationType segments(my_domain);
+  
+  //
+  // Create a storage object
+  //
+  typedef viennadata::storage<> StorageType;
+  StorageType   storage;
   
   try
   {
     viennagrid::io::netgen_reader my_reader;
-    my_reader(my_domain, "../examples/data/cube3072.mesh");
+    my_reader(my_domain, segments, "../examples/data/cube3072.mesh");
   }
   catch (...)
   {
@@ -267,26 +274,26 @@ int main()
   std::vector<double> bnd_data_right(3);
   bnd_data_right[0] = 0.2; //small displacement into x-direction prescribed
   
-  VertexContainer vertices = viennagrid::ncells<0>(my_domain);
+  VertexContainer vertices = viennagrid::elements<VertexType>(my_domain);  
   for (VertexIterator vit = vertices.begin();
       vit != vertices.end();
       ++vit)
   {
     //boundary for first equation: Homogeneous Dirichlet everywhere
-    if (vit->point()[0] == 0.0 || vit->point()[0] == 1.0)
-      viennafem::set_dirichlet_boundary(*vit, 0);
+    if (viennagrid::point(my_domain, *vit)[0] == 0.0 || viennagrid::point(my_domain, *vit)[0] == 1.0 )
+      viennafem::set_dirichlet_boundary(storage, *vit, 0);
     
-    if (vit->point()[0] == 1.0)
+    if (viennagrid::point(my_domain, *vit)[0] == 1.0)
     {
-      viennafem::set_dirichlet_boundary(*vit, bnd_data_right);
-      viennadata::access<BoundaryKey, double>(BoundaryKey(0))(*vit) = bnd_data_right[0]; //this is for the moment used for the VTK writer
+      viennafem::set_dirichlet_boundary(storage, *vit, bnd_data_right);
+      viennadata::access<BoundaryKey, double>(storage, BoundaryKey(0), *vit) = bnd_data_right[0]; //this is for the moment used for the VTK writer
     }
   }
   
   //
   // Create PDE solver functors: (discussion about proper interface required)
   //
-  viennafem::pde_assembler fem_assembler;
+  viennafem::pde_assembler<StorageType> fem_assembler(storage);
 
   //
   // Assemble and solve system and write solution vector to pde_result:
@@ -306,8 +313,8 @@ int main()
   VectorType displacements = viennacl::linalg::solve(system_matrix, load_vector, viennacl::linalg::bicgstab_tag());
   std::cout << "* solve(): Residual: " << norm_2(prod(system_matrix, displacements) - load_vector) << std::endl;
   
-  apply_displacements(my_domain, displacements);
-  viennafem::io::write_solution_to_VTK_file(displacements, "lame", my_domain, 0);
+  apply_displacements(my_domain, storage, displacements);
+  viennafem::io::write_solution_to_VTK_file(displacements, "lame", my_domain, segments, storage, 0);
 
   std::cout << "*****************************************" << std::endl;
   std::cout << "* Lame solver finished successfully! *" << std::endl;
