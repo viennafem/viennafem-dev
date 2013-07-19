@@ -20,10 +20,8 @@
 #include "viennafem/io/vtk_writer.hpp"
 
 // ViennaGrid includes:
-#include "viennagrid/domain.hpp"
-#include "viennagrid/config/simplex.hpp"
-#include "viennagrid/io/netgen_reader.hpp"
-#include "viennagrid/io/vtk_writer.hpp"
+#include "viennagrid/forwards.hpp"
+#include "viennagrid/config/default_configs.hpp"
 
 // ViennaData includes:
 #include "viennadata/api.hpp"
@@ -44,12 +42,18 @@ struct testkey
 
 int main()
 {
-  typedef viennagrid::config::triangular_2d                       ConfigType;
-  typedef viennagrid::result_of::domain<ConfigType>::type         DomainType;
-  typedef viennagrid::result_of::ncell<ConfigType, 2>::type       CellType;
+  typedef viennagrid::domain_t< viennagrid::config::triangular_2d >       DomainType;
+  typedef viennagrid::result_of::cell_tag<DomainType>::type               CellTag;
+  typedef viennagrid::result_of::element<DomainType, CellTag>::type       CellType;
   
   typedef viennamath::function_symbol   FunctionSymbol;
   typedef viennamath::equation          Equation;
+  
+  //
+  // Create a storage object
+  //
+  typedef viennadata::storage<> StorageType;
+  StorageType   storage;  
   
   //
   // Specify PDEs and derive weak form:
@@ -80,7 +84,7 @@ int main()
   std::cout << "Weak form: " << viennafem::make_weak_form(equ_5) << std::endl;  
   std::cout << "-------------" << std::endl;
   
-  viennafem::cell_quan<CellType, viennamath::expr::interface_type>  permittivity; permittivity.wrap_constant( testkey() );  
+  viennafem::cell_quan<CellType, viennamath::expr::interface_type>  permittivity; permittivity.wrap_constant( storage, testkey() );  
   Equation equ_6 = viennamath::make_equation( viennamath::div( permittivity * viennamath::grad(u)), -1);
   std::cout << "Strong form: " << equ_6 << std::endl;
   std::cout << "Weak form: " << viennafem::make_weak_form(equ_6) << std::endl;  
