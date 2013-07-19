@@ -20,10 +20,9 @@
 #include "viennafem/io/vtk_writer.hpp"
 
 // ViennaGrid includes:
-#include "viennagrid/domain.hpp"
-#include "viennagrid/config/simplex.hpp"
+#include "viennagrid/forwards.hpp"
+#include "viennagrid/config/default_configs.hpp"
 #include "viennagrid/io/netgen_reader.hpp"
-#include "viennagrid/io/vtk_writer.hpp"
 
 // ViennaData includes:
 #include "viennadata/api.hpp"
@@ -57,15 +56,17 @@ struct permittivity_key
 
 int main()
 {
-  typedef viennagrid::config::triangular_2d                             ConfigType;
-  typedef viennagrid::result_of::domain<ConfigType>::type               DomainType;
-  typedef viennagrid::segment_t<ConfigType>                             SegmentType;
-
-  typedef viennagrid::result_of::ncell_range<DomainType, 0>::type    VertexContainer;
-  typedef viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
-  typedef viennagrid::result_of::ncell_range<SegmentType, 2>::type   CellContainer;
-  typedef viennagrid::result_of::iterator<CellContainer>::type           CellIterator;
-  typedef viennagrid::result_of::ncell<ConfigType, 2>::type              CellType;
+  typedef viennagrid::domain_t< viennagrid::config::triangular_2d >                       DomainType;
+  typedef viennagrid::result_of::segmentation<DomainType>::type                           SegmentationType;
+  typedef SegmentationType::iterator                                                      SegmentationIteratorType;
+  typedef viennagrid::result_of::cell_tag<DomainType>::type                               CellTagType;
+  typedef viennagrid::result_of::element<DomainType, viennagrid::vertex_tag>::type        VertexType;  
+  typedef viennagrid::result_of::element<DomainType, CellTagType>::type                   CellType;  
+  
+  typedef viennagrid::result_of::element_range<DomainType, viennagrid::vertex_tag>::type  VertexContainerType;
+  typedef viennagrid::result_of::iterator<VertexContainerType>::type                      VertexIteratorType;
+  typedef viennagrid::result_of::element_range<DomainType, CellTagType>::type             CellContainerType;
+  typedef viennagrid::result_of::iterator<CellContainerType>::type                        CellIteratorType;
   
   typedef boost::numeric::ublas::compressed_matrix<viennafem::numeric_type>  MatrixType;
   typedef boost::numeric::ublas::vector<viennafem::numeric_type>             VectorType;
@@ -79,11 +80,18 @@ int main()
   // Create a domain from file
   //
   DomainType my_domain;
+  SegmentationType segments(my_domain);
+  
+  //
+  // Create a storage object
+  //
+  typedef viennadata::storage<> StorageType;
+  StorageType   storage;
 
   try
   {
     viennagrid::io::netgen_reader my_netgen_reader;
-    my_netgen_reader(my_domain, "../examples/data/square224.mesh");
+    my_netgen_reader(my_domain, segments, "../examples/data/square224.mesh");
   }
   catch (...)
   {
@@ -97,7 +105,7 @@ int main()
   //
   FunctionSymbol u(0, viennamath::unknown_tag<>());   //an unknown function used for PDE specification
   FunctionSymbol v(0, viennamath::test_tag<>());   //an unknown function used for PDE specification
-  viennafem::cell_quan<CellType, viennamath::expr::interface_type>  permittivity; permittivity.wrap_constant( permittivity_key() );  
+  viennafem::cell_quan<CellType, viennamath::expr::interface_type>  permittivity; permittivity.wrap_constant( storage, permittivity_key() );  
 
   //the strong form (not yet functional because of ViennaMath limitations)
   //Equation poisson_equ = viennamath::make_equation( viennamath::div(permittivity * viennamath::grad(u)), 0);
@@ -115,16 +123,16 @@ int main()
   // Setting boundary information on domain (this should come from device specification)
   //
   //setting some boundary flags:
-  VertexContainer vertices = viennagrid::ncells<0>(my_domain);
-  for (VertexIterator vit = vertices.begin();
+  VertexContainerType vertices = viennagrid::elements<VertexType>(my_domain);  
+  for (VertexIteratorType vit = vertices.begin();
       vit != vertices.end();
       ++vit)
   {
     // Boundary condition: 0 at left boundary, 1 at right boundary
-    if ( (*vit)[0] == 0.0)
-      viennafem::set_dirichlet_boundary(*vit, 0.0);
-    else if ( (*vit)[0] == 1.0)
-      viennafem::set_dirichlet_boundary(*vit, 1.0);
+    if ( viennagrid::point(my_domain, *vit)[0] == 0.0)
+      viennafem::set_dirichlet_boundary(storage, *vit, 0.0);
+    else if ( viennagrid::point(my_domain, *vit)[0] == 1.0)
+      viennafem::set_dirichlet_boundary(storage, *vit, 1.0);
     
   }
   
@@ -132,25 +140,26 @@ int main()
   //
   // Create PDE solver functors: (discussion about proper interface required)
   //
-  viennafem::pde_assembler fem_assembler;
+  viennafem::pde_assembler<StorageType> fem_assembler(storage);
 
   
   //
   // Solve system and write solution vector to pde_result:
   // (discussion about proper interface required. Introduce a pde_result class?)
   //
-  for (size_t i=0; i<my_domain.segments().size(); ++i)
+  std::size_t si = 0;
+  for(SegmentationIteratorType sit = segments.begin(); sit != segments.end(); sit++)
   {
     //set permittivity:
-    CellContainer cells = viennagrid::ncells<2>(my_domain.segments()[i]);
-    for (CellIterator cit  = cells.begin();
-                      cit != cells.end();
-                    ++cit)
+    CellContainerType cells = viennagrid::elements<CellType>(my_domain);  
+    for (CellIteratorType cit  = cells.begin();
+                          cit != cells.end();
+                        ++cit)
     {
-      if (i==0) //Si
-        viennadata::access<permittivity_key, double>(permittivity_key())(*cit) = 3.9; 
+      if (si == 0) //Si
+        viennadata::access<permittivity_key, double>(storage, permittivity_key(), *cit) = 3.9; 
       else //SiO2
-        viennadata::access<permittivity_key, double>(permittivity_key())(*cit) = 11.9; 
+        viennadata::access<permittivity_key, double>(storage, permittivity_key(), *cit) = 11.9; 
     }
     
     
@@ -160,7 +169,7 @@ int main()
                                                                                        viennafem::lagrange_tag<1>(),
                                                                                        viennafem::lagrange_tag<1>())
                                                   ),
-                  my_domain.segments()[i],
+                  *sit,
                   system_matrix,
                   load_vector
                 );
@@ -171,7 +180,7 @@ int main()
   //
   // Writing solution back to domain (discussion about proper way of returning a solution required...)
   //
-  viennafem::io::write_solution_to_VTK_file(pde_result, "poisson_cellquan_2d", my_domain, 0);
+  viennafem::io::write_solution_to_VTK_file(pde_result, "poisson_cellquan_2d", my_domain, segments, storage, 0);
   
   std::cout << "*****************************************" << std::endl;
   std::cout << "* Poisson solver finished successfully! *" << std::endl;
