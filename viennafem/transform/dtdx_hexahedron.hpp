@@ -40,30 +40,30 @@ namespace viennafem
     typedef typename viennagrid::result_of::point<DomainType>::type                       PointType;
     typedef typename viennagrid::result_of::default_point_accessor<DomainType>::type      PointAccessorType;
 
-    typedef typename viennadata::result_of::accessor<StorageType, det_dF_dt_key,   viennafem::numeric_type, CellType>::type   det_dF_dt_AccessorType;
-    typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<0, 0>, viennafem::numeric_type, CellType>::type   dt_dx_key_00_AccessorType;
-    typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<0, 1>, viennafem::numeric_type, CellType>::type   dt_dx_key_01_AccessorType;
-    typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<0, 2>, viennafem::numeric_type, CellType>::type   dt_dx_key_02_AccessorType;
-    typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<1, 0>, viennafem::numeric_type, CellType>::type   dt_dx_key_10_AccessorType;
-    typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<1, 1>, viennafem::numeric_type, CellType>::type   dt_dx_key_11_AccessorType;
-    typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<1, 2>, viennafem::numeric_type, CellType>::type   dt_dx_key_12_AccessorType;
-    typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<2, 0>, viennafem::numeric_type, CellType>::type   dt_dx_key_20_AccessorType;
-    typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<2, 1>, viennafem::numeric_type, CellType>::type   dt_dx_key_21_AccessorType;
-    typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<2, 2>, viennafem::numeric_type, CellType>::type   dt_dx_key_22_AccessorType;
+    typedef typename viennadata::result_of::accessor<StorageType, det_dF_dt_key,   viennamath::expr, CellType>::type   det_dF_dt_AccessorType;
+    typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<0, 0>, viennamath::expr, CellType>::type   dt_dx_key_00_AccessorType;
+    typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<0, 1>, viennamath::expr, CellType>::type   dt_dx_key_01_AccessorType;
+    typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<0, 2>, viennamath::expr, CellType>::type   dt_dx_key_02_AccessorType;
+    typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<1, 0>, viennamath::expr, CellType>::type   dt_dx_key_10_AccessorType;
+    typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<1, 1>, viennamath::expr, CellType>::type   dt_dx_key_11_AccessorType;
+    typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<1, 2>, viennamath::expr, CellType>::type   dt_dx_key_12_AccessorType;
+    typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<2, 0>, viennamath::expr, CellType>::type   dt_dx_key_20_AccessorType;
+    typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<2, 1>, viennamath::expr, CellType>::type   dt_dx_key_21_AccessorType;
+    typedef typename viennadata::result_of::accessor<StorageType, dt_dx_key<2, 2>, viennamath::expr, CellType>::type   dt_dx_key_22_AccessorType;
 
     dt_dx_handler(DomainType& domain, StorageType& storage) : pnt_acc(viennagrid::default_point_accessor(domain))
     {
 
-      det_dF_dt_acc    = viennadata::make_accessor<det_dF_dt_key,   viennafem::numeric_type, CellType>(storage, det_dF_dt_key());
-      dt_dx_key_00_acc = viennadata::make_accessor<dt_dx_key<0, 0>, viennafem::numeric_type, CellType>(storage, dt_dx_key<0, 0>());
-      dt_dx_key_01_acc = viennadata::make_accessor<dt_dx_key<0, 1>, viennafem::numeric_type, CellType>(storage, dt_dx_key<0, 1>());
-      dt_dx_key_02_acc = viennadata::make_accessor<dt_dx_key<0, 2>, viennafem::numeric_type, CellType>(storage, dt_dx_key<0, 2>());
-      dt_dx_key_10_acc = viennadata::make_accessor<dt_dx_key<1, 0>, viennafem::numeric_type, CellType>(storage, dt_dx_key<1, 0>());
-      dt_dx_key_11_acc = viennadata::make_accessor<dt_dx_key<1, 1>, viennafem::numeric_type, CellType>(storage, dt_dx_key<1, 1>());
-      dt_dx_key_12_acc = viennadata::make_accessor<dt_dx_key<1, 2>, viennafem::numeric_type, CellType>(storage, dt_dx_key<1, 2>());
-      dt_dx_key_20_acc = viennadata::make_accessor<dt_dx_key<2, 0>, viennafem::numeric_type, CellType>(storage, dt_dx_key<2, 0>());
-      dt_dx_key_21_acc = viennadata::make_accessor<dt_dx_key<2, 1>, viennafem::numeric_type, CellType>(storage, dt_dx_key<2, 1>());
-      dt_dx_key_22_acc = viennadata::make_accessor<dt_dx_key<2, 2>, viennafem::numeric_type, CellType>(storage, dt_dx_key<2, 2>());
+      det_dF_dt_acc    = viennadata::make_accessor(storage, det_dF_dt_key());
+      dt_dx_key_00_acc = viennadata::make_accessor(storage, dt_dx_key<0, 0>());
+      dt_dx_key_01_acc = viennadata::make_accessor(storage, dt_dx_key<0, 1>());
+      dt_dx_key_02_acc = viennadata::make_accessor(storage, dt_dx_key<0, 2>());
+      dt_dx_key_10_acc = viennadata::make_accessor(storage, dt_dx_key<1, 0>());
+      dt_dx_key_11_acc = viennadata::make_accessor(storage, dt_dx_key<1, 1>());
+      dt_dx_key_12_acc = viennadata::make_accessor(storage, dt_dx_key<1, 2>());
+      dt_dx_key_20_acc = viennadata::make_accessor(storage, dt_dx_key<2, 0>());
+      dt_dx_key_21_acc = viennadata::make_accessor(storage, dt_dx_key<2, 1>());
+      dt_dx_key_22_acc = viennadata::make_accessor(storage, dt_dx_key<2, 2>());
     }
 
     template <typename CellType>

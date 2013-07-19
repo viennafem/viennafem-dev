@@ -42,8 +42,8 @@ namespace viennafem
 
     dt_dx_handler(DomainType& domain, StorageType& storage) : pnt_acc(viennagrid::default_point_accessor(domain))
     {
-      det_dF_dt_acc    = viennadata::make_accessor<det_dF_dt_key,   viennafem::numeric_type, CellType>(storage, det_dF_dt_key());
-      dt_dx_key_00_acc = viennadata::make_accessor<dt_dx_key<0, 0>, viennafem::numeric_type, CellType>(storage, dt_dx_key<0, 0>());
+      det_dF_dt_acc    = viennadata::make_accessor(storage, det_dF_dt_key());
+      dt_dx_key_00_acc = viennadata::make_accessor(storage, dt_dx_key<0, 0>());
     }
 
     template <typename CellType>

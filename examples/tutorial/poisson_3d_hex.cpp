@@ -24,10 +24,9 @@
 #include "viennafem/io/vtk_writer.hpp"
 
 // ViennaGrid includes:
-#include "viennagrid/domain.hpp"
-#include "viennagrid/config/others.hpp"
+#include "viennagrid/forwards.hpp"
+#include "viennagrid/config/default_configs.hpp"
 #include "viennagrid/io/netgen_reader.hpp"
-#include "viennagrid/io/vtk_writer.hpp"
 
 // ViennaData includes:
 #include "viennadata/api.hpp"
@@ -55,12 +54,12 @@
 
 int main()
 {
-  typedef viennagrid::config::hexahedral_3d                       ConfigType;
-  typedef viennagrid::result_of::domain<ConfigType>::type         DomainType;
-
-  typedef viennagrid::result_of::ncell_range<DomainType, 0>::type    VertexContainer;
-  typedef viennagrid::result_of::iterator<VertexContainer>::type         VertexIterator;
-  typedef viennagrid::result_of::ncell<ConfigType, 3>::type              CellType;
+  typedef viennagrid::domain_t< viennagrid::config::hexahedral_3d >                       DomainType;
+  typedef viennagrid::result_of::segmentation<DomainType>::type                           SegmentationType;
+  typedef SegmentationType::iterator                                                      SegmentationIterator;
+  typedef viennagrid::result_of::element<DomainType, viennagrid::vertex_tag>::type        VertexType;  
+  typedef viennagrid::result_of::element_range<DomainType, viennagrid::vertex_tag>::type  VertexContainer;
+  typedef viennagrid::result_of::iterator<VertexContainer>::type                          VertexIterator;
   
   typedef boost::numeric::ublas::compressed_matrix<viennafem::numeric_type>  MatrixType;
   typedef boost::numeric::ublas::vector<viennafem::numeric_type>             VectorType;
@@ -75,11 +74,18 @@ int main()
   // Create a domain from file
   //
   DomainType my_domain;
+  SegmentationType segments(my_domain);
+  
+  //
+  // Create a storage object
+  //
+  typedef viennadata::storage<> StorageType;
+  StorageType   storage;
   
   try
   {
     viennagrid::io::netgen_reader my_reader;
-    my_reader(my_domain, "../examples/data/cube343_hex.mesh");
+    my_reader(my_domain, segments, "../examples/data/cube343_hex.mesh");
   }
   catch (...)
   {
@@ -102,28 +108,28 @@ int main()
   // Setting boundary information on domain (this should come from device specification)
   //
   //setting some boundary flags:
-  VertexContainer vertices = viennagrid::ncells<0>(my_domain);
+  VertexContainer vertices = viennagrid::elements<VertexType>(my_domain);  
   for (VertexIterator vit = vertices.begin();
       vit != vertices.end();
       ++vit)
   {
     // First equation: Homogeneous boundary conditions at x=0, x=1, y=0, or y=1
-    if ( (*vit)[0] == 0.0 || (*vit)[0] == 1.0 
-         || (*vit)[1] == 0.0 || (*vit)[1] == 1.0 ) 
-      viennafem::set_dirichlet_boundary(*vit, 0.0, 0);  //simulation with ID 0 uses homogeneous boundary data
+    if ( viennagrid::point(my_domain, *vit)[0] == 0.0 || viennagrid::point(my_domain, *vit)[0] == 1.0 
+         || viennagrid::point(my_domain, *vit)[1] == 0.0 || viennagrid::point(my_domain, *vit)[1] == 1.0 ) 
+      viennafem::set_dirichlet_boundary(storage, *vit, 0.0, 0);  //simulation with ID 0 uses homogeneous boundary data
     
     // Boundary for second equation (ID 1): 0 at left boundary, 1 at right boundary
-    if ( (*vit)[0] == 0.0)
-      viennafem::set_dirichlet_boundary(*vit, 0.0, 1);
-    else if ( (*vit)[0] == 1.0)
-      viennafem::set_dirichlet_boundary(*vit, 1.0, 1);
+    if ( viennagrid::point(my_domain, *vit)[0] == 0.0)
+      viennafem::set_dirichlet_boundary(storage, *vit, 0.0, 1);
+    else if ( viennagrid::point(my_domain, *vit)[0] == 1.0)
+      viennafem::set_dirichlet_boundary(storage, *vit, 1.0, 1);
   }
   
   
   //
   // Create PDE solver functors: (discussion about proper interface required)
   //
-  viennafem::pde_assembler fem_assembler;
+  viennafem::pde_assembler<StorageType> fem_assembler(storage);
 
   
   //
@@ -162,8 +168,8 @@ int main()
   //
   // Writing solution back to domain (discussion about proper way of returning a solution required...)
   //
-  viennafem::io::write_solution_to_VTK_file(pde_result_1, "poisson_3d_hex_1", my_domain, 0);
-  viennafem::io::write_solution_to_VTK_file(pde_result_2, "poisson_3d_hex_2", my_domain, 1);
+  viennafem::io::write_solution_to_VTK_file(pde_result_1, "poisson_3d_hex_1", my_domain, segments, storage, 0);
+  viennafem::io::write_solution_to_VTK_file(pde_result_2, "poisson_3d_hex_2", my_domain, segments, storage, 1);
   
   std::cout << "*****************************************" << std::endl;
   std::cout << "* Poisson solver finished successfully! *" << std::endl;
