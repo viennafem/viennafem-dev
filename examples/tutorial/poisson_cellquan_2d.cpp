@@ -59,14 +59,15 @@ int main()
   typedef viennagrid::domain_t< viennagrid::config::triangular_2d >                       DomainType;
   typedef viennagrid::result_of::segmentation<DomainType>::type                           SegmentationType;
   typedef SegmentationType::iterator                                                      SegmentationIteratorType;
+  typedef SegmentationType::segment_type                                                  SegmentType;
   typedef viennagrid::result_of::cell_tag<DomainType>::type                               CellTagType;
   typedef viennagrid::result_of::element<DomainType, viennagrid::vertex_tag>::type        VertexType;  
   typedef viennagrid::result_of::element<DomainType, CellTagType>::type                   CellType;  
   
   typedef viennagrid::result_of::element_range<DomainType, viennagrid::vertex_tag>::type  VertexContainerType;
   typedef viennagrid::result_of::iterator<VertexContainerType>::type                      VertexIteratorType;
-  typedef viennagrid::result_of::element_range<DomainType, CellTagType>::type             CellContainerType;
-  typedef viennagrid::result_of::iterator<CellContainerType>::type                        CellIteratorType;
+  typedef viennagrid::result_of::element_range<SegmentType, CellTagType>::type            CellOnSegmentContainerType;
+  typedef viennagrid::result_of::iterator<CellOnSegmentContainerType>::type               CellOnSegmentIteratorType;
   
   typedef boost::numeric::ublas::compressed_matrix<viennafem::numeric_type>  MatrixType;
   typedef boost::numeric::ublas::vector<viennafem::numeric_type>             VectorType;
@@ -151,10 +152,10 @@ int main()
   for(SegmentationIteratorType sit = segments.begin(); sit != segments.end(); sit++)
   {
     //set permittivity:
-    CellContainerType cells = viennagrid::elements<CellType>(my_domain);  
-    for (CellIteratorType cit  = cells.begin();
-                          cit != cells.end();
-                        ++cit)
+    CellOnSegmentContainerType cells = viennagrid::elements<CellType>(*sit);  
+    for (CellOnSegmentIteratorType cit  = cells.begin();
+                                   cit != cells.end();
+                                 ++cit)
     {
       if (si == 0) //Si
         viennadata::access<permittivity_key, double>(storage, permittivity_key(), *cit) = 3.9; 
@@ -176,7 +177,8 @@ int main()
   }
   
   VectorType pde_result = viennacl::linalg::solve(system_matrix, load_vector, viennacl::linalg::cg_tag());
-
+  std::cout << "* solve(): Residual: " << norm_2(prod(system_matrix, pde_result) - load_vector) << std::endl;
+  
   //
   // Writing solution back to domain (discussion about proper way of returning a solution required...)
   //

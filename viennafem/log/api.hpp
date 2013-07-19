@@ -49,12 +49,12 @@ namespace viennafem
   }
 
   /** @brief Writes the weak form transformed to the reference cell to the logger */
-  template <typename CellType, typename EquationArray, typename PDESystem>
+  template <typename CellType, typename StorageType, typename EquationArray, typename PDESystem>
   void log_transformed_weak_form(EquationArray const & weak_form, PDESystem const & pde_system)
   {
     // make cell type known to logger
     // TODO: Better encapsulation
-    pde_system.logger().translator().add_processor(new rt_latex_dt_dx_processor<CellType, viennamath::default_interface_type>());
+    pde_system.logger().translator().add_processor(new rt_latex_dt_dx_processor<CellType, StorageType, viennamath::default_interface_type>());
 
     pde_system.logger().write_transformed_weak_form(weak_form);
   }
