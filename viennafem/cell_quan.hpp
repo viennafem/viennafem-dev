@@ -95,12 +95,12 @@ namespace viennafem
 
         numeric_type eval(CellType const & cell, numeric_type v) const
         {
-          return accessor_(cell);
+          return accessor_(cell)(v); // evaluate the expression based on 'v'
         }
 
         numeric_type eval(CellType const & cell, std::vector<numeric_type> const & v) const
         {
-          return accessor_(cell);
+          return accessor_(cell)(v); // evaluate the expression based on 'v'
         }
 
         cell_quan_interface<CellType> * clone() const { return new self_type(accessor_); }
@@ -244,7 +244,7 @@ namespace viennafem
       {
         detail::cell_quan_wrapper<CellType, numeric_type> temp(
           new detail::cell_quan_constant<CellType, typename viennadata::result_of::accessor<StorageType, KeyType, numeric_type, CellType>::type >(
-            viennadata::make_accessor<KeyType, numeric_type, CellType>(storage, k)
+            viennadata::make_accessor(storage, k)
           )
         );
         accessor = temp;
@@ -261,8 +261,8 @@ namespace viennafem
       void wrap_expr(StorageType & storage, KeyType const & k)
       {
         detail::cell_quan_wrapper<CellType, numeric_type> temp(
-          new detail::cell_quan_expr<CellType, typename viennadata::result_of::accessor<StorageType, KeyType, numeric_type, CellType>::type >(
-            viennadata::make_accessor<KeyType, numeric_type, CellType>(storage, k)
+          new detail::cell_quan_expr<CellType, typename viennadata::result_of::accessor<StorageType, KeyType, viennamath::expr, CellType>::type >(
+            viennadata::make_accessor(storage, k)
           )
         );
         accessor = temp;

@@ -48,11 +48,10 @@ ADD_EXECUTABLE(poisson_3d examples/tutorial/poisson_3d.cpp)
 ADD_EXECUTABLE(lame_3d examples/tutorial/lame_3d.cpp)
 ADD_EXECUTABLE(sshape_2d examples/tutorial/sshape_2d.cpp)
 ADD_EXECUTABLE(sshape_3d examples/tutorial/sshape_3d.cpp)
-#ADD_EXECUTABLE(poisson_2d_rect examples/tutorial/poisson_2d_rect.cpp)
-#ADD_EXECUTABLE(poisson_3d_hex examples/tutorial/poisson_3d_hex.cpp)
-#ADD_EXECUTABLE(lame_3d_hex examples/tutorial/lame_3d_hex.cpp)
 ADD_EXECUTABLE(weak_forms examples/tutorial/weak_forms.cpp)
-
+ADD_EXECUTABLE(poisson_2d_rect examples/tutorial/poisson_2d_rect.cpp)
+ADD_EXECUTABLE(poisson_3d_hex examples/tutorial/poisson_3d_hex.cpp)
+ADD_EXECUTABLE(lame_3d_hex examples/tutorial/lame_3d_hex.cpp)
 
 # Add visibility of headers
 # Necessary for Qt-Creator usage.

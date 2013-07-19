@@ -24,8 +24,6 @@
 #include "viennamath/manipulation/eval.hpp"
 #include "viennamath/runtime/numerical_quadrature.hpp"
 
-#include "viennagrid/topology/simplex.hpp"
-
 /** @file   viennafem/quadrature/hexahedron.hpp
     @brief  Provides quadrature rules for hexahedra
 */
