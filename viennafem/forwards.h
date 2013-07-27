@@ -233,15 +233,15 @@ namespace viennafem
             unsigned long global_index>
   struct dt_dx_key { };
 
-  bool operator<(dt_dx_key<0,0> const &, dt_dx_key<0,0> const&) { return false; }
-  bool operator<(dt_dx_key<0,1> const &, dt_dx_key<0,1> const&) { return false; }
-  bool operator<(dt_dx_key<0,2> const &, dt_dx_key<0,2> const&) { return false; }
-  bool operator<(dt_dx_key<1,0> const &, dt_dx_key<1,0> const&) { return false; }
-  bool operator<(dt_dx_key<1,1> const &, dt_dx_key<1,1> const&) { return false; }
-  bool operator<(dt_dx_key<1,2> const &, dt_dx_key<1,2> const&) { return false; }
-  bool operator<(dt_dx_key<2,0> const &, dt_dx_key<2,0> const&) { return false; }
-  bool operator<(dt_dx_key<2,1> const &, dt_dx_key<2,1> const&) { return false; }
-  bool operator<(dt_dx_key<2,2> const &, dt_dx_key<2,2> const&) { return false; }
+  inline bool operator<(dt_dx_key<0,0> const &, dt_dx_key<0,0> const&) { return false; }
+  inline bool operator<(dt_dx_key<0,1> const &, dt_dx_key<0,1> const&) { return false; }
+  inline bool operator<(dt_dx_key<0,2> const &, dt_dx_key<0,2> const&) { return false; }
+  inline bool operator<(dt_dx_key<1,0> const &, dt_dx_key<1,0> const&) { return false; }
+  inline bool operator<(dt_dx_key<1,1> const &, dt_dx_key<1,1> const&) { return false; }
+  inline bool operator<(dt_dx_key<1,2> const &, dt_dx_key<1,2> const&) { return false; }
+  inline bool operator<(dt_dx_key<2,0> const &, dt_dx_key<2,0> const&) { return false; }
+  inline bool operator<(dt_dx_key<2,1> const &, dt_dx_key<2,1> const&) { return false; }
+  inline bool operator<(dt_dx_key<2,2> const &, dt_dx_key<2,2> const&) { return false; }
 
 
   /** @brief Convenience overload for converting a det_dF_dt_key to a string and streaming it to an output-stream */
@@ -258,7 +258,7 @@ namespace viennafem
   /** @brief A tag class used for storing and accessing the Jacobian determinant via ViennaData on ViennaGrid objects */
   struct det_dF_dt_key { };
 
-  bool operator<(det_dF_dt_key const &, det_dF_dt_key const&)
+  inline bool operator<(det_dF_dt_key const &, det_dF_dt_key const&)
   {
       return false;
   }
