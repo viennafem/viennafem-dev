@@ -25,7 +25,7 @@ if [ "$INPUT" != "" ]; then
       echo ""
       echo "regression result is available here:"
       echo "----------------------------------------------"
-      echo "http://my.cdash.org/index.php?project=ViennaData"
+      echo "http://my.cdash.org/index.php?project=ViennaFEM"
       echo "----------------------------------------------"
       echo ""
    else 

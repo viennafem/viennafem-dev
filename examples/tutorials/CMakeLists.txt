@@ -1,0 +1,13 @@
+ADD_EXECUTABLE(basic_poisson        basic_poisson.cpp)
+ADD_EXECUTABLE(poisson_1d           poisson_1d.cpp)
+ADD_EXECUTABLE(poisson_2d           poisson_2d.cpp)
+ADD_EXECUTABLE(poisson_cellquan_2d  poisson_cellquan_2d.cpp)
+ADD_EXECUTABLE(poisson_3d           poisson_3d.cpp)
+ADD_EXECUTABLE(lame_3d              lame_3d.cpp)
+ADD_EXECUTABLE(sshape_2d            sshape_2d.cpp)
+ADD_EXECUTABLE(sshape_3d            sshape_3d.cpp)
+ADD_EXECUTABLE(weak_forms           weak_forms.cpp)
+ADD_EXECUTABLE(poisson_2d_rect      poisson_2d_rect.cpp)
+ADD_EXECUTABLE(poisson_3d_hex       poisson_3d_hex.cpp)
+ADD_EXECUTABLE(lame_3d_hex          lame_3d_hex.cpp)
+

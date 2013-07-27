@@ -1,0 +1,19 @@
+#- CMake configuration file for ViennaFEM
+# Sets the following variables if ViennaFEM was found:
+#  VIENNAFEM_FOUND         : TRUE if found
+#  VIENNAFEM_INCLUDE_DIRS  : Include-directories to be used
+
+# Compute paths
+get_filename_component(VIENNAFEM_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+if(EXISTS "${VIENNAFEM_CMAKE_DIR}/CMakeCache.txt")
+   # in build tree
+   get_filename_component(VIENNAFEM_INSTALL_PREFIX "${VIENNAFEM_CMAKE_DIR}" PATH)
+   set(VIENNAFEM_INCLUDE_DIR "${_VIENNAFEM_PREFIX}")
+else()
+   set(VIENNAFEM_INSTALL_PREFIX "${VIENNAFEM_CMAKE_DIR}/@CONF_REL_INSTALL_PREFIX@")
+   set(VIENNAFEM_INCLUDE_DIR    "${VIENNAFEM_CMAKE_DIR}/@CONF_REL_INCLUDE_DIR@")
+endif()
+
+# Set up variables
+set(VIENNAFEM_INCLUDE_DIRS ${VIENNAFEM_INCLUDE_DIR})
+
