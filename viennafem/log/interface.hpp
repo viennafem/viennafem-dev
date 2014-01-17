@@ -17,7 +17,6 @@
 
 #include <vector>
 #include "viennafem/forwards.h"
-#include "viennagrid/config/domain_config.hpp"
 
 /** @file  viennafem/log/interface.hpp
     @brief Defines the runtime interface for a logger

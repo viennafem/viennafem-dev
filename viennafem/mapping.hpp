@@ -17,7 +17,8 @@
 
 #include <vector>
 #include "viennafem/forwards.h"
-#include "viennagrid/config/domain_config.hpp"
+#include "viennagrid/config/mesh_config.hpp"
+#include "viennagrid/mesh/segmentation.hpp"
 
 
 /** @file   mapping.hpp
@@ -39,11 +40,11 @@ namespace viennafem
     };
 
     /** @brief Specialization of the domain extraction for a ViennaGrid segment */
-    template <typename ConfigType>
-    struct extract_domain<viennagrid::segment_t<ConfigType> >
+    template <typename SegmentationT>
+    struct extract_domain<viennagrid::segment_handle<SegmentationT> >
     {
-      typedef typename viennagrid::segment_t<ConfigType>::domain_type    type;
-      static type & apply(viennagrid::segment_t<ConfigType> & seg) { return seg.segmentation().domain(); }
+      typedef typename viennagrid::result_of::segmentation_mesh_type<SegmentationT>::type    type;
+      static type & apply(viennagrid::segment_handle<SegmentationT> & seg) { return seg.parent().mesh(); }
     };
   }
 

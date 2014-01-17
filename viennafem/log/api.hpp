@@ -17,7 +17,7 @@
 
 #include <vector>
 #include "viennafem/forwards.h"
-#include "viennagrid/config/domain_config.hpp"
+#include "viennagrid/config/mesh_config.hpp"
 
 #include "viennafem/log/latex.hpp"
 

@@ -18,7 +18,7 @@
 #include "viennafem/forwards.h"
 #include "viennagrid/topology/simplex.hpp"
 #include "viennagrid/algorithm/spanned_volume.hpp"
-#include "viennagrid/config/domain_config.hpp"
+#include "viennagrid/config/mesh_config.hpp"
 #include "viennagrid/point.hpp"
 
 

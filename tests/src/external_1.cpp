@@ -64,24 +64,24 @@ int main()
   std::cout << "*****************" << std::endl;
   std::cout << "* Test started! *" << std::endl;
   std::cout << "*****************" << std::endl;
-  
+
   viennamath::function_symbol u(0);  //an unknown function
-  
+
   viennamath::equation strong_form = viennamath::make_equation( viennamath::laplace(u), 1);
   std::cout << "Strong (classical) form of equation:" << std::endl;
   std::cout << "  " << strong_form << std::endl;
-  
-  
+
+
   viennamath::equation weak_form_general = viennafem::make_weak_form(strong_form);
-  
+
   //this is the external linkage check:
   other_func();
-  
-  
-  
+
+
+
   std::cout << "*******************************" << std::endl;
   std::cout << "* Test finished successfully! *" << std::endl;
   std::cout << "*******************************" << std::endl;
-  
+
   return EXIT_SUCCESS;
 }

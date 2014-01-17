@@ -45,20 +45,20 @@ int main()
   equation strong_form = make_equation( laplace(u), 1);
   std::cout << "Strong (classical) form of equation:" << std::endl;
   std::cout << "  " << strong_form << std::endl;
-  
-  
+
+
   //
   // Step 2: For FEM, an integral formulation ('weak form') is required.
   //         This is obtained by:
   //           - multiplying with a test function (v)
   //           - integration over domain (Omega)
   //           - integration by parts (shift derivative from u to v)
-  //         
+  //
   //         Integral form of Poisson equation:
   //         \int_\Omega grad(u) * grad(v) dx  = \int_\Omega v dx
   //
   equation weak_form_general = viennafem::make_weak_form(strong_form);
-  
+
   std::cout << "General weak form: " << std::endl;
   std::cout << "  " << weak_form_general << std::endl;
 
@@ -70,21 +70,21 @@ int main()
   equation weak_form_1d = apply_coordinate_system(cartesian<1>(), weak_form_general);
   std::cout << "Weak form in 1d:" << std::endl;
   std::cout << "  " << weak_form_1d << std::endl;
-  
+
   equation weak_form_2d = apply_coordinate_system(cartesian<2>(), weak_form_general);
   std::cout << "Weak form in 2d:" << std::endl;
   std::cout << "  " << weak_form_2d << std::endl;
-  
+
   equation weak_form_3d = apply_coordinate_system(cartesian<3>(), weak_form_general);
   std::cout << "Weak form in 3d:" << std::endl;
   std::cout << "  " << weak_form_3d << std::endl;
-  
+
   //
   // That's it! Everything else is left to ViennaFEM
   //
   std::cout << "************************************************" << std::endl;
   std::cout << "*****     TEST COMPLETED SUCCESSFULLY!     *****" << std::endl;
   std::cout << "************************************************" << std::endl;
-  
+
   return EXIT_SUCCESS;
 }

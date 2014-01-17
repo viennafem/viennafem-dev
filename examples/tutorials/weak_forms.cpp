@@ -35,61 +35,61 @@
 
 
 // A test key used later for storing a cell quantity
-struct testkey 
+struct testkey
 {
   bool operator<(testkey const & /*other*/) const { return false; }
 };
 
 int main()
 {
-  typedef viennagrid::domain_t< viennagrid::config::triangular_2d >       DomainType;
+  typedef viennagrid::triangular_2d_mesh                                  DomainType;
   typedef viennagrid::result_of::cell_tag<DomainType>::type               CellTag;
   typedef viennagrid::result_of::element<DomainType, CellTag>::type       CellType;
-  
+
   typedef viennamath::function_symbol   FunctionSymbol;
   typedef viennamath::equation          Equation;
-  
+
   //
   // Create a storage object
   //
   typedef viennadata::storage<> StorageType;
-  StorageType   storage;  
-  
+  StorageType   storage;
+
   //
   // Specify PDEs and derive weak form:
   //
   FunctionSymbol u(0, viennamath::unknown_tag<>());   //an unknown function used for PDE specification
   Equation equ_1 = viennamath::make_equation( viennamath::laplace(u), -1);
   std::cout << "Strong form: " << equ_1 << std::endl;
-  std::cout << "Weak form: " << viennafem::make_weak_form(equ_1) << std::endl;  
+  std::cout << "Weak form: " << viennafem::make_weak_form(equ_1) << std::endl;
   std::cout << "-------------" << std::endl;
-  
+
   Equation equ_2 = viennamath::make_equation( viennamath::laplace(u) + u, -1);
   std::cout << "Strong form: " << equ_2 << std::endl;
-  std::cout << "Weak form: " << viennafem::make_weak_form(equ_2) << std::endl;  
+  std::cout << "Weak form: " << viennafem::make_weak_form(equ_2) << std::endl;
   std::cout << "-------------" << std::endl;
-  
+
   Equation equ_3 = viennamath::make_equation( viennamath::div( 3.0 * viennamath::grad(u)), -1);
   std::cout << "Strong form: " << equ_3 << std::endl;
-  std::cout << "Weak form: " << viennafem::make_weak_form(equ_3) << std::endl;  
+  std::cout << "Weak form: " << viennafem::make_weak_form(equ_3) << std::endl;
   std::cout << "-------------" << std::endl;
-  
+
   Equation equ_4 = viennamath::make_equation( viennamath::div( 4.0 * viennamath::grad(u)) + u, -1);
   std::cout << "Strong form: " << equ_4 << std::endl;
-  std::cout << "Weak form: " << viennafem::make_weak_form(equ_4) << std::endl;  
+  std::cout << "Weak form: " << viennafem::make_weak_form(equ_4) << std::endl;
   std::cout << "-------------" << std::endl;
-  
+
   Equation equ_5 = viennamath::make_equation( u, -1);
   std::cout << "Strong form: " << equ_5 << std::endl;
-  std::cout << "Weak form: " << viennafem::make_weak_form(equ_5) << std::endl;  
+  std::cout << "Weak form: " << viennafem::make_weak_form(equ_5) << std::endl;
   std::cout << "-------------" << std::endl;
-  
-  viennafem::cell_quan<CellType, viennamath::expr::interface_type>  permittivity; permittivity.wrap_constant( storage, testkey() );  
+
+  viennafem::cell_quan<CellType, viennamath::expr::interface_type>  permittivity; permittivity.wrap_constant( storage, testkey() );
   Equation equ_6 = viennamath::make_equation( viennamath::div( permittivity * viennamath::grad(u)), -1);
   std::cout << "Strong form: " << equ_6 << std::endl;
-  std::cout << "Weak form: " << viennafem::make_weak_form(equ_6) << std::endl;  
+  std::cout << "Weak form: " << viennafem::make_weak_form(equ_6) << std::endl;
   std::cout << "-------------" << std::endl;
-  
+
   std::cout << "*************************************" << std::endl;
   std::cout << "* Weak forms finished successfully! *" << std::endl;
   std::cout << "*************************************" << std::endl;
