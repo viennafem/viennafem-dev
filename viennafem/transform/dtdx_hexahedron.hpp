@@ -118,8 +118,6 @@ namespace viennafem
       det_dF_dt_acc(cell) = det_J;
 
       //Step 2: store partial derivatives:
-      typedef viennamath::expr   ValueType;
-
       dt_dx_key_00_acc(cell) = viennamath::simplify(J_11*J_22 - J_21*J_12) / det_J;
       dt_dx_key_01_acc(cell) = viennamath::simplify(J_21*J_02 - J_01*J_22) / det_J;
       dt_dx_key_02_acc(cell) = viennamath::simplify(J_01*J_12 - J_11*J_02) / det_J;

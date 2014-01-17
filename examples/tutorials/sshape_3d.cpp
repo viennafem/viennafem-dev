@@ -62,8 +62,6 @@ int main()
   typedef viennamath::function_symbol   FunctionSymbol;
   typedef viennamath::equation          Equation;
 
-  typedef viennafem::boundary_key      BoundaryKey;
-
   //
   // Create a domain from file
   //

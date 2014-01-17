@@ -172,7 +172,7 @@ namespace viennafem
                                                 ReferenceCellTag)
     {
       typedef typename EquationType::interface_type             InterfaceType;
-      typedef typename InterfaceType::numeric_type              numeric_type;
+
       typedef viennamath::rt_function_symbol<InterfaceType>   FunctionSymbol;
       typedef viennamath::rt_expr<InterfaceType>              Expression;
       typedef viennamath::rt_unary_expr<InterfaceType>        UnaryExpression;
@@ -229,7 +229,7 @@ namespace viennafem
                                                 ReferenceCellTag)
     {
       typedef typename EquationType::interface_type             InterfaceType;
-      typedef typename InterfaceType::numeric_type              numeric_type;
+
       typedef viennamath::rt_function_symbol<InterfaceType>   FunctionSymbol;
       typedef viennamath::rt_expr<InterfaceType>              Expression;
       typedef viennamath::rt_unary_expr<InterfaceType>        UnaryExpression;

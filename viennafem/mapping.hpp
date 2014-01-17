@@ -57,10 +57,7 @@ namespace viennafem
                       SystemType & pde_system,
                       DomainType & domain)
   {
-    typedef typename viennagrid::result_of::point<DomainType>::type                                   PointType;
     typedef typename viennagrid::result_of::element<DomainType, viennagrid::vertex_tag>::type         VertexType;
-    typedef typename viennagrid::result_of::cell_tag<DomainType>::type                                CellTag;
-    typedef typename viennagrid::result_of::element<DomainType, CellTag>::type                        CellType;
 
     typedef typename viennagrid::result_of::element_range<DomainType, viennagrid::vertex_tag>::type   VertexRange;
     typedef typename viennagrid::result_of::iterator<VertexRange>::type                               VertexIterator;

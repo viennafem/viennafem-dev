@@ -181,13 +181,9 @@ namespace viennafem
                       LinearSystemT & linear_system
                     ) const
       {
-        typedef typename viennagrid::result_of::point<DomainType>::type                                   PointType;
         typedef typename viennagrid::result_of::element<DomainType, viennagrid::vertex_tag>::type         VertexType;
         typedef typename viennagrid::result_of::cell_tag<DomainType>::type                                CellTag;
         typedef typename viennagrid::result_of::element<DomainType, CellTag>::type                        CellType;
-
-        typedef typename viennagrid::result_of::element_range<DomainType, viennagrid::vertex_tag>::type   VertexContainer;
-        typedef typename viennagrid::result_of::iterator<VertexContainer>::type                           VertexIterator;
 
         typedef typename viennagrid::result_of::element_range<DomainType, CellTag>::type                  CellContainer;
         typedef typename viennagrid::result_of::iterator<CellContainer>::type                             CellIterator;
@@ -197,8 +193,6 @@ namespace viennafem
 
         typedef typename PDESystemType::boundary_key_type  BoundaryKeyType;
         typedef std::vector<long>                          MappingContainer;
-
-        typedef typename EquationType::value_type          Expression;
 
         BoundaryKeyType bnd_key(pde_system.option(0).data_id());
 

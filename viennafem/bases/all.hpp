@@ -260,6 +260,8 @@ namespace viennafem
     static std::vector<expression_type> get(T)
     {
        typedef typename T::ERROR_BASIS_FUNCTION_NOT_IMPLEMENTED       error_type;
+       error_type e;
+       (void)e;
        return std::vector<expression_type>(1);
     }
   };

@@ -77,8 +77,6 @@ namespace viennafem
       det_dF_dt_acc(cell) = det_J;
 
       //Step 2: store partial derivatives:
-      typedef viennamath::expr   ValueType;
-
       dt_dx_key_00_acc(cell) = ( y2_y0 +  xi * coeff_y) / det_J;
       dt_dx_key_01_acc(cell) = (-x2_x0 -  xi * coeff_x) / det_J;
       dt_dx_key_10_acc(cell) = (-y1_y0 - eta * coeff_y) / det_J;

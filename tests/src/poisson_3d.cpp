@@ -55,7 +55,7 @@ int main()
 {
   typedef viennagrid::tetrahedral_3d_mesh                                                 DomainType;
   typedef viennagrid::result_of::segmentation<DomainType>::type                           SegmentationType;
-  typedef SegmentationType::iterator                                                      SegmentationIterator;
+
   typedef viennagrid::result_of::element<DomainType, viennagrid::vertex_tag>::type        VertexType;
   typedef viennagrid::result_of::element_range<DomainType, viennagrid::vertex_tag>::type  VertexContainer;
   typedef viennagrid::result_of::iterator<VertexContainer>::type                          VertexIterator;
@@ -65,9 +65,6 @@ int main()
 
   typedef viennamath::function_symbol   FunctionSymbol;
   typedef viennamath::equation          Equation;
-
-  typedef viennafem::boundary_key      BoundaryKey;
-
 
   //
   // Create a domain from file

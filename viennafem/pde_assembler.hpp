@@ -101,20 +101,12 @@ namespace viennafem
         typedef typename viennagrid::result_of::cell_tag<DomainType>::type CellTag;
 
         typedef typename viennagrid::result_of::point<DomainType>::type                                   PointType;
-        typedef typename viennagrid::result_of::element<DomainType, viennagrid::vertex_tag>::type         VertexType;
         typedef typename viennagrid::result_of::element<DomainType, CellTag>::type                        CellType;
-
-        typedef typename viennagrid::result_of::element_range<DomainType, viennagrid::vertex_tag>::type   VertexContainer;
-        typedef typename viennagrid::result_of::iterator<VertexContainer>::type                           VertexIterator;
 
         typedef typename viennagrid::result_of::element_range<DomainType, CellTag>::type                  CellContainer;
         typedef typename viennagrid::result_of::iterator<CellContainer>::type                             CellIterator;
 
-        typedef typename viennagrid::result_of::element_range<CellType, VertexType>::type                 VertexOnCellContainer;
-        typedef typename viennagrid::result_of::iterator<VertexOnCellContainer>::type                     VertexOnCellIterator;
-
         typedef typename SystemType::equation_type                  EquationType;
-        typedef typename SystemType::equation_type::value_type      Expression;
 
      #ifdef VIENNAFEM_DEBUG
         std::cout << "Strong form: " << pde_system.pde(0) << std::endl;
