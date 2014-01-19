@@ -2,9 +2,9 @@
 #define VIENNAFEM_LOG_LATEX_HPP
 
 /* =========================================================================
-   Copyright (c) 2012, Institute for Microelectronics,
-                       Institute for Analysis and Scientific Computing,
-                       TU Wien.
+   Copyright (c) 2012-2014, Institute for Microelectronics,
+                            Institute for Analysis and Scientific Computing,
+                            TU Wien.
                              -----------------
                ViennaFEM - The Vienna Finite Element Method Library
                              -----------------
@@ -105,7 +105,7 @@ namespace viennafem
 
         viennamath::variable x(0);
         viennamath::variable y(1);
-        viennamath::variable z(2); 
+        viennamath::variable z(2);
 
         std::auto_ptr< detail::cell_quan_interface<CellType> > temp(e.wrapper().clone());  //create a clone in order to dispatch with respect to the type
 
@@ -114,7 +114,7 @@ namespace viennafem
         {
           ss << " \\frac{\\partial \\xi}{\\partial x} ";
         }
-        else 
+        else
         if (dynamic_cast< detail::cell_quan_expr<CellType, typename viennadata::result_of::accessor<StorageType, viennafem::dt_dx_key<1,0>, ExpressionType, CellType>::type > * >(temp.get()) != NULL
             || dynamic_cast< detail::cell_quan_constant<CellType, typename viennadata::result_of::accessor<StorageType, viennafem::dt_dx_key<1,0>, NumericType, CellType>::type > * >(temp.get()) != NULL)
         {

@@ -1,15 +1,15 @@
-/* =======================================================================
-   Copyright (c) 2012, Institute for Microelectronics,
-                       Institute for Analysis and Scientific Computing,
-                       TU Wien.
+/* =========================================================================
+   Copyright (c) 2012-2014, Institute for Microelectronics,
+                            Institute for Analysis and Scientific Computing,
+                            TU Wien.
                              -----------------
-               ViennaMath - Symbolic and Numerical Math in C++
+               ViennaFEM - The Vienna Finite Element Method Library
                              -----------------
 
    Author:     Karl Rupp                          rupp@iue.tuwien.ac.at
 
-   License:    MIT (X11), see file LICENSE in the ViennaMath base directory
-======================================================================= */
+   License:    MIT (X11), see file LICENSE in the ViennaFEM base directory
+============================================================================ */
 
 // remove assert() statements and the like in order to get reasonable performance
 #ifndef NDEBUG

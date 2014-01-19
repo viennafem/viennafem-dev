@@ -2,9 +2,9 @@
 #define VIENNAFEM_LINEAR_PDE_SYSTEM_HPP
 
 /* =========================================================================
-   Copyright (c) 2012, Institute for Microelectronics,
-                       Institute for Analysis and Scientific Computing,
-                       TU Wien.
+   Copyright (c) 2012-2014, Institute for Microelectronics,
+                            Institute for Analysis and Scientific Computing,
+                            TU Wien.
                              -----------------
                ViennaFEM - The Vienna Finite Element Method Library
                              -----------------

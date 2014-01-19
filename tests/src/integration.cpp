@@ -1,14 +1,15 @@
-/* ====================================================================================
-   Copyright (c) 2010, Institute for Microelectronics, Vienna University of Technology.
-   http://www.iue.tuwien.ac.at
-                                  -----------------
+/* =========================================================================
+   Copyright (c) 2012-2014, Institute for Microelectronics,
+                            Institute for Analysis and Scientific Computing,
+                            TU Wien.
+                             -----------------
                ViennaFEM - The Vienna Finite Element Method Library
-                                  -----------------
+                             -----------------
 
-   authors:    Karl Rupp                          rupp@iue.tuwien.ac.at
+   Author:     Karl Rupp                          rupp@iue.tuwien.ac.at
 
-   license:    MIT (X11), see file LICENSE in the ViennaFEM base directory
-======================================================================================= */
+   License:    MIT (X11), see file LICENSE in the ViennaFEM base directory
+============================================================================ */
 
 // include necessary system headers
 #include <iostream>

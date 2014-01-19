@@ -2,9 +2,9 @@
 #define VIENNAMATH_WEAK_FORM_HPP
 
 /* =========================================================================
-   Copyright (c) 2012, Institute for Microelectronics,
-                       Institute for Analysis and Scientific Computing,
-                       TU Wien.
+   Copyright (c) 2012-2014, Institute for Microelectronics,
+                            Institute for Analysis and Scientific Computing,
+                            TU Wien.
                              -----------------
                ViennaFEM - The Vienna Finite Element Method Library
                              -----------------
