@@ -70,7 +70,9 @@ configure_file(cmake/ViennaFEMConfig.cmake.in
 configure_file(cmake/ViennaFEMConfigVersion.cmake.in
    ${PROJECT_BINARY_DIR}/ViennaFEMConfigVersion.cmake @ONLY)
 
-export(PACKAGE ViennaFEM)
+if (CMAKE_MINOR_VERSION GREATER 6)  # export(PACKAGE ...) introduced with CMake 2.8.0
+  export(PACKAGE ViennaFEM)
+endif()
 
 # Install
 #########
