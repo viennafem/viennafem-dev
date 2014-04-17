@@ -20,7 +20,7 @@ elif [ "$OS" == "Linux" ]; then
 else
    echo "no available CPU core extraction available"
 fi
-echo "building with " $CORES "cores " 
+echo "building with " $CORES "cores "
 
 ./clean.sh
 if [ "$INPUT" != "" ]; then
@@ -40,10 +40,10 @@ if [ "$INPUT" != "" ]; then
       echo ""
       echo "regression result is available here:"
       echo "----------------------------------------------------------------------"
-      echo "http://jwein2.iue.tuwien.ac.at:50000/CDash/index.php?project=ViennaFEM"
+      echo "http://frudo.iue.tuwien.ac.at:50080/CDash/index.php?project=ViennaFEM"
       echo "----------------------------------------------------------------------"
       echo ""
-   else 
+   else
       echo ""
       echo "# Error - wrong option: \""$INPUT"\""
       echo ""
